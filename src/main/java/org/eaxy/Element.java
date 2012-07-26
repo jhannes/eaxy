@@ -44,10 +44,13 @@ public class Element implements Node {
 
     @Override
     public String print(LinkedList<Namespace> printedNamespaces) {
+        // TODO: Would performance be notably better if we write to a Writer instead of generating a String
         if (content.isEmpty()) {
-            return "<" + printTag() + printNamespace(printedNamespaces) + printAttributes() + " />";
+            return "<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + " />";
         } else {
-            return "<" + printTag() + printNamespace(printedNamespaces) + printAttributes() + ">" + printContent() + "</" + printTag() + ">";
+            return "<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + ">" +
+                    printContent(printedNamespaces) +
+                    "</" + printTag() + ">";
         }
     }
 
@@ -64,7 +67,7 @@ public class Element implements Node {
         return result.toString();
     }
 
-    private String printNamespace(LinkedList<Namespace> printedNamespaces) {
+    private String printNamespaces(LinkedList<Namespace> printedNamespaces) {
         StringBuilder result = new StringBuilder();
         for (Namespace namespace : namespaces) {
             if (printedNamespaces.contains(namespace) || namespace.isNoNamespace()) continue;
@@ -73,8 +76,9 @@ public class Element implements Node {
         return result.toString();
     }
 
-    private String printContent() {
+    private String printContent(List<Namespace> printedNamespaces2) {
         LinkedList<Namespace> printedNamespaces = new LinkedList<Namespace>();
+        printedNamespaces.addAll(printedNamespaces2);
         printedNamespaces.addAll(namespaces);
         StringBuilder result = new StringBuilder();
         for (Node element : content) {
@@ -153,6 +157,7 @@ public class Element implements Node {
         return name.hashCode();
     }
 
+    // TODO: Would an event based finder (instead of returning a set) be more efficient?
     public ElementSet find(Object... path) {
         return new ElementSet(this).find(path);
     }

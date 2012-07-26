@@ -78,6 +78,17 @@ public class ElementBuilderTest {
     }
 
     @Test
+    public void shouldNotPrintAncestorNamespace() {
+        Namespace A_NS = new Namespace("http://a.com", "a");
+        Namespace B_NS = new Namespace("http://b.com", "b");
+        assertThat(A_NS.el("Ancestor", B_NS.el("Child", A_NS.el("GrandChild"))).toXML())
+            .isEqualTo("<a:Ancestor xmlns:a=\"http://a.com\">" +
+                    "<b:Child xmlns:b=\"http://b.com\"><a:GrandChild /></b:Child>" +
+                    "</a:Ancestor>");
+
+    }
+
+    @Test
     public void shouldPrintSiblingNamespaces() {
         Namespace SOAP_NS = new Namespace("http://soap.com", "S");
         assertThat(el("Super", SOAP_NS.el("Envelope"), SOAP_NS.el("Body")).toXML())
