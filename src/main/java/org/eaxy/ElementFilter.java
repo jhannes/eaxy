@@ -2,11 +2,11 @@ package org.eaxy;
 
 import java.util.ArrayList;
 
-public abstract class ElementFilter implements ElementQuery {
+abstract class ElementFilter implements ElementQuery {
 
     private final String filterName;
 
-    public ElementFilter(String filterName) {
+    ElementFilter(String filterName) {
         this.filterName = filterName;
     }
 

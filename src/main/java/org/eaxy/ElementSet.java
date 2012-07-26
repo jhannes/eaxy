@@ -14,19 +14,19 @@ public class ElementSet implements Iterable<Element> {
 
     private List<Element> elements = new ArrayList<Element>();
     private ElementSet parent = NULL_ELEMENT_SET;
-    private Object filter;
+    private final Object filter;
 
     public ElementSet(Element element) {
         this.elements.add(element);
         this.filter = element.getName().print();
     }
 
-    public ElementSet(ElementSet parent, Object filter) {
+    private ElementSet(ElementSet parent, Object filter) {
         this.parent = parent;
         this.filter = filter;
     }
 
-    public ElementSet(ElementSet parent, ElementQuery filter, List<Element> elements) {
+    private ElementSet(ElementSet parent, ElementQuery filter, List<Element> elements) {
         this.parent = parent;
         this.filter = filter;
         this.elements = elements;

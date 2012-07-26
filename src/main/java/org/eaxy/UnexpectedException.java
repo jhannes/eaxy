@@ -1,8 +1,8 @@
 package org.eaxy;
 
-public class UnexpectedException extends RuntimeException {
+class UnexpectedException extends RuntimeException {
 
-    public UnexpectedException(Exception e) {
+    UnexpectedException(Exception e) {
         super(e);
     }
 

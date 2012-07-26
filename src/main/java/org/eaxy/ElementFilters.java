@@ -7,12 +7,12 @@ import java.util.regex.Pattern;
 
 public class ElementFilters {
 
-    static class ChildQuery implements ElementQuery {
+    private static class ChildQuery implements ElementQuery {
 
         private final ElementQuery parent;
         private final ElementQuery child;
 
-        public ChildQuery(ElementQuery parent, ElementQuery child) {
+        private ChildQuery(ElementQuery parent, ElementQuery child) {
             this.parent = parent;
             this.child = child;
         }
@@ -24,7 +24,7 @@ public class ElementFilters {
 
     }
 
-    static final class ElementDescendantQuery implements ElementQuery {
+    private static final class ElementDescendantQuery implements ElementQuery {
         private final ElementFilter filter;
         private ElementQuery next;
 
@@ -62,7 +62,7 @@ public class ElementFilters {
         }
     }
 
-    static final class ElementPositionFilter implements ElementQuery {
+    private static final class ElementPositionFilter implements ElementQuery {
         private final Number position;
 
         private ElementPositionFilter(Number position) {
@@ -72,13 +72,13 @@ public class ElementFilters {
         @Override
         public ElementSet search(ElementSet elements) {
             if (intValue() < elements.size()) {
-                return elements.nestedSet(this, Arrays.asList(elements.get(position.intValue())));
+                return elements.nestedSet(this, Arrays.asList(elements.get(intValue())));
             } else {
                 return elements.nestedSet(this, new ArrayList<Element>());
             }
         }
 
-        public int intValue() {
+        private int intValue() {
             return position.intValue();
         }
 
