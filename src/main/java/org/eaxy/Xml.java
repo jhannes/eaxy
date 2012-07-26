@@ -191,6 +191,10 @@ public abstract class Xml {
         return new Xml.CDataElement(stringContent);
     }
 
+    public static Attribute attr(String key, String value) {
+        return Namespace.NO_NAMESPACE.attr(key, value);
+    }
+
     public static Document xml(String xml) {
         try {
             return read(new StringReader(xml));

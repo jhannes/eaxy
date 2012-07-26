@@ -12,7 +12,7 @@ import org.xml.sax.Attributes;
 public class Element implements Node {
 
     private final QualifiedName name;
-    private List<Node> content;
+    private final List<Node> content;
     private final Map<QualifiedName,Attribute> attributes = new LinkedHashMap<QualifiedName, Attribute>();
     // TODO: Maybe namespaces should be part of the attributes - are namespaces attributes?
     private final List<Namespace> namespaces = new ArrayList<Namespace>();
@@ -21,6 +21,10 @@ public class Element implements Node {
         this.name = name;
         this.content = content;
         this.namespaces.add(name.getNamespace());
+    }
+
+    public String tagName() {
+        return name.getName();
     }
 
     public Element addAll(Node... content) {
@@ -208,6 +212,10 @@ public class Element implements Node {
         return attr("id", id);
     }
 
+    public String type() {
+        return attr("type");
+    }
+
     public Element type(String type) {
         return attr("type", type);
     }
@@ -224,5 +232,30 @@ public class Element implements Node {
         return name;
     }
 
+    public boolean checked() {
+        return attr("checked") != null;
+    }
+
+    public Element checked(boolean checked) {
+        if (checked) {
+            attr("checked", "checked");
+        } else {
+            attributes.remove(new QualifiedName("checked"));
+        }
+        return this;
+    }
+
+    public boolean selected() {
+        return attr("selected") != null;
+    }
+
+    public Element selected(boolean selected) {
+        if (selected) {
+            attr("selected", "selected");
+        } else {
+            attributes.remove(new QualifiedName("selected"));
+        }
+        return this;
+    }
 }
 

@@ -16,6 +16,10 @@ class QualifiedName {
         this.name = name;
     }
 
+    public String getName() {
+        return name;
+    }
+
     public Namespace getNamespace() {
         return namespace;
     }
@@ -50,5 +54,4 @@ class QualifiedName {
         }
         return this.name.equals(filter);
     }
-
 }

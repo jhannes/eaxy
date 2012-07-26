@@ -58,7 +58,7 @@ public class ElementFilters {
 
         @Override
         public String toString() {
-            return "..."; // + filter;
+            return "...//" + filter;
         }
     }
 
