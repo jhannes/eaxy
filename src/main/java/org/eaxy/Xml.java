@@ -23,17 +23,17 @@ import org.xml.sax.ext.DefaultHandler2;
 public abstract class Xml {
 
     private static final class ElementBuilderHandler extends DefaultHandler2 {
-        private Stack<Element> elementStack = new Stack<Element>();
+        private final Stack<Element> elementStack = new Stack<Element>();
         private StringBuilder currentText;
         private Document document;
 
         @Override
-        public void startDocument() throws SAXException {
+        public void startDocument() {
             document = new Document();
         }
 
         @Override
-        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+        public void startElement(String uri, String localName, String qName, Attributes attributes) {
             Element newElement = el(qName, Namespace.NO_NAMESPACE).attrs(attributes);
             pushTextToTopElement();
             if (!elementStack.isEmpty()) elementStack.peek().add(newElement);
@@ -41,7 +41,13 @@ public abstract class Xml {
         }
 
         @Override
-        public void comment(char[] ch, int start, int length) throws SAXException {
+        public void startEntity(String name) throws SAXException {
+            // TODO Auto-generated method stub
+            super.startEntity(name);
+        }
+
+        @Override
+        public void comment(char[] ch, int start, int length) {
             pushTextToTopElement();
             if (!elementStack.isEmpty()) {
                 elementStack.peek().add(Xml.comment(new String(ch, start, length)));
@@ -49,24 +55,24 @@ public abstract class Xml {
         }
 
         @Override
-        public void startDTD(String name, String publicId, String systemId) throws SAXException {
+        public void startDTD(String name, String publicId, String systemId) {
             document.addDTD("<!DOCTYPE " + name + " PUBLIC \"" + publicId + "\" \"" + systemId + "\">");
             System.out.println(name + publicId + systemId);
         }
 
         @Override
-        public void processingInstruction(String target, String data) throws SAXException {
+        public void processingInstruction(String target, String data) {
             System.out.println(target + data);
         }
 
         @Override
-        public void startCDATA() throws SAXException {
+        public void startCDATA() {
             pushTextToTopElement();
             currentText = new StringBuilder();
         }
 
         @Override
-        public void endCDATA() throws SAXException {
+        public void endCDATA() {
             if (!elementStack.isEmpty()) {
                 if (currentText.length() > 0) {
                     elementStack.peek().add(cdata(currentText));
@@ -85,12 +91,12 @@ public abstract class Xml {
         }
 
         @Override
-        public void characters(char[] ch, int start, int length) throws SAXException {
+        public void characters(char[] ch, int start, int length) {
             currentText.append(ch, start, length);
         }
 
         @Override
-        public void endElement(String uri, String localName, String qName) throws SAXException {
+        public void endElement(String uri, String localName, String qName) {
             pushTextToTopElement();
             this.document.setRootElement(elementStack.pop());
         }
