@@ -3,11 +3,7 @@ package org.eaxy.usage;
 import static org.eaxy.Xml.el;
 import static org.fest.assertions.Assertions.assertThat;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.eaxy.Element;
-import org.eaxy.html.EaxyHtml;
 import org.junit.Test;
 
 public class HtmlConvenienceTest {
@@ -61,33 +57,5 @@ public class HtmlConvenienceTest {
                 el("li", "item 4").id("item-4"));
         assertThat(ul.find("#item-3").first().text()).isEqualTo("item 3");
         assertThat(ul.find("li#item-3").first().text()).isEqualTo("item 3");
-    }
-
-    @Test
-    public void shouldSerializeForm() {
-        Element form = el("div",
-                el("form").id("form-id").addAll(
-                        el("div", el("input").name("first_name")),
-                        el("input").name("last_name")));
-        form.find("#form-id", "...", "[name=first_name]").first().val("Johannes");
-        form.find("#form-id", "...", "[name=last_name]").first().val("Brodwall");
-        assertThat(EaxyHtml.serialize(form.find("#form-id")))
-            .isEqualTo("first_name=Johannes&last_name=Brodwall");
-        assertThat(EaxyHtml.formToMap(form.find("#form-id")).get("first_name"))
-            .containsOnly("Johannes");
-    }
-
-    @Test
-    public void shouldUpdateForm() {
-        Map<String,String> values = new HashMap<String, String>();
-        values.put("first_name", "Johannes");
-        values.put("last_name", "Brodwall");
-        Element form = el("div",
-                el("form").id("form-id").addAll(
-                        el("input").name("first_name"),
-                        el("input").name("last_name")));
-        EaxyHtml.updateForm(form.find("form#form-id"), values);
-        assertThat(form.find("form", "[name=first_name]").first().val()).isEqualTo("Johannes");
-        assertThat(form.find("form", "[name=last_name]").first().val()).isEqualTo("Brodwall");
     }
 }

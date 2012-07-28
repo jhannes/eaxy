@@ -4,6 +4,9 @@ import static org.eaxy.Xml.attr;
 import static org.eaxy.Xml.el;
 import static org.fest.assertions.Assertions.assertThat;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eaxy.Element;
 import org.junit.Test;
 
@@ -32,6 +35,25 @@ public class HtmlFormTest {
         assertThat(form.get("checked_box")).isEqualTo("on");
         assertThat(form.get("unchecked_box")).isNull();
         assertThat(form.get("select_field")).isEqualTo("option2");
+    }
+
+    @Test
+    public void shouldShowFormFieldNames() {
+        Element html = el("form", el("div").name("div_name").addAll(
+                el("input").name("text_field").val("input value").type("text"),
+                el("textarea").name("text_area").text("text area content"),
+                el("input").name("radio_field").val("first").type("radio").checked(false),
+                el("input").name("radio_field").val("second").type("radio").checked(true),
+                el("input").name("checked_box").type("checkbox").checked(true),
+                el("select").name("select_field").addAll(
+                        el("optgroup",
+                            el("option", "Option name").name("option_name").val("option1"),
+                            el("option", "Option name").val("option2").selected(true)),
+                        el("option", "Option name").val("option3")
+                        )
+                ));
+        assertThat(new HtmlForm(html).getFieldNames())
+            .containsExactly("text_field", "text_area", "radio_field", "checked_box", "select_field");
     }
 
     @Test
@@ -113,4 +135,34 @@ public class HtmlFormTest {
             .isEqualTo("option1");
     }
 
+    @Test
+    public void shouldUpdateForm() {
+        Element html = el("div",
+                el("form").id("form-id").addAll(
+                        el("input").name("first_name"),
+                        el("input").name("last_name")));
+
+        Map<String,String> values = new HashMap<String, String>();
+        values.put("first_name", "Johannes");
+        values.put("last_name", "Brodwall");
+        HtmlForm form = new HtmlForm(html.find("form").first());
+        form.update(values);
+        assertThat(html.find("form", "[name=first_name]").first().val()).isEqualTo("Johannes");
+        assertThat(html.find("form", "[name=last_name]").first().val()).isEqualTo("Brodwall");
+    }
+
+    @Test
+    public void shouldSerializeForm() {
+        Element html = el("div",
+                el("form").id("form-id").addAll(
+                        el("div", el("input").name("first_name")),
+                        el("input").name("last_name")));
+        html.find("#form-id", "...", "[name=first_name]").first().val("Johannes");
+        html.find("#form-id", "...", "[name=last_name]").first().val("Brodwall");
+        HtmlForm form = new HtmlForm(html.find("form").first());
+        assertThat(form.toMap().get("first_name")).containsOnly("Johannes");
+        assertThat(form.toMap().get("last_name")).containsOnly("Brodwall");
+        assertThat(form.serialize())
+            .isEqualTo("first_name=Johannes&last_name=Brodwall");
+    }
 }

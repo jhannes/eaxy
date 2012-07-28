@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.eaxy.Element;
 
 public class HtmlForm {
@@ -20,6 +19,26 @@ public class HtmlForm {
             }
             elementByNameIndex.get(element.name()).add(element);
         }
+    }
+
+    public List<String> getFieldNames() {
+        ArrayList<String> names = new ArrayList<String>();
+        for (String fieldName : elementByNameIndex.keySet()) {
+            List<Element> elements = elementByNameIndex.get(fieldName);
+            String tagName = elements.get(0).tagName().toLowerCase();
+            if (tagName.equals("input") || tagName.equals("select") || tagName.equals("textarea")) {
+                names.add(fieldName);
+            }
+        }
+        return names;
+    }
+
+    public String get(String parameterName) {
+        Element element = first(parameterName);
+        if ("radio".equalsIgnoreCase(element.type())) {
+            return selectedRadio(getElementByName(parameterName), element.name()).val();
+        }
+        return value(element, getElementByName(parameterName));
     }
 
     public HtmlForm set(String parameterName, String value) {
@@ -44,12 +63,10 @@ public class HtmlForm {
         return this;
     }
 
-    public String get(String parameterName) {
-        Element element = first(parameterName);
-        if ("radio".equalsIgnoreCase(element.type())) {
-            return selectedRadio(getElementByName(parameterName), element.name()).val();
+    public void update(Map<String, String> values) {
+        for (String parameterName : values.keySet()) {
+            set(parameterName, values.get(parameterName));
         }
-        return value(element, getElementByName(parameterName));
     }
 
     public Element first(String parameterName) {
@@ -104,6 +121,26 @@ public class HtmlForm {
             if (element.name().equalsIgnoreCase(name) && element.checked()) {
                 result = element;
             }
+        }
+        return result;
+    }
+
+    public String serialize() {
+        // TODO: URL encode?
+        StringBuilder result = new StringBuilder();
+        for (String fieldName : getFieldNames()) {
+            for (String value : getAll(fieldName)) {
+                if (result.length() > 0) result.append("&");
+                result.append(fieldName).append("=").append(value);
+            }
+        }
+        return result.toString();
+    }
+
+    public Map<String,List<String>> toMap() {
+        LinkedHashMap<String, List<String>> result = new LinkedHashMap<String, List<String>>();
+        for (String fieldName : getFieldNames()) {
+            result.put(fieldName, getAll(fieldName));
         }
         return result;
     }
