@@ -27,6 +27,8 @@ public abstract class Xml {
         private StringBuilder currentText;
         private Document document;
 
+        // TODO: Keep entities like &aring; and &oslash;
+
         @Override
         public void startDocument() {
             document = new Document();
@@ -38,12 +40,6 @@ public abstract class Xml {
             pushTextToTopElement();
             if (!elementStack.isEmpty()) elementStack.peek().add(newElement);
             elementStack.add(newElement);
-        }
-
-        @Override
-        public void startEntity(String name) throws SAXException {
-            // TODO Auto-generated method stub
-            super.startEntity(name);
         }
 
         @Override
@@ -218,8 +214,10 @@ public abstract class Xml {
 
     public static Document parse(InputSource inputSource) throws IOException {
         try {
-            SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
             ElementBuilderHandler handler = new ElementBuilderHandler();
+            SAXParserFactory parserFactory = SAXParserFactory.newInstance();
+            parserFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            SAXParser parser = parserFactory.newSAXParser();
             parser.setProperty("http://xml.org/sax/properties/lexical-handler", handler);
             parser.parse(inputSource, handler);
             return handler.getDocument();
