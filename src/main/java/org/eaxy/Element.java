@@ -1,5 +1,8 @@
 package org.eaxy;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -47,14 +50,13 @@ public class Element implements Node {
     }
 
     @Override
-    public String print(LinkedList<Namespace> printedNamespaces) {
-        // TODO: Would performance be notably better if we write to a Writer instead of generating a String
+    public void print(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException {
         if (content.isEmpty()) {
-            return "<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + " />";
+            writer.write("<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + " />");
         } else {
-            return "<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + ">" +
-                    printContent(printedNamespaces) +
-                    "</" + printTag() + ">";
+            writer.write("<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + ">");
+            printContent(writer, printedNamespaces);
+            writer.write("</" + printTag() + ">");
         }
     }
 
@@ -80,15 +82,13 @@ public class Element implements Node {
         return result.toString();
     }
 
-    private String printContent(List<Namespace> printedNamespaces2) {
+    private void printContent(Writer writer, List<Namespace> printedNamespaces2) throws IOException {
         LinkedList<Namespace> printedNamespaces = new LinkedList<Namespace>();
         printedNamespaces.addAll(printedNamespaces2);
         printedNamespaces.addAll(namespaces);
-        StringBuilder result = new StringBuilder();
         for (Node element : content) {
-            result.append(element.print(printedNamespaces));
+            element.print(writer, printedNamespaces);
         }
-        return result.toString();
     }
 
     @Override
@@ -134,8 +134,18 @@ public class Element implements Node {
         return this;
     }
 
+    public void writeTo(Writer writer) throws IOException {
+        print(writer, new LinkedList<Namespace>());
+    }
+
     public String toXML() {
-        return print(new LinkedList<Namespace>());
+        try {
+            StringWriter result = new StringWriter();
+            print(result, new LinkedList<Namespace>());
+            return result.toString();
+        } catch (IOException e) {
+            throw new CanNeverHappenException("StringWriter doesn't throw IOException", e);
+        }
     }
 
     public Element xmlns(Namespace namespace) {

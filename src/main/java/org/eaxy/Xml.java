@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -53,12 +54,6 @@ public abstract class Xml {
         @Override
         public void startDTD(String name, String publicId, String systemId) {
             document.addDTD("<!DOCTYPE " + name + " PUBLIC \"" + publicId + "\" \"" + systemId + "\">");
-            System.out.println(name + publicId + systemId);
-        }
-
-        @Override
-        public void processingInstruction(String target, String data) {
-            System.out.println(target + data);
         }
 
         @Override
@@ -116,8 +111,8 @@ public abstract class Xml {
         }
 
         @Override
-        public CharSequence print(LinkedList<Namespace> printedNamespaces) {
-            return text();
+        public void print(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException {
+            writer.write(text().toString());
         }
 
     }
@@ -131,8 +126,8 @@ public abstract class Xml {
         }
 
         @Override
-        public CharSequence print(LinkedList<Namespace> printedNamespaces) {
-            return "<!--" + text() + "-->";
+        public void print(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException {
+            writer.write("<!--" + text() + "-->");
         }
 
         @Override
@@ -151,10 +146,10 @@ public abstract class Xml {
         }
 
         @Override
-        public CharSequence print(LinkedList<Namespace> printedNamespaces) {
-            return text().replaceAll("&", "&amp;")
+        public void print(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException {
+            writer.write(text().replaceAll("&", "&amp;")
                     .replaceAll("<", "&lt;")
-                    .replaceAll(">", "&gt;");
+                    .replaceAll(">", "&gt;"));
         }
 
         @Override
