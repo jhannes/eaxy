@@ -1,10 +1,15 @@
 package org.eaxy.html;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.eaxy.CanNeverHappenException;
 import org.eaxy.Element;
 
 public class HtmlForm {
@@ -88,7 +93,38 @@ public class HtmlForm {
         return arrayList;
     }
 
+    public String serialize() {
+        StringBuilder result = new StringBuilder();
+        for (String fieldName : getFieldNames()) {
+            for (String value : getAll(fieldName)) {
+                if (result.length() > 0) result.append("&");
+                result.append(urlEncode(fieldName)).append("=").append(urlEncode(value));
+            }
+        }
+        return result.toString();
+    }
+
+    public void deserialize(String queryString) {
+        for (String parameter : queryString.split("&")) {
+            int separatorPos = parameter.indexOf('=');
+            set(urlDecode(parameter.substring(0, separatorPos)),
+                urlDecode(parameter.substring(separatorPos+1)));
+        }
+
+    }
+
+    public Map<String,List<String>> toMap() {
+        LinkedHashMap<String, List<String>> result = new LinkedHashMap<String, List<String>>();
+        for (String fieldName : getFieldNames()) {
+            result.put(fieldName, getAll(fieldName));
+        }
+        return result;
+    }
+
     private Iterable<Element> getElementByName(String parameterName) {
+        if (!elementByNameIndex.containsKey(parameterName)) {
+            throw new IllegalArgumentException("Form field " + parameterName + " not found in " + elementByNameIndex.keySet());
+        }
         return elementByNameIndex.get(parameterName);
     }
 
@@ -125,24 +161,20 @@ public class HtmlForm {
         return result;
     }
 
-    public String serialize() {
-        // TODO: URL encode?
-        StringBuilder result = new StringBuilder();
-        for (String fieldName : getFieldNames()) {
-            for (String value : getAll(fieldName)) {
-                if (result.length() > 0) result.append("&");
-                result.append(fieldName).append("=").append(value);
-            }
+    private String urlEncode(String value) {
+        try {
+            return URLEncoder.encode(value, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new CanNeverHappenException("What were they thinking?!?", e);
         }
-        return result.toString();
     }
 
-    public Map<String,List<String>> toMap() {
-        LinkedHashMap<String, List<String>> result = new LinkedHashMap<String, List<String>>();
-        for (String fieldName : getFieldNames()) {
-            result.put(fieldName, getAll(fieldName));
+    private String urlDecode(String value) {
+        try {
+            return URLDecoder.decode(value, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new CanNeverHappenException("What were they thinking?!?", e);
         }
-        return result;
     }
 
 }

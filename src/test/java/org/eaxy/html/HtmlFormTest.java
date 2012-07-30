@@ -3,6 +3,7 @@ package org.eaxy.html;
 import static org.eaxy.Xml.attr;
 import static org.eaxy.Xml.el;
 import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.assertions.Fail.fail;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +36,18 @@ public class HtmlFormTest {
         assertThat(form.get("checked_box")).isEqualTo("on");
         assertThat(form.get("unchecked_box")).isNull();
         assertThat(form.get("select_field")).isEqualTo("option2");
+    }
+
+    @Test
+    public void shouldWarnAboutMissingField() {
+        HtmlForm form = new HtmlForm(el("form", el("input").type("text").name("foo")));
+        try {
+            form.set("bar", "whatever");
+            fail("Expected exception");
+        } catch (Exception e) {
+            assertThat(e).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Form field bar not found in [foo]");
+        }
     }
 
     @Test
@@ -96,7 +109,6 @@ public class HtmlFormTest {
                 el("input").name("field_name").val("third_radio").type("radio").checked(false),
                 el("input").type("submit")
                 );
-        System.out.println(html.toXML());
         HtmlForm form = new HtmlForm(html);
         assertThat(form.get("field_name")).isEqualTo("input value");
         assertThat(form.getAll("field_name"))
@@ -166,5 +178,24 @@ public class HtmlFormTest {
             .isEqualTo("first_name=Johannes&last_name=Brodwall");
     }
 
-    // TODO: Should deserialize form
+    @Test
+    public void shouldSerializeSpecialCharacters() {
+        Element html = el("div", el("form",
+                el("input").type("text").name("field=1")));
+        HtmlForm form = new HtmlForm(html);
+        form.set("field=1", "\'\"?=&");
+        assertThat(form.serialize()).isEqualTo("field%3D1=%27%22%3F%3D%26");
+    }
+
+    @Test
+    public void shouldDeserializeForm() {
+        Element html = el("form",
+                el("input").name("last_name").type("text"),
+                el("input").name("unchecked_box").type("checkbox"),
+                el("input").name("checked=box").type("checkbox"));
+        HtmlForm form = new HtmlForm(html);
+        form.deserialize("last_name=O%27Malley&checked%3Dbox=");
+        assertThat(form.get("last_name")).isEqualTo("O'Malley");
+        assertThat(form.get("checked=box")).isEqualTo("on");
+    }
 }
