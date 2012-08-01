@@ -167,6 +167,18 @@ public class ElementBuilderTest {
     }
 
     @Test
+    public void shouldReadPrefixedNamespace() {
+        String xml = "<s:super xmlns:s=\"uri:test\">some data</s:super>";
+        assertThat(xml(xml).getRootElement().toXML()).isEqualTo(xml);
+    }
+
+    @Test
+    public void shouldReadDefaultNamespace() {
+        String xml = "<super xmlns=\"uri:test\">some data</super>";
+        assertThat(xml(xml).getRootElement().toXML()).isEqualTo(xml);
+    }
+
+    @Test
     public void shouldReadHtml() {
         String xml = el("html",
                 el("body",

@@ -27,6 +27,12 @@ public class XmlSerializationTest {
             .isEqualTo(normalize(slurp(xmlFile)));
     }
 
+    @Test
+    public void shouldTransformViaDom() throws Exception {
+        assertThat(normalize(Xml.fromDom(Xml.read(xmlFile).getRootElement().toDom()).toXML()))
+            .isEqualTo(normalize(slurp(xmlFile)));
+    }
+
     protected String normalize(String text) {
         return text.trim().replaceAll("\\s+", " ");
     }

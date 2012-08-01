@@ -1,6 +1,7 @@
 package org.eaxy;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -10,7 +11,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 public class Element implements Node {
 
@@ -279,6 +286,21 @@ public class Element implements Node {
             attributes.remove(new QualifiedName("selected"));
         }
         return this;
+    }
+
+    public org.w3c.dom.Document toDom() {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            String xml = new org.eaxy.Document(this).toXML();
+            return builder.parse(new InputSource(new StringReader(xml)));
+        } catch (ParserConfigurationException e) {
+            throw new CanNeverHappenException("Oh, just shut up!", e);
+        } catch (SAXException e) {
+            throw new CanNeverHappenException("Oh, just shut up!", e);
+        } catch (IOException e) {
+            throw new CanNeverHappenException("Oh, just shut up!", e);
+        }
     }
 }
 

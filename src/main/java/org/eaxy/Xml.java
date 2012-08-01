@@ -1,5 +1,6 @@
 package org.eaxy;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -14,6 +15,14 @@ import java.util.Stack;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -186,9 +195,9 @@ public abstract class Xml {
         return Namespace.NO_NAMESPACE.attr(key, value);
     }
 
-    public static Document xml(String xml) {
+    public static Document xml(CharSequence xml) {
         try {
-            return read(new StringReader(xml));
+            return read(new StringReader(xml.toString()));
         } catch (IOException e) {
             throw new CanNeverHappenException("StringReader never throws IOException", e);
         }
@@ -223,6 +232,24 @@ public abstract class Xml {
         } catch (ParserConfigurationException e) {
             throw new CanNeverHappenException("SAXParserFactory is always supported", e);
         }
+    }
+
+    public static Document fromDom(org.w3c.dom.Document document) {
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            Source source = new DOMSource(document);
+            Result target = new StreamResult(out);
+            transformer.transform(source, target);
+            return xml(out.toString());
+        } catch (TransformerException e) {
+            throw new CanNeverHappenException("Oh, shut up!", e);
+        }
+    }
+
+    public static Document doc(Element el) {
+        return new Document(el);
     }
 
 
