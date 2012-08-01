@@ -6,6 +6,7 @@ import static org.fest.assertions.Assertions.assertThat;
 import static org.fest.assertions.Fail.fail;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eaxy.Element;
@@ -67,6 +68,30 @@ public class HtmlFormTest {
                 ));
         assertThat(new HtmlForm(html).getFieldNames())
             .containsExactly("text_field", "text_area", "radio_field", "checked_box", "select_field");
+    }
+
+    @Test
+    public void shouldSetSelectOptions() {
+        Element html = el("form", el("select").name("select_field"));
+        Map<String, String> optionValues = new LinkedHashMap<String, String>();
+        optionValues.put("1", "first");
+        optionValues.put("2", "second");
+        optionValues.put("3", "third");
+        new HtmlForm(html).setFieldOptions("select_field", optionValues);
+        assertThat(html.find("select", "option").texts()).containsExactly("first", "second", "third");
+        assertThat(html.find("select", "option").attrs("value")).containsExactly("1", "2", "3");
+    }
+
+    @Test
+    public void shouldGetSelectOptions() {
+        Element html = el("form", el("select").name("select_field").addAll(
+                        el("optgroup",
+                            el("option", "Option name").val("option1"),
+                            el("option", "Option name").val("option2").selected(true)),
+                        el("option", "Option name").val("option3")));
+        HtmlForm form = new HtmlForm(html);
+        assertThat(form.getOptions("select_field").values()).containsExactly("option1", "option2", "option3");
+        assertThat(form.getOptions("select_field").texts()).containsExactly("Option name", "Option name", "Option name");
     }
 
     @Test

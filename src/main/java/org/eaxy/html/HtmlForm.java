@@ -8,9 +8,11 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Map.Entry;
 import org.eaxy.CanNeverHappenException;
 import org.eaxy.Element;
+import org.eaxy.ElementSet;
+import org.eaxy.Xml;
 
 public class HtmlForm {
 
@@ -68,6 +70,23 @@ public class HtmlForm {
         return this;
     }
 
+    public ElementSet getOptions(String parameterName) {
+        List<Element> select = getElementByName(parameterName);
+        return select.get(0).find("...", "option");
+    }
+
+    public void setFieldOptions(String parameterName, Map<String, String> optionValues) {
+        for (Element element : getElementByName(parameterName)) {
+            if (!element.tagName().equalsIgnoreCase("select")) {
+                throw new IllegalArgumentException("There are non-select fields named " + parameterName + ": " + element);
+            }
+            for (Entry<String, String> option : optionValues.entrySet()) {
+                element.add(Xml.el("option", option.getValue()).val(option.getKey()));
+            }
+        }
+
+    }
+
     public void update(Map<String, String> values) {
         for (String parameterName : values.keySet()) {
             set(parameterName, values.get(parameterName));
@@ -121,7 +140,7 @@ public class HtmlForm {
         return result;
     }
 
-    private Iterable<Element> getElementByName(String parameterName) {
+    private List<Element> getElementByName(String parameterName) {
         if (!elementByNameIndex.containsKey(parameterName)) {
             throw new IllegalArgumentException("Form field " + parameterName + " not found in " + elementByNameIndex.keySet());
         }
