@@ -12,6 +12,9 @@ class QualifiedName {
     }
 
     public QualifiedName(String name) {
+        if (name == null || name.equals("")) {
+            throw new IllegalArgumentException("name must be provided");
+        }
         this.namespace = Namespace.NO_NAMESPACE;
         this.name = name;
     }

@@ -125,13 +125,22 @@ public class Element implements Node {
     }
 
     public Element attr(QualifiedName key, String value) {
-        return attr(new Attribute(key, value));
+        if (value == null) {
+            attributes.remove(key);
+        } else {
+            attr(new Attribute(key, value));
+        }
+        return this;
     }
 
     public Element attr(Attribute attribute) {
         xmlns(attribute.getKey().getNamespace());
         attributes.put(attribute.getKey(), attribute);
         return this;
+    }
+
+    public boolean hasAttr(String name) {
+        return attributes.containsKey(new QualifiedName(name));
     }
 
     public void writeTo(Writer writer) throws IOException {
@@ -174,6 +183,10 @@ public class Element implements Node {
     // TODO: Would an event based finder (instead of returning a set) be more efficient?
     public ElementSet find(Object... path) {
         return new ElementSet(this).find(path);
+    }
+
+    public Element select(String element) {
+        return find("...", element).first();
     }
 
     public Collection<? extends Element> elements() {

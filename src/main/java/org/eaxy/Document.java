@@ -47,4 +47,12 @@ public class Document {
         }
         rootElement.writeTo(writer);
     }
+
+    public ElementSet find(Object... path) {
+        return getRootElement().find(path);
+    }
+
+    public Element select(String element) {
+        return getRootElement().select(element);
+    }
 }

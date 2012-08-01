@@ -118,6 +118,7 @@ public class ElementSet implements Iterable<Element> {
     }
 
     public Element get(int pos) {
+        check();
         return elements.get(pos);
     }
 

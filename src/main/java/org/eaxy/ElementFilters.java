@@ -33,6 +33,7 @@ public class ElementFilters {
                 this.filter = (ElementFilter) ((ChildQuery)filter).parent;
                 this.next = ((ChildQuery)filter).child;
             } else {
+                // TODO: This look wrong!
                 this.filter = any();
                 this.next = identity();
             }
@@ -110,11 +111,17 @@ public class ElementFilters {
         ElementQuery query = identity();
         for (int i = path.length-1; i >= 0 ; i--) {
             Object filter = path[i];
-            query = "...".equals(filter)
-                    ? new ElementDescendantQuery(query)
-                    : new ChildQuery(create(filter), query);
+            query = "...".equals(filter) ? descendant(query) : child(query, filter);
         }
         return query;
+    }
+
+    private static ChildQuery child(ElementQuery query, Object filter) {
+        return new ChildQuery(filter(filter), query);
+    }
+
+    public static ElementDescendantQuery descendant(ElementQuery query) {
+        return new ElementDescendantQuery(query);
     }
 
     private static ElementQuery identity() {
@@ -126,7 +133,7 @@ public class ElementFilters {
         };
     }
 
-    private static ElementQuery create(Object filter) {
+    public static ElementQuery filter(Object filter) {
         if (filter instanceof Attribute) {
             return attrFilter((Attribute)filter);
         } else if (filter instanceof CharSequence) {
@@ -136,7 +143,7 @@ public class ElementFilters {
         } else if (filter instanceof Number) {
             return position((Number)filter);
         } else {
-            return (ElementFilter)filter;
+            return (ElementQuery)filter;
         }
     }
 

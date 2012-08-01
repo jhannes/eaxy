@@ -37,7 +37,7 @@ class Attribute {
     }
 
     public String toXML() {
-        return key.print() + "=\"" + valueToXML() + "\"";
+        return key.print() + (value != null ? ("=\"" + valueToXML() + "\"") : "");
     }
 
     private String valueToXML() {
