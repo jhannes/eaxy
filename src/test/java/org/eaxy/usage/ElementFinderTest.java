@@ -126,6 +126,12 @@ public class ElementFinderTest {
     }
 
     @Test
+    public void shouldMatchAnyOnNoNamespace() {
+        Namespace SOAP_NS = new Namespace("http://schemas.xmlsoap.org/soap/envelope/", "S");
+        SOAP_NS.el("Envelope", SOAP_NS.el("Body", el("something"))).find("Body", "*").check();
+    }
+
+    @Test
     public void shouldMatchOnAttribute() {
         Namespace NS = new Namespace("uri:a", "a");
         Element xml = NS.el("parent",
@@ -162,6 +168,5 @@ public class ElementFinderTest {
                 .contains("actual-child");
         }
     }
-
 
 }
