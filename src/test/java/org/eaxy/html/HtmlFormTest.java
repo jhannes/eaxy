@@ -2,8 +2,8 @@ package org.eaxy.html;
 
 import static org.eaxy.Xml.attr;
 import static org.eaxy.Xml.el;
-import static org.fest.assertions.Assertions.assertThat;
-import static org.fest.assertions.Fail.fail;
+import static org.fest.assertions.api.Assertions.assertThat;
+import static org.fest.assertions.api.Fail.fail;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;

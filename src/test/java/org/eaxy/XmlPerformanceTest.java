@@ -1,11 +1,10 @@
 package org.eaxy;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.assertions.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
 
-import org.eaxy.Xml;
 import org.eaxy.utils.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,7 +13,7 @@ import org.junit.runner.RunWith;
 @FileTestRunner.Directory("src/test/xml/performance-suite")
 public class XmlPerformanceTest {
 
-    private String contents;
+    private final String contents;
 
     public XmlPerformanceTest(File xmlFile) throws IOException {
         long startTime = System.currentTimeMillis();

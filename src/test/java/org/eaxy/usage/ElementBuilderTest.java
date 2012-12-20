@@ -3,7 +3,7 @@ package org.eaxy.usage;
 import static org.eaxy.Xml.el;
 import static org.eaxy.Xml.text;
 import static org.eaxy.Xml.xml;
-import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.assertions.api.Assertions.assertThat;
 
 import org.eaxy.Element;
 import org.eaxy.MalformedXMLException;

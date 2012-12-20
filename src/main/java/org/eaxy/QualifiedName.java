@@ -35,7 +35,6 @@ class QualifiedName {
     public boolean equals(Object obj) {
         if (!(obj instanceof QualifiedName)) return false;
         QualifiedName other = ((QualifiedName) obj);
-        if (namespace == Namespace.NO_NAMESPACE) return Objects.equals(name, other.name);
         return Objects.equals(name, other.name) &&
                 Objects.equals(namespace, other.namespace);
     }
@@ -47,14 +46,22 @@ class QualifiedName {
 
     @Override
     public String toString() {
-        if (namespace == Namespace.NO_NAMESPACE) return name;
+        if (namespace.isNoNamespace()) return name;
         return "{" + namespace.getUri() + "}" + name;
     }
 
-    public boolean matches(Object filter) {
-        if (filter instanceof QualifiedName) {
-            return filter.equals(this);
-        }
-        return this.name.equals(filter);
+    public boolean hasNoNamespace() {
+    	return namespace.isNoNamespace();
     }
+
+    public boolean matches(QualifiedName filter) {
+    	if (filter.hasNoNamespace() || hasNoNamespace()) {
+    		return filter.name.equals(this.name);
+    	}
+        return filter.equals(this);
+    }
+
+	public boolean matches(String tagName) {
+		return name.equals(tagName);
+	}
 }

@@ -2,7 +2,11 @@ package org.eaxy;
 
 public class Namespace {
 
-    public static final Namespace NO_NAMESPACE = new Namespace(null);
+    static final Namespace NO_NAMESPACE = new Namespace(null) {
+    	@Override
+		public boolean isNoNamespace() { return true; }
+    };
+
     private final String uri;
     private final String prefix;
 
@@ -42,7 +46,7 @@ public class Namespace {
     }
 
     public boolean isNoNamespace() {
-        return uri == null;
+        return false;
     }
 
     public String print() {

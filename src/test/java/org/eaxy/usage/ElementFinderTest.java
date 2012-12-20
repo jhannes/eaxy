@@ -2,10 +2,8 @@ package org.eaxy.usage;
 
 import static org.eaxy.Xml.el;
 import static org.eaxy.Xml.text;
-import static org.fest.assertions.Assertions.assertThat;
-import static org.fest.assertions.Fail.fail;
-
-import java.util.Arrays;
+import static org.fest.assertions.api.Assertions.assertThat;
+import static org.fest.assertions.api.Fail.fail;
 
 import org.eaxy.Element;
 import org.eaxy.Namespace;
@@ -144,8 +142,7 @@ public class ElementFinderTest {
     @Test
     public void shouldKeepFullPath() {
         Element xml = el("root", el("a", el("b", el("c"))));
-        assertThat(xml.find("a").find("b", "c").getPath()).isEqualTo(
-                Arrays.asList("root", "a", "b", "c"));
+        assertThat(xml.find("a").find("b", "c").getPath()).containsExactly("root", "a", "b", "c");
     }
 
     @Test
@@ -164,7 +161,7 @@ public class ElementFinderTest {
             assertThat(e.getMessage())
                 .contains("below [root, top, parent]")
                 .contains("Can't find <searched-child>")
-                .excludes("foo")
+                .doesNotContain("foo")
                 .contains("actual-child");
         }
     }

@@ -118,7 +118,7 @@ public class Element implements Node {
     }
 
     public String attr(QualifiedName key) {
-        if (key.getNamespace() == Namespace.NO_NAMESPACE) {
+        if (key.hasNoNamespace()) {
             for (Attribute attr : attributes.values()) {
                 if (attr.getKey().matches(key)) return attr.getValue();
             }

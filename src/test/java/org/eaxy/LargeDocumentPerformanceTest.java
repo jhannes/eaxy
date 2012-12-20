@@ -2,7 +2,7 @@ package org.eaxy;
 
 import static org.eaxy.Xml.el;
 import static org.eaxy.Xml.text;
-import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.assertions.api.Assertions.assertThat;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -85,7 +85,7 @@ public class LargeDocumentPerformanceTest {
         }
         long start = System.currentTimeMillis();
         ElementSet matches = root.find("some_element", "child.class-0");
-        assertThat(matches.texts()).contains("yes").excludes("no");
+        assertThat(matches.texts()).contains("yes").doesNotContain("no");
         assertThat(matches.size()).isGreaterThan(elementCount/15).isLessThan(elementCount/8);
         long duration = System.currentTimeMillis()-start;
         return duration;

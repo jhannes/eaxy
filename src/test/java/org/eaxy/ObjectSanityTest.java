@@ -1,17 +1,15 @@
 package org.eaxy;
 
 import static org.eaxy.Namespace.NO_NAMESPACE;
-import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.assertions.api.Assertions.assertThat;
 
-import org.eaxy.Namespace;
-import org.eaxy.QualifiedName;
 import org.junit.Test;
 
 public class ObjectSanityTest {
 
-    private Namespace NS = new Namespace("http://foo.com", "a1");
-    private Namespace NS_OTHER_PREFIX = new Namespace("http://foo.com", "a2");
-    private Namespace OTHER_NS = new Namespace("uri:somethingElse", "a2");
+    private final Namespace NS = new Namespace("http://foo.com", "a1");
+    private final Namespace NS_OTHER_PREFIX = new Namespace("http://foo.com", "a2");
+    private final Namespace OTHER_NS = new Namespace("uri:somethingElse", "a2");
 
     @Test
     public void elementsShouldHaveDecentToString() {
@@ -36,9 +34,7 @@ public class ObjectSanityTest {
             .isEqualTo(new QualifiedName(NS_OTHER_PREFIX, "foo"))
             .isNotEqualTo(new QualifiedName(OTHER_NS, "foo"))
             .isNotEqualTo(new QualifiedName("foo"))
-            .isNotEqualTo(null)
-            .isNotEqualTo(new Object())
-            ;
+            .isNotEqualTo(null);
     }
 
     @Test
@@ -64,8 +60,7 @@ public class ObjectSanityTest {
             .isNotEqualTo(OTHER_NS.attr("href", "something"))
             .isNotEqualTo(NS.attr("src", "something"))
             .isNotEqualTo(NS.attr("href", "something else"))
-            .isNotEqualTo(null)
-            .isNotEqualTo(new Object());
+            .isNotEqualTo(null);
     }
 
     @Test

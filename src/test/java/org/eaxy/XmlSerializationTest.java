@@ -1,10 +1,9 @@
 package org.eaxy;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.assertions.api.Assertions.assertThat;
 
 import java.io.File;
 
-import org.eaxy.Xml;
 import org.eaxy.utils.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
