@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import org.eaxy.CanNeverHappenException;
 import org.eaxy.Element;
 import org.eaxy.ElementSet;
@@ -27,6 +28,17 @@ public class HtmlForm {
             elementByNameIndex.get(element.name()).add(element);
         }
     }
+
+	public Element getSubmitButton() {
+		for (String fieldName : elementByNameIndex.keySet()) {
+            List<Element> elements = elementByNameIndex.get(fieldName);
+            Element element = elements.get(0);
+			if (element.tagName().equalsIgnoreCase("input") && element.type().equalsIgnoreCase("submit")) {
+                return element;
+            }
+        }
+		return null;
+	}
 
     public List<String> getFieldNames() {
         ArrayList<String> names = new ArrayList<String>();
@@ -195,5 +207,6 @@ public class HtmlForm {
             throw new CanNeverHappenException("What were they thinking?!?", e);
         }
     }
+
 
 }

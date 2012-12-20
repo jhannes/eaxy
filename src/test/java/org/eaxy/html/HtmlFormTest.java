@@ -54,6 +54,7 @@ public class HtmlFormTest {
     @Test
     public void shouldShowFormFieldNames() {
         Element html = el("form", el("div").name("div_name").addAll(
+                el("input").name("submit_button").val("Click me!").type("submit"),
                 el("input").name("text_field").val("input value").type("text"),
                 el("textarea").name("text_area").text("text area content"),
                 el("input").name("radio_field").val("first").type("radio").checked(false),
@@ -67,8 +68,17 @@ public class HtmlFormTest {
                         )
                 ));
         assertThat(new HtmlForm(html).getFieldNames())
-            .containsExactly("text_field", "text_area", "radio_field", "checked_box", "select_field");
+            .containsExactly("submit_button", "text_field", "text_area", "radio_field", "checked_box", "select_field");
     }
+
+    @Test
+	public void shouldShowFirstButton() throws Exception {
+    	Element html = el("form", el("div").name("div_name").addAll(
+    			el("input").name("text_field").val("input value").type("text"),
+                el("input").name("submit_button").val("Click me!").type("submit"),
+                el("textarea").name("text_area").text("text area content")));
+    	assertThat(new HtmlForm(html).getSubmitButton().name()).isEqualTo("submit_button");
+	}
 
     @Test
     public void shouldSetSelectOptions() {
