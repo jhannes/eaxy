@@ -32,6 +32,13 @@
       <scope>test</scope>
       <version>1.4</version>
     </dependency>
+    <dependency>
+      <!-- Compatibility: This version of Xerces breaks stuff. The tests must be able to run with it -->
+      <groupId>xerces</groupId>
+      <artifactId>xercesImpl</artifactId>
+      <scope>test</scope>
+      <version>2.9.1</version>
+    </dependency>
   </dependencies>
 
 </project>

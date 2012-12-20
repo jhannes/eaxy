@@ -51,7 +51,7 @@ public class Element implements Node {
 
     Element attrs(Attributes attributes) {
         for (int i = 0; i < attributes.getLength(); i++) {
-            attr(attributes.getLocalName(i), attributes.getValue(i));
+            attr(attributes.getQName(i), attributes.getValue(i));
         }
         return this;
     }
