@@ -10,31 +10,34 @@ import java.util.Random;
 
 import org.junit.Test;
 
-public class LargeDocumentTest {
+public class LargeDocumentPerformanceTest {
 
     public static void main(String[] args) throws IOException {
 
-        int elementCount = 1000;
+        int step = 1000;
         while (true) {
-            System.out.println("buildDocument\t" + elementCount + "\t" + buildDocument(elementCount));
-            System.out.println("writeLargeDocument\t" + elementCount + "\t" + writeLargeDocument(elementCount));
-            System.out.println("searchInLargeDocument\t" + elementCount + "\t" + searchInLargeDocument(elementCount));
-            elementCount *= 2;
+        	int elementCount = step/1000 * 1000;
+            System.out.print("buildLargeDocument\t" + elementCount + "\t");
+            System.out.println(buildLargeDocument(elementCount));
+            System.out.print("writeLargeDocument\t" + elementCount + "\t");
+            System.out.println(writeLargeDocument(elementCount));
+            System.out.print("searchInLargeDocument\t" + elementCount + "\t");
+            System.out.println(searchInLargeDocument(elementCount));
+            step *= 1.5;
         }
-
     }
 
     private static Random random = new Random();
 
-    private int elementCount = getProperty("elementCount", 1000);
+    private final int elementCount = getProperty("elementCount", 1000);
 
     @Test
     public void shouldBuildLargeDocument() {
-        long duration = buildDocument(elementCount);
-        assertThat(duration).isLessThan(elementCount/40+100).as("duration");
+        long duration = buildLargeDocument(elementCount);
+        assertThat(duration).as("duration").isLessThan(elementCount/30+100);
     }
 
-    private static long buildDocument(int elementCount) {
+    private static long buildLargeDocument(int elementCount) {
         long start = System.currentTimeMillis();
         Element root = el("root");
         for (int i=0; i<elementCount; i++) {
@@ -48,7 +51,7 @@ public class LargeDocumentTest {
     @Test
     public void shouldWriteHugeXmlDocument() throws IOException {
         long duration = writeLargeDocument(elementCount);
-        assertThat(duration).isLessThan(elementCount/10+400).as("duration");
+        assertThat(duration).as("duration").isLessThan(elementCount/5+500);
     }
 
     private static long writeLargeDocument(int elementCount) throws IOException {
@@ -97,7 +100,7 @@ public class LargeDocumentTest {
     }
 
     private String getProperty(String parameter, String defaultString) {
-        String key = LargeDocumentTest.class.getName() + "." + parameter;
+        String key = LargeDocumentPerformanceTest.class.getName() + "." + parameter;
         return System.getProperty(key, defaultString);
     }
 
