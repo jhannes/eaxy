@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -193,6 +194,10 @@ public abstract class Xml {
 
     public static Attribute attr(String key, String value) {
         return Namespace.NO_NAMESPACE.attr(key, value);
+    }
+
+    public static Document xml(StringWriter xml) {
+    	return xml(xml.toString());
     }
 
     public static Document xml(CharSequence xml) {
