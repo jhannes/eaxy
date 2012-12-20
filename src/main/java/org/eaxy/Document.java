@@ -9,7 +9,7 @@ import java.util.List;
 public class Document {
 
     private Element rootElement;
-    private List<String> dtds = new ArrayList<String>();
+    private final List<String> dtds = new ArrayList<String>();
 
     public Document(Element root) {
         rootElement = root;
@@ -52,7 +52,13 @@ public class Document {
         return getRootElement().find(path);
     }
 
-    public Element select(String element) {
+    public Element select(Object element) {
         return getRootElement().select(element);
+    }
+
+    public Document copy() {
+        Document result = new Document(rootElement.copy());
+        result.dtds.addAll(dtds);
+        return result;
     }
 }

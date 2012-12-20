@@ -124,7 +124,7 @@ public class ElementBuilderTest {
         assertThat(el("Super",
                     SOAP_NS.el("Envelope"),
                     SOAP_NS.el("Body"))
-                .xmlns(SOAP_NS).toXML())
+                .xmlns(SOAP_NS).copy().toXML())
             .isEqualTo("<Super xmlns:S=\"http://soap.com\"><S:Envelope /><S:Body /></Super>");
     }
 

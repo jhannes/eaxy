@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -197,6 +198,12 @@ public class Element implements Node {
         return find("...", filter).first();
     }
 
+    public Element take(Object selector) {
+        Element result = select(selector);
+        content.clear();
+        return result;
+    }
+
     public Collection<? extends Element> elements() {
         ArrayList<Element> result = new ArrayList<Element>();
         for (Node node : content) {
@@ -303,5 +310,20 @@ public class Element implements Node {
             throw new CanNeverHappenException("Oh, just shut up!", e);
         }
     }
+
+    @Override
+    public Element copy() {
+        List<Node> contentCopy = new ArrayList<Node>();
+        for (Node node : content) {
+            contentCopy.add(node.copy());
+        }
+        Element copy = new Element(this.name, contentCopy);
+        for (Entry<QualifiedName, Attribute> entry : attributes.entrySet()) {
+            copy.attr(entry.getKey(), entry.getValue().getValue());
+        }
+        copy.namespaces.addAll(namespaces);
+        return copy;
+    }
+
 }
 

@@ -36,4 +36,15 @@ public class ElementManipulationTest {
         assertThat(xml.find("li").first().className()).isEqualTo("new-class");
     }
 
+    @Test
+    public void shouldUseFragmentAsTemplate() throws Exception {
+        Element xml = el("ul",
+                el("li", "some text"));
+        Element template = xml.take("li");
+        xml.add(template.copy().text("foo"));
+        xml.add(template.copy().text("bar"));
+        xml.add(template.copy().text("baz"));
+        assertThat(xml.find("li").check().texts()).containsExactly("foo", "bar", "baz");
+    }
+
 }

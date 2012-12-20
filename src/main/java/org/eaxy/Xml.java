@@ -2,8 +2,9 @@ package org.eaxy;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -125,6 +126,10 @@ public abstract class Xml {
             writer.write(text().toString());
         }
 
+        @Override
+        public Node copy() {
+            return new CDataElement(stringContent);
+        }
     }
 
     private static class CommentElement implements Node {
@@ -143,6 +148,11 @@ public abstract class Xml {
         @Override
         public String text() {
             return stringContent;
+        }
+
+        @Override
+        public Node copy() {
+            return new CommentElement(stringContent);
         }
 
     }
@@ -165,6 +175,11 @@ public abstract class Xml {
         @Override
         public String text() {
             return stringContent;
+        }
+
+        @Override
+        public Node copy() {
+            return new TextElement(stringContent);
         }
     }
 
@@ -209,11 +224,14 @@ public abstract class Xml {
     }
 
     public static Document read(File file) throws IOException {
-        FileReader reader = new FileReader(file);
+        return readAndClose(new FileInputStream(file));
+    }
+
+    public static Document readAndClose(InputStream inputStream) throws IOException {
         try {
-            return read(reader);
+            return parse(new InputSource(inputStream));
         } finally {
-            reader.close();
+            inputStream.close();
         }
     }
 

@@ -20,7 +20,7 @@ public class XmlSerializationTest {
 
     @Test
     public void serializedShouldMatch() throws Exception {
-        assertThat(normalize(Xml.read(xmlFile).toXML()))
+        assertThat(normalize(Xml.read(xmlFile).copy().toXML()))
             .isEqualTo(normalize(IOUtils.slurp(xmlFile)));
     }
 

@@ -10,4 +10,6 @@ public interface Node {
 
     CharSequence text();
 
+    Node copy();
+
 }
