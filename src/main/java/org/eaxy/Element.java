@@ -188,12 +188,13 @@ public class Element implements Node {
     }
 
     // TODO: Would an event based finder (instead of returning a set) be more efficient?
+    // TODO: Will the paths pretty much always be "...", something?
     public ElementSet find(Object... path) {
         return new ElementSet(this).find(path);
     }
 
-    public Element select(String element) {
-        return find("...", element).first();
+    public Element select(Object filter) {
+        return find("...", filter).first();
     }
 
     public Collection<? extends Element> elements() {
