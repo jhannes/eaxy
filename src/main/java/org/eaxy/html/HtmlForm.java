@@ -45,11 +45,15 @@ public class HtmlForm {
         for (String fieldName : elementByNameIndex.keySet()) {
             List<Element> elements = elementByNameIndex.get(fieldName);
             String tagName = elements.get(0).tagName().toLowerCase();
-            if (tagName.equals("input") || tagName.equals("select") || tagName.equals("textarea")) {
+            if (isFormElement(tagName)) {
                 names.add(fieldName);
             }
         }
         return names;
+    }
+
+    private boolean isFormElement(String tagName) {
+        return tagName.equals("input") || tagName.equals("select") || tagName.equals("textarea");
     }
 
     public String get(String parameterName) {
