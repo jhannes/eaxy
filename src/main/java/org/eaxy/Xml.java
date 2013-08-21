@@ -183,8 +183,9 @@ public abstract class Xml {
         }
     }
 
-    public static Element el(String tagName, Node... content) {
-        return new Element(Namespace.NO_NAMESPACE.name(tagName), new ArrayList<Node>(Arrays.asList(content)));
+    public static Element el(String tagName, Content... contents) {
+        return new Element(Namespace.NO_NAMESPACE.name(tagName), Objects.list(contents, Node.class))
+            .attrs(Objects.list(contents, Attribute.class));
     }
 
     public static Node comment(String string) {

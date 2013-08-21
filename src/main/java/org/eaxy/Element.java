@@ -325,5 +325,12 @@ public class Element implements Node {
         return copy;
     }
 
+    Element attrs(List<Attribute> attributes) {
+        for (Attribute attribute : attributes) {
+            attr(attribute);
+        }
+        return this;
+    }
+
 }
 

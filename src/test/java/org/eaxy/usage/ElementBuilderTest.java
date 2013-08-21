@@ -1,5 +1,6 @@
 package org.eaxy.usage;
 
+import static org.eaxy.Xml.attr;
 import static org.eaxy.Xml.el;
 import static org.eaxy.Xml.text;
 import static org.eaxy.Xml.xml;
@@ -39,6 +40,14 @@ public class ElementBuilderTest {
         assertThat(el("foo").attr("attr", "This is \"<\" - a less than sign").attr("attr"))
             .isEqualTo("This is \"<\" - a less than sign");
         assertThat(el("foo").attr("attr", "This is \"<\" - a less than sign").toXML())
+            .isEqualTo("<foo attr=\"This is &quot;&lt;&quot; - a less than sign\" />");
+    }
+
+    @Test
+    public void shouldCreateAttributesAsArguments() {
+        assertThat(el("foo", attr("attr", "This is \"<\" - a less than sign")).attr("attr"))
+            .isEqualTo("This is \"<\" - a less than sign");
+        assertThat(el("foo", attr("attr", "This is \"<\" - a less than sign")).toXML())
             .isEqualTo("<foo attr=\"This is &quot;&lt;&quot; - a less than sign\" />");
     }
 

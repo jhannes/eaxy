@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.LinkedList;
 
-public interface Node {
+public interface Node extends Content {
 
     void print(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException;
 

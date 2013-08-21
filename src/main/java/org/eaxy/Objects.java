@@ -1,6 +1,8 @@
 package org.eaxy;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 abstract class Objects {
 
@@ -11,5 +13,14 @@ abstract class Objects {
     public static int hashCode(Object...o) {
         return Arrays.hashCode(o);
     }
+
+	@SuppressWarnings("unchecked")
+	public static<T,U> List<U> list(T[] fullList, Class<U> filteredType) {
+    	List<U> list = new ArrayList<U>();
+    	for (T o : fullList) {
+    		if (filteredType.isInstance(o)) list.add((U)o);
+		}
+		return list;
+	}
 
 }
