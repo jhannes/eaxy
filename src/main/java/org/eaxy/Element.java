@@ -332,5 +332,9 @@ public class Element implements Node {
         return this;
     }
 
+    public void delete(Element existingChild) {
+        content.remove(existingChild);
+    }
+
 }
 

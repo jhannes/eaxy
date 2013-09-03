@@ -96,6 +96,10 @@ public class HtmlForm {
             if (!element.tagName().equalsIgnoreCase("select")) {
                 throw new IllegalArgumentException("There are non-select fields named " + parameterName + ": " + element);
             }
+            for (Element existingOption : element.find("option")) {
+                element.delete(existingOption);
+            }
+
             for (Entry<String, String> option : optionValues.entrySet()) {
                 element.add(Xml.el("option", option.getValue()).val(option.getKey()));
             }

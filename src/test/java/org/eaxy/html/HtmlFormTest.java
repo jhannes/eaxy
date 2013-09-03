@@ -93,6 +93,18 @@ public class HtmlFormTest {
     }
 
     @Test
+    public void shouldReplaceSelectOptions() throws Exception {
+        Element html = el("form", el("select").name("select_field"));
+        Map<String, String> optionValues = new LinkedHashMap<String, String>();
+        optionValues.put("1", "first");
+        optionValues.put("2", "second");
+        optionValues.put("3", "third");
+        new HtmlForm(html).setFieldOptions("select_field", optionValues);
+        new HtmlForm(html).setFieldOptions("select_field", new LinkedHashMap<String, String>());
+        assertThat(html.find("select", "option").texts()).isEmpty();
+    }
+
+    @Test
     public void shouldGetSelectOptions() {
         Element html = el("form", el("select").name("select_field").addAll(
                         el("optgroup",
