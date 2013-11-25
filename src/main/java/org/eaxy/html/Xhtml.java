@@ -3,7 +3,6 @@ package org.eaxy.html;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.net.URL;
 
 import org.eaxy.Document;
 import org.eaxy.Element;
@@ -30,10 +29,6 @@ public class Xhtml extends Document {
 
     public Element findById(String id) {
         return select(ElementFilters.attrFilter("id", id));
-    }
-
-    public static Xhtml fromResource(URL resource) throws IOException {
-        return new Xhtml(Xml.readAndClose(resource.openStream()));
     }
 
     public static Element div(String text) {
