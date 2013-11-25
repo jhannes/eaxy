@@ -6,7 +6,7 @@ import java.util.LinkedList;
 
 public interface Node extends Content {
 
-    void print(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException;
+    void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException;
 
     CharSequence text();
 

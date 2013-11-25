@@ -58,7 +58,7 @@ public class Element implements Node {
     }
 
     @Override
-    public void print(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException {
+    public void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException {
         if (content.isEmpty()) {
             writer.write("<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + " />");
         } else {
@@ -95,7 +95,7 @@ public class Element implements Node {
         printedNamespaces.addAll(printedNamespaces2);
         printedNamespaces.addAll(namespaces);
         for (Node element : content) {
-            element.print(writer, printedNamespaces);
+            element.writeTo(writer, printedNamespaces);
         }
     }
 
@@ -152,13 +152,13 @@ public class Element implements Node {
     }
 
     public void writeTo(Writer writer) throws IOException {
-        print(writer, new LinkedList<Namespace>());
+        writeTo(writer, new LinkedList<Namespace>());
     }
 
     public String toXML() {
         try {
             StringWriter result = new StringWriter();
-            print(result, new LinkedList<Namespace>());
+            writeTo(result);
             return result.toString();
         } catch (IOException e) {
             throw new CanNeverHappenException("StringWriter doesn't throw IOException", e);

@@ -120,7 +120,7 @@ public abstract class Xml {
         }
 
         @Override
-        public void print(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException {
+        public void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException {
             writer.write(text().toString());
         }
 
@@ -139,7 +139,7 @@ public abstract class Xml {
         }
 
         @Override
-        public void print(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException {
+        public void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException {
             writer.write("<!--" + text() + "-->");
         }
 
@@ -164,7 +164,7 @@ public abstract class Xml {
         }
 
         @Override
-        public void print(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException {
+        public void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException {
             writer.write(text().replaceAll("&", "&amp;")
                     .replaceAll("<", "&lt;")
                     .replaceAll(">", "&gt;"));

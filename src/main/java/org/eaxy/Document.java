@@ -29,7 +29,7 @@ public class Document {
     public String toXML() {
         StringWriter result = new StringWriter();
         try {
-            write(result);
+            writeTo(result);
         } catch (IOException e) {
             throw new CanNeverHappenException("StringBuilder doesn't throw IOException", e);
         }
@@ -40,7 +40,7 @@ public class Document {
         this.dtds.add(dtdString);
     }
 
-    public void write(Writer writer) throws IOException {
+    public void writeTo(Writer writer) throws IOException {
         writer.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
         for (String dtd : dtds) {
             writer.append(dtd).append("\n");
