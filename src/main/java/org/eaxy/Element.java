@@ -114,6 +114,14 @@ public class Element implements Node {
         return this;
     }
 
+    public Map<String, String> attrs() {
+        LinkedHashMap<String, String> result = new LinkedHashMap<String, String>();
+        for (QualifiedName attrName : attributes.keySet()) {
+            result.put(attrName.getName(), attr(attrName));
+        }
+        return result;
+    }
+
     public String attr(String attrName) {
         return attr(new QualifiedName(attrName));
     }
@@ -335,6 +343,7 @@ public class Element implements Node {
     public void delete(Element existingChild) {
         content.remove(existingChild);
     }
+
 
 }
 

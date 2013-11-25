@@ -6,6 +6,8 @@ import static org.eaxy.Xml.text;
 import static org.eaxy.Xml.xml;
 import static org.fest.assertions.api.Assertions.assertThat;
 
+import java.util.Map;
+
 import org.eaxy.Element;
 import org.eaxy.MalformedXMLException;
 import org.eaxy.Namespace;
@@ -33,6 +35,13 @@ public class ElementBuilderTest {
     public void shouldSerializeAttributes() {
         assertThat(el("foo", el("bar", "gz").attr("href", "http://a.com")).attr("alt", "test").toXML())
             .isEqualTo("<foo alt=\"test\"><bar href=\"http://a.com\">gz</bar></foo>");
+    }
+
+    @Test
+    public void shouldGetAllAttributes() {
+        Map<String, String> attrs = el("element", attr("abc", "a"), attr("xyz", "b"), attr("def", "c")).attrs();
+        assertThat(attrs.keySet()).containsExactly("abc", "xyz", "def");
+        assertThat(attrs.values()).containsExactly("a", "b", "c");
     }
 
     @Test
