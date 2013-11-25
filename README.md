@@ -70,6 +70,6 @@ HTML utilities:
 
 Known issues:
 -------------
-* HTML form utilities are nowhere near done
-* I need to check out performance for searching through really large docs
-* Needs to support XSD validation
+* SAX namespace may be broken with certain classpath combinations - perhaps I need to write my own parser
+* Finding doesn't include the current element, which is often non-intuitive
+* The "..." syntax is unintuitive and could use some improvement
