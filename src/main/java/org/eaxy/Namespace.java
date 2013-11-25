@@ -1,5 +1,6 @@
 package org.eaxy;
 
+
 public class Namespace {
 
     static final Namespace NO_NAMESPACE = new Namespace(null) {
@@ -37,12 +38,13 @@ public class Namespace {
         return getClass().getSimpleName() + "{uri=" + uri + ",prefix=" + prefix + "}";
     }
 
-    public Element el(String tagName, Node... content) {
-        return Xml.el(tagName, this, content);
+    public Element el(String tagName, Content... contents) {
+        return new Element(name(tagName), Objects.list(contents, Node.class))
+            .attrs(Objects.list(contents, Attribute.class));
     }
 
     public Element el(String tagName, String stringContent) {
-        return Xml.el(tagName, this, Xml.text(stringContent));
+        return el(tagName, Xml.text(stringContent));
     }
 
     public boolean isNoNamespace() {

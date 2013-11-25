@@ -9,8 +9,6 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Stack;
 
@@ -184,16 +182,15 @@ public abstract class Xml {
     }
 
     public static Element el(String tagName, Content... contents) {
-        return new Element(Namespace.NO_NAMESPACE.name(tagName), Objects.list(contents, Node.class))
-            .attrs(Objects.list(contents, Attribute.class));
+        return Namespace.NO_NAMESPACE.el(tagName, contents);
     }
 
     public static Node comment(String string) {
         return new Xml.CommentElement(string);
     }
 
-    public static Element el(String tagName, Namespace namespace, Node... content) {
-        return new Element(namespace.name(tagName), new ArrayList<Node>(Arrays.asList(content)));
+    public static Element el(String tagName, Namespace namespace, Node... contents) {
+        return namespace.el(tagName, contents);
     }
 
     public static Element el(String tagName, String stringContent) {
