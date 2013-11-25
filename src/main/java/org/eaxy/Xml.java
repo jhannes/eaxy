@@ -273,5 +273,9 @@ public abstract class Xml {
         return new Document(el);
     }
 
+    public static Validator validatorFromResource(String... resourcePaths) {
+        return new Validator(resourcePaths);
+    }
+
 
 }

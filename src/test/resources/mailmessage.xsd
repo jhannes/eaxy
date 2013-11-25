@@ -1,0 +1,45 @@
+<s:schema xmlns:s="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://eaxy.org/test/mailmessage" xmlns:tns="http://eaxy.org/test/mailmessage">
+
+    <s:element name="message" type="tns:message" />
+
+    <s:complexType name="message">
+        <s:sequence>
+            <s:element ref="tns:recipients" />
+            <s:element ref="tns:subject" minOccurs="0" />
+            <s:element ref="tns:content" minOccurs="0" />
+        </s:sequence>
+    </s:complexType>
+
+    <s:element name="subject" type="s:string" />
+    <s:element name="content" type="s:string" />
+
+    <s:element name="recipients" type="tns:recipients" />
+    <s:complexType name="recipients">
+        <s:sequence>
+            <s:element ref="tns:recipient" maxOccurs="unbounded" />
+        </s:sequence>
+    </s:complexType>
+
+    <s:attribute name="type">
+        <s:simpleType>
+            <s:restriction base="s:string">
+                <s:enumeration value="email" />
+                <s:enumeration value="phone" />
+            </s:restriction>
+        </s:simpleType>
+    </s:attribute>
+
+    <s:element name="recipient" type="tns:recipient" />
+    <s:complexType name="recipient" mixed="true">
+        <s:attribute ref="tns:type" />
+        <s:attribute name="role">
+            <s:simpleType>
+                <s:restriction base="s:string">
+                    <s:enumeration value="to" />
+                    <s:enumeration value="cc" />
+                </s:restriction>
+            </s:simpleType>
+        </s:attribute>
+    </s:complexType>
+</s:schema>
