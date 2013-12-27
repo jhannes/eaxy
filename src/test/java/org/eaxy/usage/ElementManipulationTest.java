@@ -39,12 +39,14 @@ public class ElementManipulationTest {
     @Test
     public void shouldUseFragmentAsTemplate() throws Exception {
         Element xml = el("ul",
-                el("li", "some text"));
+                el("li", "some text"),
+                el("p", "other text"));
         Element template = xml.take("li");
         xml.add(template.copy().text("foo"));
         xml.add(template.copy().text("bar"));
         xml.add(template.copy().text("baz"));
         assertThat(xml.find("li").check().texts()).containsExactly("foo", "bar", "baz");
+        assertThat(xml.find("p").check().texts()).containsExactly("other text");
     }
 
 }

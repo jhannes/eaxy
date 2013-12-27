@@ -8,6 +8,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 
 import java.util.Map;
 
+import org.eaxy.Document;
 import org.eaxy.Element;
 import org.eaxy.MalformedXMLException;
 import org.eaxy.Namespace;
@@ -63,13 +64,13 @@ public class ElementBuilderTest {
     @Test
     public void shouldPrintElementWithNameSpace() {
         Namespace SOAP_NS = new Namespace("http://soap.com");
-        assertThat(SOAP_NS.el("Envelope").toXML()).isEqualTo("<Envelope xmlns=\"http://soap.com\" />");
+        assertThat(SOAP_NS.el("Envelope").copy().toXML()).isEqualTo("<Envelope xmlns=\"http://soap.com\" />");
     }
 
     @Test
     public void shouldPrintNamespacePrefix() {
         Namespace SOAP_NS = new Namespace("http://soap.com", "SOAP");
-        assertThat(SOAP_NS.el("Envelope").toXML()).isEqualTo("<SOAP:Envelope xmlns:SOAP=\"http://soap.com\" />");
+        assertThat(SOAP_NS.el("Envelope").copy().toXML()).isEqualTo("<SOAP:Envelope xmlns:SOAP=\"http://soap.com\" />");
     }
 
     @Test
@@ -77,14 +78,14 @@ public class ElementBuilderTest {
         Namespace A1_NS = new Namespace("uri:a1", "a");
         Namespace A2_NS = new Namespace("uri:a2", "b");
 
-        assertThat(A1_NS.el("foo").attr(A2_NS.name("bar"), "test").toXML())
+        assertThat(A1_NS.el("foo").attr(A2_NS.name("bar"), "test").copy().toXML())
             .isEqualTo("<a:foo xmlns:a=\"uri:a1\" xmlns:b=\"uri:a2\" b:bar=\"test\" />");
     }
 
     @Test
     public void shouldOnlyPrintNamespaceOnce() {
         Namespace A_NS = new Namespace("uri:a", "a");
-        assertThat(A_NS.el("foo").attr(A_NS.name("first"), "one").attr(A_NS.name("second"), "two").toXML())
+        assertThat(A_NS.el("foo").attr(A_NS.name("first"), "one").attr(A_NS.name("second"), "two").copy().toXML())
             .isEqualTo("<a:foo xmlns:a=\"uri:a\" a:first=\"one\" a:second=\"two\" />");
     }
 
@@ -139,28 +140,38 @@ public class ElementBuilderTest {
     @Test
     public void shouldNotPrintDeclaredNamespaces() {
         Namespace SOAP_NS = new Namespace("http://soap.com", "S");
-        assertThat(el("Super",
+        assertThat(el("Super", SOAP_NS,
                     SOAP_NS.el("Envelope"),
                     SOAP_NS.el("Body"))
-                .xmlns(SOAP_NS).copy().toXML())
+                .copy().toXML())
             .isEqualTo("<Super xmlns:S=\"http://soap.com\"><S:Envelope /><S:Body /></Super>");
     }
 
     @Test
     public void shouldReadXml() {
         Namespace SOAP_NS = new Namespace("http://soap.com", "S");
-        Namespace INNER_NS = new Namespace("http://inner.com", "i");
-        String xml = el("Super",
+        Namespace INNER_NS = new Namespace("uri:inner", "i");
+        String xml = el("Super", SOAP_NS,
                     SOAP_NS.el("Envelope"),
-                    SOAP_NS.el("Body", INNER_NS.el("content", "some string")))
-                .xmlns(SOAP_NS).toXML();
-        assertThat(xml(xml).getRootElement().toXML()).isEqualTo(xml);
+                    SOAP_NS.el("Body", INNER_NS.el("content", "some string"))).copy().toXML();
+        Document doc = xml(xml);
+		assertThat(doc.getRootElement().toXML()).isEqualTo(xml);
     }
+
+    @Test
+	public void shouldHandleAttributesOnNamespaces() throws Exception {
+		// <a:foo xmlns:a="uri:a" a:first="one" a:second="two" />
+    	Namespace A_NS = new Namespace("uri:a", "a");
+    	Element xml = A_NS.el("foo", A_NS.attr("first", "one"), A_NS.attr("second", "two"));
+		Document doc = xml(xml.copy().toXML());
+		assertThat(doc.getRootElement().toXML()).isEqualTo("<a:foo xmlns:a=\"uri:a\" a:first=\"one\" a:second=\"two\" />");
+	}
+    
 
     @Test
     public void shouldReadDocument() {
         String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<super>Some text<!-- only a comment --></super>";
-        assertThat(xml(xml).toXML()).isEqualTo(xml);
+        assertThat(xml(xml).copy().toXML()).isEqualTo(xml);
     }
 
     @Test
@@ -169,7 +180,7 @@ public class ElementBuilderTest {
         String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 docType +
                 "\n<super>Some text<!-- only a comment --></super>";
-        assertThat(xml(xml).toXML()).isEqualTo(xml);
+        assertThat(xml(xml).copy().toXML()).isEqualTo(xml);
     }
 
     @Test
@@ -186,8 +197,10 @@ public class ElementBuilderTest {
 
     @Test
     public void shouldReadPrefixedNamespace() {
-        String xml = "<s:super xmlns:s=\"uri:test\">some data</s:super>";
+        String xml = "<s:super xmlns:s=\"uri:test\"><s:sub>some data</s:sub></s:super>";
         assertThat(xml(xml).getRootElement().toXML()).isEqualTo(xml);
+        assertThat(xml(xml).find(new Namespace("uri:test", "s").name("sub")).first().text())
+        	.isEqualTo("some data");
     }
 
     @Test
@@ -195,7 +208,7 @@ public class ElementBuilderTest {
         String xml = "<super xmlns=\"uri:test\">some data</super>";
         assertThat(xml(xml).getRootElement().toXML()).isEqualTo(xml);
     }
-
+    
     @Test
     public void shouldReadHtml() {
         String xml = el("html",
@@ -206,7 +219,7 @@ public class ElementBuilderTest {
                                 text("looks"),
                                 el("strong", "like a"),
                                 text("weasel")
-                                ))).toXML();
+                                ))).copy().toXML();
         assertThat(xml(xml).getRootElement().toXML()).isEqualTo(xml);
     }
 

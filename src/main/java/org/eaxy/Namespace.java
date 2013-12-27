@@ -1,7 +1,7 @@
 package org.eaxy;
 
 
-public class Namespace {
+public class Namespace implements Content {
 
     static final Namespace NO_NAMESPACE = new Namespace(null) {
     	@Override
@@ -39,8 +39,7 @@ public class Namespace {
     }
 
     public Element el(String tagName, Content... contents) {
-        return new Element(name(tagName), Objects.list(contents, Node.class))
-            .attrs(Objects.list(contents, Attribute.class));
+        return new Element(name(tagName), contents);
     }
 
     public Element el(String tagName, String stringContent) {

@@ -129,4 +129,8 @@ public class ElementSet implements Iterable<Element> {
     public Collection<? extends Element> elements() {
         return elements;
     }
+
+	public Element firstOrDefault() {
+		return elements.isEmpty() ? null : first();
+	}
 }

@@ -46,8 +46,16 @@ public abstract class Xml {
 
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) {
-            Element newElement = el(qName, Namespace.NO_NAMESPACE).attrs(attributes);
-            pushTextToTopElement();
+        	Namespace namespace;
+        	if (uri != null && !uri.isEmpty()) {
+        		String prefix = qName.contains(":") ? qName.split(":")[0] : null;
+				namespace = new Namespace(uri, prefix);
+        	} else {
+        		namespace = Namespace.NO_NAMESPACE;
+        	}
+
+        	Element newElement = namespace.el(localName).attrs(attributes);
+        	pushTextToTopElement();
             if (!elementStack.isEmpty()) elementStack.peek().add(newElement);
             elementStack.add(newElement);
         }
@@ -189,10 +197,6 @@ public abstract class Xml {
         return new Xml.CommentElement(string);
     }
 
-    public static Element el(String tagName, Namespace namespace, Node... contents) {
-        return namespace.el(tagName, contents);
-    }
-
     public static Element el(String tagName, String stringContent) {
         return el(tagName, text(stringContent));
     }
@@ -242,6 +246,8 @@ public abstract class Xml {
             ElementBuilderHandler handler = new ElementBuilderHandler();
             SAXParserFactory parserFactory = SAXParserFactory.newInstance();
             parserFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            parserFactory.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
+            parserFactory.setNamespaceAware(true);
             SAXParser parser = parserFactory.newSAXParser();
             parser.setProperty("http://xml.org/sax/properties/lexical-handler", handler);
             parser.parse(inputSource, handler);

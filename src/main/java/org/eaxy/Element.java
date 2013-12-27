@@ -10,7 +10,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -23,18 +22,28 @@ import org.xml.sax.SAXException;
 public class Element implements Node {
 
     private final QualifiedName name;
-    private final List<Node> content;
+    private final List<Node> children;
     private final Map<QualifiedName,Attribute> attributes = new LinkedHashMap<QualifiedName, Attribute>();
     // TODO: Maybe namespaces should be part of the attributes - are namespaces attributes?
     private final List<Namespace> namespaces = new ArrayList<Namespace>();
 
-    Element(QualifiedName name, List<Node> content) {
-        this.name = name;
-        this.content = content;
-        this.namespaces.add(name.getNamespace());
+    Element(QualifiedName name, Content... contents) {
+    	this(name, Objects.list(contents, Node.class),
+    			Objects.list(contents, Attribute.class),
+    			Objects.list(contents, Namespace.class));
     }
 
-    public String tagName() {
+    public Element(QualifiedName name, List<Node> children, Collection<Attribute> attrs, Collection<Namespace> namespaces) {
+		this.name = name;
+		namespace(name.getNamespace());
+		this.children = children;
+        attrs(attrs);
+        for (Namespace namespace : namespaces) {
+        	namespace(namespace);
+        }
+	}
+
+	public String tagName() {
         return name.getName();
     }
 
@@ -46,20 +55,20 @@ public class Element implements Node {
     }
 
     public Element add(Node node) {
-        this.content.add(node);
+        this.children.add(node);
         return this;
     }
 
     Element attrs(Attributes attributes) {
         for (int i = 0; i < attributes.getLength(); i++) {
-            attr(attributes.getQName(i), attributes.getValue(i));
+        	attr(attributes.getQName(i), attributes.getValue(i));
         }
         return this;
     }
 
     @Override
     public void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException {
-        if (content.isEmpty()) {
+        if (children.isEmpty()) {
             writer.write("<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + " />");
         } else {
             writer.write("<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + ">");
@@ -94,7 +103,7 @@ public class Element implements Node {
         LinkedList<Namespace> printedNamespaces = new LinkedList<Namespace>();
         printedNamespaces.addAll(printedNamespaces2);
         printedNamespaces.addAll(namespaces);
-        for (Node element : content) {
+        for (Node element : children) {
             element.writeTo(writer, printedNamespaces);
         }
     }
@@ -102,15 +111,15 @@ public class Element implements Node {
     @Override
     public String text() {
         StringBuilder result = new StringBuilder();
-        for (Node element : content) {
+        for (Node element : children) {
             result.append(element.text());
         }
         return result.toString();
     }
 
     public Element text(String string) {
-        this.content.clear();
-        this.content.add(Xml.text(string));
+        this.children.clear();
+        this.children.add(Xml.text(string));
         return this;
     }
 
@@ -136,8 +145,14 @@ public class Element implements Node {
         return attribute != null ? attribute.getValue() : null;
     }
 
-    public Element attr(String key, String value) {
-        return attr(new QualifiedName(key), value);
+    public Element attr(String name, String value) {
+		if (name.startsWith("xmlns:")) {
+    		return namespace(new Namespace(value, name.substring(name.indexOf(":")+1)));
+		} else if (name.equals("xmlns")) {
+    		return namespace(new Namespace(value));
+		} else {
+			return attr(new QualifiedName(name), value);
+		}
     }
 
     public Element attr(QualifiedName key, String value) {
@@ -150,7 +165,7 @@ public class Element implements Node {
     }
 
     public Element attr(Attribute attribute) {
-        xmlns(attribute.getKey().getNamespace());
+        namespace(attribute.getKey().getNamespace());
         attributes.put(attribute.getKey(), attribute);
         return this;
     }
@@ -173,7 +188,7 @@ public class Element implements Node {
         }
     }
 
-    public Element xmlns(Namespace namespace) {
+    private Element namespace(Namespace namespace) {
         if (!namespaces.contains(namespace)) {
             namespaces.add(namespace);
         }
@@ -208,18 +223,12 @@ public class Element implements Node {
 
     public Element take(Object selector) {
         Element result = select(selector);
-        content.clear();
+        children.remove(result);
         return result;
     }
 
     public Collection<? extends Element> elements() {
-        ArrayList<Element> result = new ArrayList<Element>();
-        for (Node node : content) {
-            if (node instanceof Element) {
-                result.add((Element)node);
-            }
-        }
-        return result;
+        return Objects.list(children, Element.class);
     }
 
     public String className() {
@@ -227,8 +236,7 @@ public class Element implements Node {
     }
 
     public Element addClass(String newClass) {
-        attr("class", className() != null ? className() + " " + newClass : newClass);
-        return this;
+        return attr("class", className() != null ? className() + " " + newClass : newClass);
     }
 
     public Element removeClass(String classToRemove) {
@@ -321,19 +329,10 @@ public class Element implements Node {
 
     @Override
     public Element copy() {
-        List<Node> contentCopy = new ArrayList<Node>();
-        for (Node node : content) {
-            contentCopy.add(node.copy());
-        }
-        Element copy = new Element(this.name, contentCopy);
-        for (Entry<QualifiedName, Attribute> entry : attributes.entrySet()) {
-            copy.attr(entry.getKey(), entry.getValue().getValue());
-        }
-        copy.namespaces.addAll(namespaces);
-        return copy;
+        return new Element(this.name, Objects.list(children, Node.class), attributes.values(), namespaces);
     }
 
-    Element attrs(List<Attribute> attributes) {
+    Element attrs(Collection<Attribute> attributes) {
         for (Attribute attribute : attributes) {
             attr(attribute);
         }
@@ -341,7 +340,7 @@ public class Element implements Node {
     }
 
     public void delete(Element existingChild) {
-        content.remove(existingChild);
+        children.remove(existingChild);
     }
 
 

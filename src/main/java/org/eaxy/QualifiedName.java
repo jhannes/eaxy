@@ -1,7 +1,7 @@
 package org.eaxy;
 
 
-class QualifiedName {
+public class QualifiedName {
 
     private final Namespace namespace;
     private final String name;
