@@ -48,7 +48,7 @@ public class ObjectSanityTest {
 
     @Test
     public void qualifiedNameShouldShowCanonicName() {
-        assertThat(NS.name("test").toString()).isEqualTo("{http://foo.com}test");
+        assertThat(NS.name("test").toString()).isEqualTo("\"http://foo.com\":test");
         assertThat(NO_NAMESPACE.name("localName").toString()).isEqualTo("localName");
     }
 

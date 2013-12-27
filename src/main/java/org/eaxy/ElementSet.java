@@ -49,14 +49,16 @@ public class ElementSet implements Iterable<Element> {
         if (!elements.isEmpty()) return this;
         parent.check();
         String message = "Can't find <" + filter + "> below " + parent.getPath() + ".";
-        message += " Actual elements: " + parent.getActualChildren();
+        message += " Actual elements: " + parent.printActualChildren();
         throw new NonMatchingPathException(message);
     }
 
-    public String getActualChildren() {
-        List<Element> children = new ArrayList<Element>();
+    private String printActualChildren() {
+        List<String> children = new ArrayList<String>();
         for (Element element : elements) {
-            children.addAll(element.elements());
+            for (Element subElement : element.elements()) {
+            	children.add(subElement.getName().toString());
+			}
         }
         return children.toString();
     }

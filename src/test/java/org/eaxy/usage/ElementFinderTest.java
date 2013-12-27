@@ -153,7 +153,8 @@ public class ElementFinderTest {
 
     @Test
     public void shouldThrowOnMissingPath() {
-        Element xml = el("root", el("top", el("parent", el("actual-child"), el("actual-child"))));
+        Namespace NS = new Namespace("http://a.org/b/", "a");
+        Element xml = el("root", el("top", el("parent", el("actual-child"), NS.el("actual-child"))));
         try {
             xml.find("top", "parent", "searched-child", "foo").check();
             fail("expected exception");
@@ -162,7 +163,7 @@ public class ElementFinderTest {
                 .contains("below [root, top, parent]")
                 .contains("Can't find <searched-child>")
                 .doesNotContain("foo")
-                .contains("actual-child");
+                .contains("\"http://a.org/b/\":actual-child");
         }
     }
 

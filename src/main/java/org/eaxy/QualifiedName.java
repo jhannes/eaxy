@@ -47,7 +47,7 @@ public class QualifiedName {
     @Override
     public String toString() {
         if (namespace.isNoNamespace()) return name;
-        return "{" + namespace.getUri() + "}" + name;
+        return "\"" + namespace.getUri() + "\":" + name;
     }
 
     public boolean hasNoNamespace() {

@@ -29,7 +29,8 @@ public class ValidationTest {
             validator.validate(email);
             fail("Should throw validation exception");
         } catch (Exception e) {
-            assertThat(e.getMessage()).contains("recipent").contains("recipient");
+            assertThat(e.getMessage()).contains("recipent")
+            	.contains("'{\"http://eaxy.org/test/mailmessage\":recipient}'");
         }
     }
 
