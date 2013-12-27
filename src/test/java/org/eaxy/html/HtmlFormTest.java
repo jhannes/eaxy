@@ -72,13 +72,13 @@ public class HtmlFormTest {
     }
 
     @Test
-	public void shouldShowFirstButton() throws Exception {
-    	Element html = el("form", el("div").name("div_name").addAll(
-    			el("input").name("text_field").val("input value").type("text"),
+    public void shouldShowFirstButton() throws Exception {
+        Element html = el("form", el("div").name("div_name").addAll(
+                el("input").name("text_field").val("input value").type("text"),
                 el("input").name("submit_button").val("Click me!").type("submit"),
                 el("textarea").name("text_area").text("text area content")));
-    	assertThat(new HtmlForm(html).getSubmitButton().name()).isEqualTo("submit_button");
-	}
+        assertThat(new HtmlForm(html).getSubmitButton().name()).isEqualTo("submit_button");
+    }
 
     @Test
     public void shouldSetSelectOptions() {

@@ -130,7 +130,7 @@ public class ElementSet implements Iterable<Element> {
         return elements;
     }
 
-	public Element firstOrDefault() {
-		return elements.isEmpty() ? null : first();
-	}
+    public Element firstOrDefault() {
+        return elements.isEmpty() ? null : first();
+    }
 }

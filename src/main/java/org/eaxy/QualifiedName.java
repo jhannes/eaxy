@@ -51,17 +51,17 @@ public class QualifiedName {
     }
 
     public boolean hasNoNamespace() {
-    	return namespace.isNoNamespace();
+        return namespace.isNoNamespace();
     }
 
     public boolean matches(QualifiedName filter) {
-    	if (filter.hasNoNamespace() || hasNoNamespace()) {
-    		return filter.name.equals(this.name);
-    	}
+        if (filter.hasNoNamespace() || hasNoNamespace()) {
+            return filter.name.equals(this.name);
+        }
         return filter.equals(this);
     }
 
-	public boolean matches(String tagName) {
-		return name.equals(tagName);
-	}
+    public boolean matches(String tagName) {
+        return name.equals(tagName);
+    }
 }

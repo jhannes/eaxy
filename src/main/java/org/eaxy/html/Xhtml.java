@@ -16,12 +16,12 @@ public class Xhtml extends Document {
     }
 
     public static Xhtml xhtml(StringWriter html) {
-		return parse(html.toString());
-	}
+        return parse(html.toString());
+    }
 
-	public static Xhtml parse(CharSequence html) {
-		return new Xhtml(Xml.xml(html));
-	}
+    public static Xhtml parse(CharSequence html) {
+        return new Xhtml(Xml.xml(html));
+    }
 
     public HtmlForm getForm(Object filter) {
         return new HtmlForm(select(filter));

@@ -29,16 +29,16 @@ public class HtmlForm {
         }
     }
 
-	public Element getSubmitButton() {
-		for (String fieldName : elementByNameIndex.keySet()) {
+    public Element getSubmitButton() {
+        for (String fieldName : elementByNameIndex.keySet()) {
             List<Element> elements = elementByNameIndex.get(fieldName);
             Element element = elements.get(0);
-			if (element.tagName().equalsIgnoreCase("input") && element.type().equalsIgnoreCase("submit")) {
+            if (element.tagName().equalsIgnoreCase("input") && element.type().equalsIgnoreCase("submit")) {
                 return element;
             }
         }
-		return null;
-	}
+        return null;
+    }
 
     public List<String> getFieldNames() {
         ArrayList<String> names = new ArrayList<String>();

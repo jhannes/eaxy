@@ -28,22 +28,22 @@ public class Element implements Node {
     private final List<Namespace> namespaces = new ArrayList<Namespace>();
 
     Element(QualifiedName name, Content... contents) {
-    	this(name, Objects.list(contents, Node.class),
-    			Objects.list(contents, Attribute.class),
-    			Objects.list(contents, Namespace.class));
+        this(name, Objects.list(contents, Node.class),
+                Objects.list(contents, Attribute.class),
+                Objects.list(contents, Namespace.class));
     }
 
     public Element(QualifiedName name, List<Node> children, Collection<Attribute> attrs, Collection<Namespace> namespaces) {
-		this.name = name;
-		namespace(name.getNamespace());
-		this.children = children;
+        this.name = name;
+        namespace(name.getNamespace());
+        this.children = children;
         attrs(attrs);
         for (Namespace namespace : namespaces) {
-        	namespace(namespace);
+            namespace(namespace);
         }
-	}
+    }
 
-	public String tagName() {
+    public String tagName() {
         return name.getName();
     }
 
@@ -61,7 +61,7 @@ public class Element implements Node {
 
     Element attrs(Attributes attributes) {
         for (int i = 0; i < attributes.getLength(); i++) {
-        	attr(attributes.getQName(i), attributes.getValue(i));
+            attr(attributes.getQName(i), attributes.getValue(i));
         }
         return this;
     }
@@ -146,13 +146,13 @@ public class Element implements Node {
     }
 
     public Element attr(String name, String value) {
-		if (name.startsWith("xmlns:")) {
-    		return namespace(new Namespace(value, name.substring(name.indexOf(":")+1)));
-		} else if (name.equals("xmlns")) {
-    		return namespace(new Namespace(value));
-		} else {
-			return attr(new QualifiedName(name), value);
-		}
+        if (name.startsWith("xmlns:")) {
+            return namespace(new Namespace(value, name.substring(name.indexOf(":")+1)));
+        } else if (name.equals("xmlns")) {
+            return namespace(new Namespace(value));
+        } else {
+            return attr(new QualifiedName(name), value);
+        }
     }
 
     public Element attr(QualifiedName key, String value) {

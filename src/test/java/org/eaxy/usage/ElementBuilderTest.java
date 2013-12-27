@@ -155,17 +155,17 @@ public class ElementBuilderTest {
                     SOAP_NS.el("Envelope"),
                     SOAP_NS.el("Body", INNER_NS.el("content", "some string"))).copy().toXML();
         Document doc = xml(xml);
-		assertThat(doc.getRootElement().toXML()).isEqualTo(xml);
+        assertThat(doc.getRootElement().toXML()).isEqualTo(xml);
     }
 
     @Test
-	public void shouldHandleAttributesOnNamespaces() throws Exception {
-		// <a:foo xmlns:a="uri:a" a:first="one" a:second="two" />
-    	Namespace A_NS = new Namespace("uri:a", "a");
-    	Element xml = A_NS.el("foo", A_NS.attr("first", "one"), A_NS.attr("second", "two"));
-		Document doc = xml(xml.copy().toXML());
-		assertThat(doc.getRootElement().toXML()).isEqualTo("<a:foo xmlns:a=\"uri:a\" a:first=\"one\" a:second=\"two\" />");
-	}
+    public void shouldHandleAttributesOnNamespaces() throws Exception {
+        // <a:foo xmlns:a="uri:a" a:first="one" a:second="two" />
+        Namespace A_NS = new Namespace("uri:a", "a");
+        Element xml = A_NS.el("foo", A_NS.attr("first", "one"), A_NS.attr("second", "two"));
+        Document doc = xml(xml.copy().toXML());
+        assertThat(doc.getRootElement().toXML()).isEqualTo("<a:foo xmlns:a=\"uri:a\" a:first=\"one\" a:second=\"two\" />");
+    }
     
 
     @Test
@@ -200,7 +200,7 @@ public class ElementBuilderTest {
         String xml = "<s:super xmlns:s=\"uri:test\"><s:sub>some data</s:sub></s:super>";
         assertThat(xml(xml).getRootElement().toXML()).isEqualTo(xml);
         assertThat(xml(xml).find(new Namespace("uri:test", "s").name("sub")).first().text())
-        	.isEqualTo("some data");
+            .isEqualTo("some data");
     }
 
     @Test

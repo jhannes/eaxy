@@ -16,7 +16,7 @@ public class LargeDocumentPerformanceTest {
 
         int step = 1000;
         while (true) {
-        	int elementCount = step/1000 * 1000;
+            int elementCount = step/1000 * 1000;
             System.out.print("buildLargeDocument\t" + elementCount + "\t");
             System.out.println(buildLargeDocument(elementCount));
             System.out.print("writeLargeDocument\t" + elementCount + "\t");

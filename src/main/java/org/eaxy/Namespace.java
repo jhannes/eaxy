@@ -4,8 +4,8 @@ package org.eaxy;
 public class Namespace implements Content {
 
     static final Namespace NO_NAMESPACE = new Namespace(null) {
-    	@Override
-		public boolean isNoNamespace() { return true; }
+        @Override
+        public boolean isNoNamespace() { return true; }
     };
 
     private final String uri;

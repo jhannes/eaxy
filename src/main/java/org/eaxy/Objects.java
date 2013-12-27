@@ -14,22 +14,22 @@ abstract class Objects {
         return Arrays.hashCode(o);
     }
 
-	@SuppressWarnings("unchecked")
-	public static<T,U> List<U> list(T[] fullList, Class<U> filteredType) {
-    	List<U> list = new ArrayList<U>();
-    	for (T o : fullList) {
-    		if (filteredType.isInstance(o)) list.add((U)o);
-		}
-		return list;
-	}
-	
-	@SuppressWarnings("unchecked")
-	public static<T,U> List<U> list(Iterable<T> fullList, Class<U> filteredType) {
-		List<U> list = new ArrayList<U>();
-		for (T o : fullList) {
-			if (filteredType.isInstance(o)) list.add((U)o);
-		}
-		return list;
-	}
+    @SuppressWarnings("unchecked")
+    public static<T,U> List<U> list(T[] fullList, Class<U> filteredType) {
+        List<U> list = new ArrayList<U>();
+        for (T o : fullList) {
+            if (filteredType.isInstance(o)) list.add((U)o);
+        }
+        return list;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static<T,U> List<U> list(Iterable<T> fullList, Class<U> filteredType) {
+        List<U> list = new ArrayList<U>();
+        for (T o : fullList) {
+            if (filteredType.isInstance(o)) list.add((U)o);
+        }
+        return list;
+    }
 
 }

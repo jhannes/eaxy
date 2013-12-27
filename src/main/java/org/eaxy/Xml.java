@@ -46,16 +46,16 @@ public abstract class Xml {
 
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) {
-        	Namespace namespace;
-        	if (uri != null && !uri.isEmpty()) {
-        		String prefix = qName.contains(":") ? qName.split(":")[0] : null;
-				namespace = new Namespace(uri, prefix);
-        	} else {
-        		namespace = Namespace.NO_NAMESPACE;
-        	}
+            Namespace namespace;
+            if (uri != null && !uri.isEmpty()) {
+                String prefix = qName.contains(":") ? qName.split(":")[0] : null;
+                namespace = new Namespace(uri, prefix);
+            } else {
+                namespace = Namespace.NO_NAMESPACE;
+            }
 
-        	Element newElement = namespace.el(localName).attrs(attributes);
-        	pushTextToTopElement();
+            Element newElement = namespace.el(localName).attrs(attributes);
+            pushTextToTopElement();
             if (!elementStack.isEmpty()) elementStack.peek().add(newElement);
             elementStack.add(newElement);
         }
@@ -214,7 +214,7 @@ public abstract class Xml {
     }
 
     public static Document xml(StringWriter xml) {
-    	return xml(xml.toString());
+        return xml(xml.toString());
     }
 
     public static Document xml(CharSequence xml) {
