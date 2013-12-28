@@ -6,12 +6,16 @@ import static org.eaxy.Xml.text;
 import static org.eaxy.Xml.xml;
 import static org.fest.assertions.api.Assertions.assertThat;
 
+import java.io.StringReader;
 import java.util.Map;
 
 import org.eaxy.Document;
+import org.eaxy.DomTransformer;
 import org.eaxy.Element;
 import org.eaxy.MalformedXMLException;
 import org.eaxy.Namespace;
+import org.eaxy.QualifiedName;
+import org.eaxy.StaxReader;
 import org.junit.Test;
 
 public class ElementBuilderTest {
@@ -138,12 +142,12 @@ public class ElementBuilderTest {
     }
 
     @Test
-    public void shouldNotPrintDeclaredNamespaces() {
+    public void shouldUseNamespacesDeclaredInParent() {
         Namespace SOAP_NS = new Namespace("http://soap.com", "S");
-        assertThat(el("Super", SOAP_NS,
+        assertThat(xml(el("Super", SOAP_NS,
                     SOAP_NS.el("Envelope"),
                     SOAP_NS.el("Body"))
-                .copy().toXML())
+                .copy().toXML()).getRootElement().toXML())
             .isEqualTo("<Super xmlns:S=\"http://soap.com\"><S:Envelope /><S:Body /></Super>");
     }
 
@@ -166,20 +170,24 @@ public class ElementBuilderTest {
         Document doc = xml(xml.copy().toXML());
         assertThat(doc.getRootElement().toXML()).isEqualTo("<a:foo xmlns:a=\"uri:a\" a:first=\"one\" a:second=\"two\" />");
     }
-    
+
 
     @Test
     public void shouldReadDocument() {
-        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<super>Some text<!-- only a comment --></super>";
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+        		+ Document.LINE_SEPARATOR
+        		+ "<super>Some text<!-- only a comment --></super>";
         assertThat(xml(xml).copy().toXML()).isEqualTo(xml);
     }
 
     @Test
     public void shouldReadDocType() {
         String docType = "<!DOCTYPE MedlineCitationSet PUBLIC \"-//NLM//DTD Medline Citation, 1st January, 2012//EN\" \"http://www.nlm.nih.gov/databases/dtd/nlmmedlinecitationset_120101.dtd\">";
-        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+        		Document.LINE_SEPARATOR +
                 docType +
-                "\n<super>Some text<!-- only a comment --></super>";
+                Document.LINE_SEPARATOR +
+                "<super>Some text<!-- only a comment --></super>";
         assertThat(xml(xml).copy().toXML()).isEqualTo(xml);
     }
 
@@ -188,6 +196,30 @@ public class ElementBuilderTest {
         String xml = "<super>Some text<!-- only a comment --></super>";
         assertThat(xml(xml).getRootElement().toXML()).isEqualTo(xml);
     }
+
+    @Test
+	public void shouldTranslateWithAttributeNamespaces() throws Exception {
+        String text = "<msg:message xmlns:msg=\"http://eaxy.org/test/mailmessage\" msg:type=\"email\" other=\"true\" />";
+		Element email = StaxReader.read(new StringReader(text))
+        		.getRootElement();
+
+        System.out.println(email.toXML());
+        org.w3c.dom.Document dom = DomTransformer.toDom(new Document(email));
+		Element transformed = DomTransformer.fromDom(dom).getRootElement();
+		System.out.println(transformed.toXML());
+		assertThat(transformed.toXML())
+        	.isEqualTo(email.toXML());
+	}
+
+    @Test
+	public void shouldReadWithAttributeNamespaces() throws Exception {
+        String text = "<msg:message xmlns:msg=\"http://eaxy.org/test/mailmessage\" msg:type=\"email\" other=\"true\" />";
+		Element email = StaxReader.read(new StringReader(text))
+        		.getRootElement();
+        QualifiedName attrName = new QualifiedName("http://eaxy.org/test/mailmessage", "msg:type");
+		assertThat(email.attr(attrName)).isEqualTo("email");
+		assertThat(email.attr(new QualifiedName("other"))).isEqualTo("true");
+	}
 
     @Test
     public void shouldReadCDATA() {
@@ -206,9 +238,9 @@ public class ElementBuilderTest {
     @Test
     public void shouldReadDefaultNamespace() {
         String xml = "<super xmlns=\"uri:test\">some data</super>";
-        assertThat(xml(xml).getRootElement().toXML()).isEqualTo(xml);
+        assertThat(xml(xml).getRootElement().copy().toXML()).isEqualTo(xml);
     }
-    
+
     @Test
     public void shouldReadHtml() {
         String xml = el("html",

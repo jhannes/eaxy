@@ -1,11 +1,11 @@
 package org.eaxy;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.URL;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.SchemaFactory;
 
@@ -34,7 +34,7 @@ public class Validator {
 
     public void validate(Element xml) {
         try {
-            validator.validate(new StreamSource(new StringReader(xml.toXML())));
+			validator.validate(new DOMSource(DomTransformer.toDom(new Document(xml))));
         } catch (SAXException e) {
             throw new RuntimeException(e.getMessage());
         } catch (IOException e) {

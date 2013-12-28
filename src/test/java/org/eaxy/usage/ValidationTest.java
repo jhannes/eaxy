@@ -43,6 +43,7 @@ public class ValidationTest {
                             MSG_NS.attr("type", "email"),
                             attr("role", "cc"),
                             text("mailto:contact@brodwall.com"))));
+
         validator.validate(email);
     }
 

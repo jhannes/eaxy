@@ -1,7 +1,6 @@
 package org.eaxy;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -10,14 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
+import java.util.Set;
 
 public class Element implements Node {
 
@@ -35,7 +27,7 @@ public class Element implements Node {
 
     public Element(QualifiedName name, List<Node> children, Collection<Attribute> attrs, Collection<Namespace> namespaces) {
         this.name = name;
-        namespace(name.getNamespace());
+        if (name.hasNamespace()) namespace(name.getNamespace());
         this.children = children;
         attrs(attrs);
         for (Namespace namespace : namespaces) {
@@ -47,6 +39,10 @@ public class Element implements Node {
         return name.getName();
     }
 
+    public List<Namespace> getNamespaces() {
+		return namespaces;
+	}
+
     public Element addAll(Node... content) {
         for (Node node : content) {
             add(node);
@@ -56,13 +52,6 @@ public class Element implements Node {
 
     public Element add(Node node) {
         this.children.add(node);
-        return this;
-    }
-
-    Element attrs(Attributes attributes) {
-        for (int i = 0; i < attributes.getLength(); i++) {
-            attr(attributes.getQName(i), attributes.getValue(i));
-        }
         return this;
     }
 
@@ -93,7 +82,8 @@ public class Element implements Node {
     private String printNamespaces(LinkedList<Namespace> printedNamespaces) {
         StringBuilder result = new StringBuilder();
         for (Namespace namespace : namespaces) {
-            if (printedNamespaces.contains(namespace) || namespace.isNoNamespace()) continue;
+        	if (!namespace.isNamespace()) throw new IllegalStateException(name());
+            if (printedNamespaces.contains(namespace)) continue;
             result.append(" ").append(namespace.print());
         }
         return result.toString();
@@ -136,7 +126,7 @@ public class Element implements Node {
     }
 
     public String attr(QualifiedName key) {
-        if (key.hasNoNamespace()) {
+        if (!key.hasNamespace()) {
             for (Attribute attr : attributes.values()) {
                 if (attr.getKey().matches(key)) return attr.getValue();
             }
@@ -146,13 +136,7 @@ public class Element implements Node {
     }
 
     public Element attr(String name, String value) {
-        if (name.startsWith("xmlns:")) {
-            return namespace(new Namespace(value, name.substring(name.indexOf(":")+1)));
-        } else if (name.equals("xmlns")) {
-            return namespace(new Namespace(value));
-        } else {
-            return attr(new QualifiedName(name), value);
-        }
+        return attr(new QualifiedName(name), value);
     }
 
     public Element attr(QualifiedName key, String value) {
@@ -165,7 +149,9 @@ public class Element implements Node {
     }
 
     public Element attr(Attribute attribute) {
-        namespace(attribute.getKey().getNamespace());
+    	if (attribute.getKey().hasNamespace()) {
+    		namespace(attribute.getKey().getNamespace());
+    	}
         attributes.put(attribute.getKey(), attribute);
         return this;
     }
@@ -188,7 +174,10 @@ public class Element implements Node {
         }
     }
 
-    private Element namespace(Namespace namespace) {
+    Element namespace(Namespace namespace) {
+    	if (namespace.getUri() == null) {
+    		throw new IllegalArgumentException("Invalid namespace " + namespace);
+    	}
         if (!namespaces.contains(namespace)) {
             namespaces.add(namespace);
         }
@@ -230,6 +219,10 @@ public class Element implements Node {
     public Collection<? extends Element> elements() {
         return Objects.list(children, Element.class);
     }
+
+    public List<Node> children() {
+		return children;
+	}
 
     public String className() {
         return attr("class");
@@ -312,21 +305,6 @@ public class Element implements Node {
         return this;
     }
 
-    public org.w3c.dom.Document toDom() {
-        try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            String xml = new org.eaxy.Document(this).toXML();
-            return builder.parse(new InputSource(new StringReader(xml)));
-        } catch (ParserConfigurationException e) {
-            throw new CanNeverHappenException("Oh, just shut up!", e);
-        } catch (SAXException e) {
-            throw new CanNeverHappenException("Oh, just shut up!", e);
-        } catch (IOException e) {
-            throw new CanNeverHappenException("Oh, just shut up!", e);
-        }
-    }
-
     @Override
     public Element copy() {
         return new Element(this.name, Objects.list(children, Node.class), attributes.values(), namespaces);
@@ -343,6 +321,9 @@ public class Element implements Node {
         children.remove(existingChild);
     }
 
+	public Set<QualifiedName> attrNames() {
+		return attributes.keySet();
+	}
 
 }
 

@@ -5,15 +5,19 @@ public class Namespace implements Content {
 
     static final Namespace NO_NAMESPACE = new Namespace(null) {
         @Override
-        public boolean isNoNamespace() { return true; }
+        public boolean isNamespace() { return false; }
     };
 
     private final String uri;
     private final String prefix;
 
     public Namespace(String uri, String prefix) {
-        this.uri = uri;
-        this.prefix = prefix;
+        this.uri = Objects.validatePresent(uri, "uri");
+        this.prefix = "".equals(prefix) ? null : prefix;
+
+		if (prefix != null && (prefix.equals("xmlns") || prefix.startsWith("xmlns:"))) {
+			throw new IllegalArgumentException("Namespace declarations can't be prefixes: " + prefix);
+		}
     }
 
     public Namespace(String uri) {
@@ -46,8 +50,8 @@ public class Namespace implements Content {
         return el(tagName, Xml.text(stringContent));
     }
 
-    public boolean isNoNamespace() {
-        return false;
+    public boolean isNamespace() {
+        return true;
     }
 
     public String print() {

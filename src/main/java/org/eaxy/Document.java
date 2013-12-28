@@ -10,6 +10,7 @@ public class Document {
 
     private Element rootElement;
     private final List<String> dtds = new ArrayList<String>();
+	public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     public Document(Element root) {
         rootElement = root;
@@ -41,9 +42,11 @@ public class Document {
     }
 
     public void writeTo(Writer writer) throws IOException {
-        writer.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        writer.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        writer.append(LINE_SEPARATOR);
         for (String dtd : dtds) {
-            writer.append(dtd).append("\n");
+            writer.append(dtd);
+            writer.append(LINE_SEPARATOR);
         }
         rootElement.writeTo(writer);
     }
