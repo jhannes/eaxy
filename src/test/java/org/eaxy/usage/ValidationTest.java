@@ -1,6 +1,5 @@
 package org.eaxy.usage;
 
-import static org.eaxy.Xml.attr;
 import static org.eaxy.Xml.text;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.fail;
@@ -41,7 +40,7 @@ public class ValidationTest {
                 MSG_NS.el("recipients",
                     MSG_NS.el("recipient",
                             MSG_NS.attr("type", "email"),
-                            attr("role", "cc"),
+                            MSG_NS.attr("role", "cc"),
                             text("mailto:contact@brodwall.com"))));
 
         validator.validate(email);
