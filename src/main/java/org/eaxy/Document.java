@@ -8,11 +8,11 @@ import java.util.List;
 
 public class Document {
 
-	private String version = "1.0";
-	private String encoding = "UTF-8";
+    private String version = "1.0";
+    private String encoding = "UTF-8";
     private Element rootElement;
     private final List<String> dtds = new ArrayList<String>();
-	public static final String LINE_SEPARATOR = System.getProperty("line.separator");
+    public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     public Document(Element root) {
         rootElement = root;
@@ -22,22 +22,22 @@ public class Document {
     }
 
     public String getVersion() {
-		return version;
-	}
+        return version;
+    }
 
-	public void setVersion(String version) {
-		this.version = version;
-	}
+    public void setVersion(String version) {
+        this.version = version;
+    }
 
-	public String getEncoding() {
-		return encoding;
-	}
+    public String getEncoding() {
+        return encoding;
+    }
 
-	public void setEncoding(String encoding) {
-		this.encoding = encoding;
-	}
+    public void setEncoding(String encoding) {
+        this.encoding = encoding;
+    }
 
-	public void setRootElement(Element rootElement) {
+    public void setRootElement(Element rootElement) {
         this.rootElement = rootElement;
     }
 
@@ -60,8 +60,8 @@ public class Document {
     }
 
     public void writeTo(Writer writer) throws IOException {
-    	writer.append("<?xml version=\"");
-    	writer.append(version);
+        writer.append("<?xml version=\"");
+        writer.append(version);
         writer.append("\" encoding=\"");
         writer.append(encoding);
         writer.append("\"?>");

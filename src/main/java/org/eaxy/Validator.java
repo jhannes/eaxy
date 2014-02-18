@@ -34,7 +34,7 @@ public class Validator {
 
     public void validate(Element xml) {
         try {
-			validator.validate(new DOMSource(DomTransformer.toDom(new Document(xml))));
+            validator.validate(new DOMSource(DomTransformer.toDom(new Document(xml))));
         } catch (SAXException e) {
             throw new RuntimeException(e.getMessage());
         } catch (IOException e) {

@@ -136,17 +136,16 @@ public abstract class Xml {
     }
 
     public static Document fromDom(org.w3c.dom.Document document) {
-		return DomTransformer.fromDom(document);
-	}
-
-	public static org.w3c.dom.Document toDom(Element element) {
-		return DomTransformer.toDom(new Document(element));
+        return DomTransformer.fromDom(document);
     }
 
-	public static org.w3c.dom.Document toDom(Document document) {
-		return DomTransformer.toDom(document);
-	}
+    public static org.w3c.dom.Document toDom(Element element) {
+        return DomTransformer.toDom(new Document(element));
+    }
 
+    public static org.w3c.dom.Document toDom(Document document) {
+        return DomTransformer.toDom(document);
+    }
 
     public static Document doc(Element el) {
         return new Document(el);
@@ -155,6 +154,5 @@ public abstract class Xml {
     public static Validator validatorFromResource(String... resourcePaths) {
         return new Validator(resourcePaths);
     }
-
 
 }
