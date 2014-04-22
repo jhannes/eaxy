@@ -1,6 +1,8 @@
 package org.eaxy;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -45,6 +47,24 @@ public class Document {
         return rootElement;
     }
 
+    public void addDTD(String dtdString) {
+        this.dtds.add(dtdString);
+    }
+
+    public ElementSet find(Object... path) {
+        return getRootElement().find(path);
+    }
+
+    public Element select(Object element) {
+        return getRootElement().select(element);
+    }
+
+    public Document copy() {
+        Document result = new Document(rootElement.copy());
+        result.dtds.addAll(dtds);
+        return result;
+    }
+
     public String toXML() {
         StringWriter result = new StringWriter();
         try {
@@ -53,10 +73,6 @@ public class Document {
             throw new CanNeverHappenException("StringBuilder doesn't throw IOException", e);
         }
         return result.toString();
-    }
-
-    public void addDTD(String dtdString) {
-        this.dtds.add(dtdString);
     }
 
     public void writeTo(Writer writer) throws IOException {
@@ -73,17 +89,12 @@ public class Document {
         rootElement.writeTo(writer);
     }
 
-    public ElementSet find(Object... path) {
-        return getRootElement().find(path);
-    }
-
-    public Element select(Object element) {
-        return getRootElement().select(element);
-    }
-
-    public Document copy() {
-        Document result = new Document(rootElement.copy());
-        result.dtds.addAll(dtds);
-        return result;
+    public void writeAndClose(OutputStream outputStream) throws IOException {
+        Writer writer = new OutputStreamWriter(outputStream, this.encoding);
+        try {
+            writeTo(writer);
+        } finally {
+            writer.close();
+        }
     }
 }
