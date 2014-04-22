@@ -25,42 +25,42 @@ public class XmlSerializationTest {
     @Test
     public void shouldReadWithStax() throws Exception {
         InputStreamReader input = input();
-		Document doc = StaxReader.read(input);
-		input.close();
-		assertThat(normalize(doc.copy().toXML()))
+        Document doc = StaxReader.read(input);
+        input.close();
+        assertThat(normalize(doc.copy().toXML()))
             .isEqualTo(normalize(IOUtils.slurp(xmlFile)));
     }
 
     @Test
-	public void shouldReadWithSax() throws Exception {
+    public void shouldReadWithSax() throws Exception {
         InputStreamReader input = input();
-		Document doc = SaxReader.read(input);
-		input.close();
-		assertThat(normalize(doc.copy().toXML()))
+        Document doc = SaxReader.read(input);
+        input.close();
+        assertThat(normalize(doc.copy().toXML()))
             .isEqualTo(normalize(IOUtils.slurp(xmlFile)));
-	}
+    }
 
-	private InputStreamReader input() throws FileNotFoundException {
-		return new InputStreamReader(new FileInputStream(xmlFile));
-	}
+    private InputStreamReader input() throws FileNotFoundException {
+        return new InputStreamReader(new FileInputStream(xmlFile));
+    }
 
     @Test
     public void shouldTransformSerializedViaDom() throws Exception {
         assertEquals(DomSerializedTransformer.fromDom(DomSerializedTransformer.toDom(Xml.read(xmlFile))),
-        		IOUtils.slurp(xmlFile));
+                IOUtils.slurp(xmlFile));
     }
 
     @Test
     public void shouldTransformViaDom() throws Exception {
-    	Document doc = DomTransformer.fromDom(DomTransformer.toDom(Xml.read(xmlFile)));
-		assertEquals(DomTransformer.fromDom(DomTransformer.toDom(doc)),
-    			IOUtils.slurp(xmlFile));
+        Document doc = DomTransformer.fromDom(DomTransformer.toDom(Xml.read(xmlFile)));
+        assertEquals(DomTransformer.fromDom(DomTransformer.toDom(doc)),
+                IOUtils.slurp(xmlFile));
     }
 
-	private StringAssert assertEquals(Document document, String fileContents) {
-		return assertThat(normalize(document.toXML()))
+    private StringAssert assertEquals(Document document, String fileContents) {
+        return assertThat(normalize(document.toXML()))
             .isEqualTo(normalize(fileContents));
-	}
+    }
 
     protected String normalize(String text) {
         return text.trim().replaceAll("\\s+", " ");

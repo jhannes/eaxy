@@ -40,8 +40,8 @@ public class Element implements Node {
     }
 
     public List<Namespace> getNamespaces() {
-		return namespaces;
-	}
+        return namespaces;
+    }
 
     public Element addAll(Node... content) {
         for (Node node : content) {
@@ -82,7 +82,7 @@ public class Element implements Node {
     private String printNamespaces(LinkedList<Namespace> printedNamespaces) {
         StringBuilder result = new StringBuilder();
         for (Namespace namespace : namespaces) {
-        	if (!namespace.isNamespace()) throw new IllegalStateException(name());
+            if (!namespace.isNamespace()) throw new IllegalStateException(name());
             if (printedNamespaces.contains(namespace)) continue;
             result.append(" ").append(namespace.print());
         }
@@ -149,9 +149,9 @@ public class Element implements Node {
     }
 
     public Element attr(Attribute attribute) {
-    	if (attribute.getKey().hasNamespace()) {
-    		namespace(attribute.getKey().getNamespace());
-    	}
+        if (attribute.getKey().hasNamespace()) {
+            namespace(attribute.getKey().getNamespace());
+        }
         attributes.put(attribute.getKey(), attribute);
         return this;
     }
@@ -175,9 +175,9 @@ public class Element implements Node {
     }
 
     Element namespace(Namespace namespace) {
-    	if (namespace.getUri() == null) {
-    		throw new IllegalArgumentException("Invalid namespace " + namespace);
-    	}
+        if (namespace.getUri() == null) {
+            throw new IllegalArgumentException("Invalid namespace " + namespace);
+        }
         if (!namespaces.contains(namespace)) {
             namespaces.add(namespace);
         }
@@ -221,8 +221,8 @@ public class Element implements Node {
     }
 
     public List<Node> children() {
-		return children;
-	}
+        return children;
+    }
 
     public String className() {
         return attr("class");
@@ -321,9 +321,9 @@ public class Element implements Node {
         children.remove(existingChild);
     }
 
-	public Set<QualifiedName> attrNames() {
-		return attributes.keySet();
-	}
+    public Set<QualifiedName> attrNames() {
+        return attributes.keySet();
+    }
 
 }
 

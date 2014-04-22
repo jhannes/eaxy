@@ -15,9 +15,9 @@ public class Namespace implements Content {
         this.uri = Objects.validatePresent(uri, "uri");
         this.prefix = "".equals(prefix) ? null : prefix;
 
-		if (prefix != null && (prefix.equals("xmlns") || prefix.startsWith("xmlns:"))) {
-			throw new IllegalArgumentException("Namespace declarations can't be prefixes: " + prefix);
-		}
+        if (prefix != null && (prefix.equals("xmlns") || prefix.startsWith("xmlns:"))) {
+            throw new IllegalArgumentException("Namespace declarations can't be prefixes: " + prefix);
+        }
     }
 
     public Namespace(String uri) {

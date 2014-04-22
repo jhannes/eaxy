@@ -29,7 +29,7 @@ public class ValidationTest {
             fail("Should throw validation exception");
         } catch (Exception e) {
             assertThat(e.getMessage()).contains("recipent")
-            	.contains("'{\"http://eaxy.org/test/mailmessage\":recipient}'");
+                .contains("'{\"http://eaxy.org/test/mailmessage\":recipient}'");
         }
     }
 

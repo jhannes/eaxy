@@ -32,18 +32,18 @@ abstract class Objects {
         return list;
     }
 
-	public static String validatePresent(String string, String name) {
-		if (string == null || string.isEmpty()) {
-			throw new IllegalArgumentException(name + " can't be empty");
-		}
-		return string;
-	}
+    public static String validatePresent(String string, String name) {
+        if (string == null || string.isEmpty()) {
+            throw new IllegalArgumentException(name + " can't be empty");
+        }
+        return string;
+    }
 
-	public static String validateNullOrPresent(String string, String name) {
-		if (string != null && string.isEmpty()) {
-			throw new IllegalArgumentException(name + " must be null or present");
-		}
-		return string;
-	}
+    public static String validateNullOrPresent(String string, String name) {
+        if (string != null && string.isEmpty()) {
+            throw new IllegalArgumentException(name + " must be null or present");
+        }
+        return string;
+    }
 
 }

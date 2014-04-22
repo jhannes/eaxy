@@ -175,8 +175,8 @@ public class ElementBuilderTest {
     @Test
     public void shouldReadDocument() {
         String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-        		+ Document.LINE_SEPARATOR
-        		+ "<super>Some text<!-- only a comment --></super>";
+                + Document.LINE_SEPARATOR
+                + "<super>Some text<!-- only a comment --></super>";
         assertThat(xml(xml).copy().toXML()).isEqualTo(xml);
     }
 
@@ -184,7 +184,7 @@ public class ElementBuilderTest {
     public void shouldReadDocType() {
         String docType = "<!DOCTYPE MedlineCitationSet PUBLIC \"-//NLM//DTD Medline Citation, 1st January, 2012//EN\" \"http://www.nlm.nih.gov/databases/dtd/nlmmedlinecitationset_120101.dtd\">";
         String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-        		Document.LINE_SEPARATOR +
+                Document.LINE_SEPARATOR +
                 docType +
                 Document.LINE_SEPARATOR +
                 "<super>Some text<!-- only a comment --></super>";
@@ -198,28 +198,27 @@ public class ElementBuilderTest {
     }
 
     @Test
-	public void shouldTranslateWithAttributeNamespaces() throws Exception {
+    public void shouldTranslateWithAttributeNamespaces() throws Exception {
         String text = "<msg:message xmlns:msg=\"http://eaxy.org/test/mailmessage\" msg:type=\"email\" other=\"true\" />";
-		Element email = StaxReader.read(new StringReader(text))
-        		.getRootElement();
+        Element email = StaxReader.read(new StringReader(text))
+                .getRootElement();
 
         System.out.println(email.toXML());
         org.w3c.dom.Document dom = DomTransformer.toDom(new Document(email));
-		Element transformed = DomTransformer.fromDom(dom).getRootElement();
-		System.out.println(transformed.toXML());
-		assertThat(transformed.toXML())
-        	.isEqualTo(email.toXML());
-	}
+        Element transformed = DomTransformer.fromDom(dom).getRootElement();
+        System.out.println(transformed.toXML());
+        assertThat(transformed.toXML())
+            .isEqualTo(email.toXML());
+    }
 
     @Test
-	public void shouldReadWithAttributeNamespaces() throws Exception {
+    public void shouldReadWithAttributeNamespaces() throws Exception {
         String text = "<msg:message xmlns:msg=\"http://eaxy.org/test/mailmessage\" msg:type=\"email\" other=\"true\" />";
-		Element email = StaxReader.read(new StringReader(text))
-        		.getRootElement();
+        Element email = StaxReader.read(new StringReader(text)).getRootElement();
         QualifiedName attrName = new QualifiedName("http://eaxy.org/test/mailmessage", "msg:type");
-		assertThat(email.attr(attrName)).isEqualTo("email");
-		assertThat(email.attr(new QualifiedName("other"))).isEqualTo("true");
-	}
+        assertThat(email.attr(attrName)).isEqualTo("email");
+        assertThat(email.attr(new QualifiedName("other"))).isEqualTo("true");
+    }
 
     @Test
     public void shouldReadCDATA() {
