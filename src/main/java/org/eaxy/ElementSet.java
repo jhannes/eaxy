@@ -135,4 +135,17 @@ public class ElementSet implements Iterable<Element> {
     public Element firstOrDefault() {
         return elements.isEmpty() ? null : first();
     }
+
+    public boolean isEmpty() {
+        return size() == 0;
+    }
+
+    public boolean isPresent() {
+        return !isEmpty();
+    }
+
+    public String firstTextOrNull() {
+        return isPresent() ? first().text() : null;
+    }
+
 }

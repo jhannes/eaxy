@@ -135,8 +135,8 @@ public class ElementFinderTest {
         Element xml = NS.el("parent",
                 NS.el("child", "wrong").attr(NS.name("included"), "false"),
                 NS.el("child", "right").attr(NS.name("included"), "true"));
-        assertThat(xml.find(NS.attr("included", "true")).check().texts()).containsExactly("right");
-        assertThat(xml.find("[included=true]").check().texts()).containsExactly("right");
+        assertThat(xml.find(NS.attr("included", "true")).firstTextOrNull()).isEqualTo("right");
+        assertThat(xml.find("[included=true]").firstTextOrNull()).isEqualTo("right");
     }
 
     @Test
