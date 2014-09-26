@@ -8,9 +8,12 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.LinkedList;
 
 public abstract class Xml {
+
+    public static final Charset UTF_8 = Charset.forName("UTF-8");
 
     static class CDataElement implements Node {
 
@@ -124,8 +127,12 @@ public abstract class Xml {
     }
 
     public static Document readAndClose(InputStream inputStream) throws IOException {
+        return readAndClose(inputStream, UTF_8);
+    }
+
+    public static Document readAndClose(InputStream inputStream, Charset charset) throws IOException {
         try {
-            return read(new InputStreamReader(inputStream));
+            return read(new InputStreamReader(inputStream, charset));
         } finally {
             inputStream.close();
         }
