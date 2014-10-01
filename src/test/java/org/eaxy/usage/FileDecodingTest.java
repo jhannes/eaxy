@@ -1,12 +1,9 @@
 package org.eaxy.usage;
 
-import org.eaxy.Document;
 import org.eaxy.Xml;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import static org.fest.assertions.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -16,9 +13,12 @@ import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.Scanner;
 
+import static org.fest.assertions.api.Assertions.assertThat;
+
 public class FileDecodingTest {
 
-    public static final String GOOD = "UTF-8";
+    public static final String EOF = "\\Z";
+
     private static String oldSystemDefaultEncoding;
 
     @BeforeClass
@@ -37,10 +37,10 @@ public class FileDecodingTest {
         File file = new File(getClass().getResource("/testdocument.html").toURI());
 
         String reference = slurp(file);
-        Document document = Xml.read(file);
+        String result = Xml.read(file).toXML();
 
         assertThat(reference).contains("nÃ¸rwÃ¦giÃ¥n");
-        assertThat(document.toXML()).contains("nørwægiån");
+        assertThat(result).contains("nørwægiån");
     }
 
     private static void setSystemDefaultEncoding(String encoding) {
@@ -60,11 +60,8 @@ public class FileDecodingTest {
         }
     }
 
-
     private String slurp(File file) throws FileNotFoundException {
-        Scanner scan = new Scanner(file);
-        scan.useDelimiter("\\Z");
-        return scan.next();
+        return new Scanner(file).useDelimiter(EOF).next();
     }
 
 }
