@@ -123,7 +123,9 @@ public abstract class Xml {
     }
 
     public static Document read(File file) throws IOException {
-        return readAndClose(new FileInputStream(file));
+        try (FileInputStream inputStream = new FileInputStream(file)) {
+            return readAndClose(inputStream);
+        }
     }
 
     public static Document readAndClose(InputStream inputStream) throws IOException {
@@ -131,10 +133,8 @@ public abstract class Xml {
     }
 
     public static Document readAndClose(InputStream inputStream, Charset charset) throws IOException {
-        try {
-            return read(new InputStreamReader(inputStream, charset));
-        } finally {
-            inputStream.close();
+        try (Reader reader = new InputStreamReader(inputStream, charset)) {
+            return read(reader);
         }
     }
 

@@ -1,14 +1,15 @@
 package org.eaxy;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 
+import org.assertj.core.api.StringAssert;
 import org.eaxy.utils.IOUtils;
-import org.fest.assertions.api.StringAssert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -24,20 +25,22 @@ public class XmlSerializationTest {
 
     @Test
     public void shouldReadWithStax() throws Exception {
-        InputStreamReader input = input();
-        Document doc = StaxReader.read(input);
-        input.close();
-        assertThat(normalize(doc.copy().toXML()))
+        try (InputStreamReader input = input()) {
+            Document doc = StaxReader.read(input);
+            input.close();
+            assertThat(normalize(doc.copy().toXML()))
             .isEqualTo(normalize(IOUtils.slurp(xmlFile)));
+        }
     }
 
     @Test
     public void shouldReadWithSax() throws Exception {
-        InputStreamReader input = input();
-        Document doc = SaxReader.read(input);
-        input.close();
-        assertThat(normalize(doc.copy().toXML()))
-            .isEqualTo(normalize(IOUtils.slurp(xmlFile)));
+        try(InputStreamReader input = input()) {
+            Document doc = SaxReader.read(input);
+            input.close();
+            assertThat(normalize(doc.copy().toXML()))
+                .isEqualTo(normalize(IOUtils.slurp(xmlFile)));
+        }
     }
 
     private InputStreamReader input() throws FileNotFoundException {
@@ -58,7 +61,7 @@ public class XmlSerializationTest {
     }
 
     private StringAssert assertEquals(Document document, String fileContents) {
-        return assertThat(normalize(document.toXML()))
+        return (StringAssert) assertThat(normalize(document.toXML()))
             .isEqualTo(normalize(fileContents));
     }
 

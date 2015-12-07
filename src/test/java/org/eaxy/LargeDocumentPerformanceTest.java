@@ -1,8 +1,8 @@
 package org.eaxy;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.eaxy.Xml.el;
 import static org.eaxy.Xml.text;
-import static org.fest.assertions.api.Assertions.assertThat;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -60,10 +60,12 @@ public class LargeDocumentPerformanceTest {
             root.add(el("some_element").text("with text").id(String.valueOf(random.nextInt())));
             root.add(text("\n"));
         }
-        FileWriter writer = new FileWriter(getTmpFile());
+
         long start = System.currentTimeMillis();
-        new Document(root).writeTo(writer);
-        writer.close();
+        try(FileWriter writer = new FileWriter(getTmpFile())) {
+            new Document(root).writeTo(writer);
+            writer.close();
+        }
         long duration = System.currentTimeMillis()-start;
         return duration;
     }

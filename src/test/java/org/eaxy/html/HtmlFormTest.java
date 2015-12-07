@@ -1,9 +1,9 @@
 package org.eaxy.html;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.eaxy.Xml.attr;
 import static org.eaxy.Xml.el;
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.fest.assertions.api.Fail.fail;
+import static org.junit.Assert.*;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;

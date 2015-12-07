@@ -63,8 +63,9 @@ public class StaxReader implements XMLStreamConstants {
                 break;
             case COMMENT:
                 current().add(comment(streamReader.getText()));
-
+                break;
             case START_DOCUMENT:
+                break;
             case END_DOCUMENT:
                 break;
             case DTD:

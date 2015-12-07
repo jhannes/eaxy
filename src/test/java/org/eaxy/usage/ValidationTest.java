@@ -1,8 +1,8 @@
 package org.eaxy.usage;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.eaxy.Xml.text;
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.fest.assertions.api.Assertions.fail;
+import static org.junit.Assert.fail;
 
 import org.eaxy.Element;
 import org.eaxy.Namespace;

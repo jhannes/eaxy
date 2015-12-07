@@ -1,10 +1,10 @@
 package org.eaxy.usage;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.eaxy.Xml.attr;
 import static org.eaxy.Xml.el;
 import static org.eaxy.Xml.text;
 import static org.eaxy.Xml.xml;
-import static org.fest.assertions.api.Assertions.assertThat;
 
 import java.io.StringReader;
 import java.util.Map;
@@ -203,10 +203,8 @@ public class ElementBuilderTest {
         Element email = StaxReader.read(new StringReader(text))
                 .getRootElement();
 
-        System.out.println(email.toXML());
         org.w3c.dom.Document dom = DomTransformer.toDom(new Document(email));
         Element transformed = DomTransformer.fromDom(dom).getRootElement();
-        System.out.println(transformed.toXML());
         assertThat(transformed.toXML())
             .isEqualTo(email.toXML());
     }

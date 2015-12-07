@@ -5,6 +5,8 @@ import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -13,7 +15,6 @@ import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.Scanner;
 
-import static org.fest.assertions.api.Assertions.assertThat;
 
 public class FileDecodingTest {
 
@@ -48,7 +49,7 @@ public class FileDecodingTest {
         invalidateFieldCache(Charset.class, "defaultCharset");
     }
 
-    private static void invalidateFieldCache(Class classObject, String fieldName) {
+    private static void invalidateFieldCache(Class<?> classObject, String fieldName) {
         try {
             Field field = classObject.getDeclaredField(fieldName);
             field.setAccessible(true);
@@ -61,7 +62,9 @@ public class FileDecodingTest {
     }
 
     private String slurp(File file) throws FileNotFoundException {
-        return new Scanner(file).useDelimiter(EOF).next();
+        try (Scanner scanner = new Scanner(file)) {
+            return scanner.useDelimiter(EOF).next();
+        }
     }
 
 }

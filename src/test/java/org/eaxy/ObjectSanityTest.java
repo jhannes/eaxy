@@ -1,7 +1,7 @@
 package org.eaxy;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.eaxy.Namespace.NO_NAMESPACE;
-import static org.fest.assertions.api.Assertions.assertThat;
 
 import org.junit.Test;
 

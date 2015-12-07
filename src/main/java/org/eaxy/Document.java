@@ -90,11 +90,8 @@ public class Document {
     }
 
     public void writeAndClose(OutputStream outputStream) throws IOException {
-        Writer writer = new OutputStreamWriter(outputStream, this.encoding);
-        try {
+        try (Writer writer = new OutputStreamWriter(outputStream, this.encoding)) {
             writeTo(writer);
-        } finally {
-            writer.close();
         }
     }
 }
