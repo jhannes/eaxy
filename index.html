@@ -1,0 +1,121 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Eaxy by jhannes</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Eaxy</h1>
+        <p>Easy XML library for Java</p>
+
+        <p class="view"><a href="https://github.com/jhannes/eaxy">View the Project on GitHub <small>jhannes/eaxy</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/jhannes/eaxy/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/jhannes/eaxy/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/jhannes/eaxy">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="eaxy---an-easy-to-use-xml-library-for-java" class="anchor" href="#eaxy---an-easy-to-use-xml-library-for-java" aria-hidden="true"><span class="octicon octicon-link"></span></a>EAXY - An easy to use XML library for Java</h1>
+
+<p>EAXY is a Java library for building, parsing, searching and manipulating XML.</p>
+
+<p>It is small (&lt; 50 kB) and has no dependencies. It's aim is to have a compact
+syntax for doing the most common operations on XML and HTML trees.</p>
+
+<h2>
+<a id="overview" class="anchor" href="#overview" aria-hidden="true"><span class="octicon octicon-link"></span></a>Overview</h2>
+
+<p>EAXY is build with the following guiding principles:</p>
+
+<ul>
+<li>Namespaces must be build in from the start</li>
+<li>Utility methods are good</li>
+<li>Links to parent nodes and document complicates matters</li>
+<li>Libraries should not have dependencies</li>
+</ul>
+
+<h2>
+<a id="building-xml-documents" class="anchor" href="#building-xml-documents" aria-hidden="true"><span class="octicon octicon-link"></span></a>Building XML documents:</h2>
+
+<pre><code>    Namespace A_NS = new Namespace("uri:a", "a");
+    Namespace B_NS = new Namespace("uri:b", "b");
+
+    Element xml = A_NS.el("root",
+            Xml.el("node-without-namespace", "element text"), 
+            A_NS.el("parent", 
+                    A_NS.el("child")),
+            B_NS.el("other-parent", Xml.text("Here's some text")));
+</code></pre>
+
+<h2>
+<a id="manipulating-xml-documents" class="anchor" href="#manipulating-xml-documents" aria-hidden="true"><span class="octicon octicon-link"></span></a>Manipulating XML documents:</h2>
+
+<pre><code>    Element div = el("div");
+    assertThat(div.className()).isNull();
+    div.addClass("important");
+    div.addClass("hidden");
+    assertThat(div.className()).isEqualTo("important hidden");
+    div.removeClass("hidden");
+    div.removeClass("hidden");
+    assertThat(div.className()).isEqualTo("important");
+    div.removeClass("important");
+    assertThat(div.className()).isEmpty();
+</code></pre>
+
+<h2>
+<a id="finding-contents-of-xml-documents" class="anchor" href="#finding-contents-of-xml-documents" aria-hidden="true"><span class="octicon octicon-link"></span></a>Finding contents of XML documents:</h2>
+
+<pre><code>    Element xml = el("div",
+            el("div").id("not-here").add(text("something")),
+            el("div").id("below-here").add(
+                    el("div", el("div", el("p", text("around "), el("span", "HERE"), text(" around"))))));
+    assertThat(xml.find("...", "#below-here", "...", "p", "...").first().text())
+        .isEqualTo("HERE");
+</code></pre>
+
+<h2>
+<a id="html-utilities" class="anchor" href="#html-utilities" aria-hidden="true"><span class="octicon octicon-link"></span></a>HTML utilities:</h2>
+
+<pre><code>    Element form = el("form",
+            el("input").id("first_name_id").name("first_name").type("text").val("Darth"),
+            el("input").id("last_name_id").name("last_name").type("text").val("Vader"),
+            el("input").name("createPerson").type("submit").val("Create person"));
+    assertThat(form.find("input").ids()).containsExactly("first_name_id", "last_name_id");
+    assertThat(form.find("input").values()).containsExactly("Darth", "Vader", "Create person");
+    assertThat(form.find("input").names()).containsExactly("first_name", "last_name", "createPerson");
+
+    assertThat(form.find("input").first().val()).isEqualTo("Darth");
+</code></pre>
+
+<h2>
+<a id="known-issues" class="anchor" href="#known-issues" aria-hidden="true"><span class="octicon octicon-link"></span></a>Known issues:</h2>
+
+<ul>
+<li>SAX namespace may be broken with certain classpath combinations - perhaps I need to write my own parser</li>
+<li>Finding doesn't include the current element, which is often non-intuitive</li>
+<li>The "..." syntax is unintuitive and could use some improvement</li>
+</ul>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/jhannes">jhannes</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
