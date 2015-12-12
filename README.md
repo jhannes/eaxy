@@ -1,6 +1,9 @@
 EAXY - An easy to use XML library for Java
 ==========================================
 
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.eaxy/eaxy/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eaxy/eaxy)
+[![Build Status](https://travis-ci.org/jhannes/eaxy.png)](https://travis-ci.org/jhannes/eaxy)
+
 EAXY is a Java library for building, parsing, searching and manipulating XML.
 
 It is small (< 50 kB) and has no dependencies. It's aim is to have a compact
