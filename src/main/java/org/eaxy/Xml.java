@@ -129,7 +129,7 @@ public abstract class Xml {
     }
 
     public static Document readAndClose(InputStream inputStream) throws IOException {
-        return readAndClose(inputStream, UTF_8);
+        return StaxReader.read(inputStream);
     }
 
     public static Document readAndClose(InputStream inputStream, Charset charset) throws IOException {

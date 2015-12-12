@@ -1,7 +1,7 @@
 package org.eaxy;
 
 import java.io.IOException;
-import java.io.Reader;
+import java.io.InputStream;
 import java.util.Stack;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -130,7 +130,7 @@ public class SaxReader {
         }
     }
 
-    public static Document read(Reader input) throws IOException {
+    public static Document read(InputStream input) throws IOException {
         return read(new InputSource(input));
     }
 

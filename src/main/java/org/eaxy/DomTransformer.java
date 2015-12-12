@@ -11,6 +11,10 @@ public class DomTransformer {
 
     public static Document fromDom(org.w3c.dom.Document document) {
         Document doc = new Document();
+        if (document.getXmlEncoding() != null) {
+            doc.setEncoding(document.getXmlEncoding());
+        }
+        doc.setVersion(document.getXmlVersion());
 
         if (document.getDoctype() != null) doc.addDTD(document.getDoctype().getBaseURI());
         doc.setRootElement((Element)createNode(document.getDocumentElement()));
@@ -62,6 +66,7 @@ public class DomTransformer {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             org.w3c.dom.Document doc = factory.newDocumentBuilder().newDocument();
+            doc.setXmlVersion(document.getVersion());
             doc.appendChild(createElement(doc, document.getRootElement()));
             return doc;
         } catch (ParserConfigurationException e) {

@@ -3,9 +3,11 @@ package org.eaxy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import org.assertj.core.api.StringAssert;
@@ -35,7 +37,7 @@ public class XmlSerializationTest {
 
     @Test
     public void shouldReadWithSax() throws Exception {
-        try(InputStreamReader input = input()) {
+        try(InputStream input = new FileInputStream(xmlFile)) {
             Document doc = SaxReader.read(input);
             input.close();
             assertThat(normalize(doc.copy().toXML()))

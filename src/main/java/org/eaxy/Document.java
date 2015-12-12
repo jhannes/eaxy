@@ -1,8 +1,6 @@
 package org.eaxy;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -61,6 +59,8 @@ public class Document {
 
     public Document copy() {
         Document result = new Document(rootElement.copy());
+        result.version = version;
+        result.encoding = encoding;
         result.dtds.addAll(dtds);
         return result;
     }
@@ -77,9 +77,9 @@ public class Document {
 
     public void writeTo(Writer writer) throws IOException {
         writer.append("<?xml version=\"");
-        writer.append(version);
+        writer.append(getVersion());
         writer.append("\" encoding=\"");
-        writer.append(encoding);
+        writer.append(getEncoding());
         writer.append("\"?>");
         writer.append(LINE_SEPARATOR);
         for (String dtd : dtds) {
@@ -87,11 +87,5 @@ public class Document {
             writer.append(LINE_SEPARATOR);
         }
         rootElement.writeTo(writer);
-    }
-
-    public void writeAndClose(OutputStream outputStream) throws IOException {
-        try (Writer writer = new OutputStreamWriter(outputStream, this.encoding)) {
-            writeTo(writer);
-        }
     }
 }

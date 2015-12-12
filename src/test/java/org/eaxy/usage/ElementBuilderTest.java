@@ -6,6 +6,7 @@ import static org.eaxy.Xml.el;
 import static org.eaxy.Xml.text;
 import static org.eaxy.Xml.xml;
 
+import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 import java.util.Map;
 
@@ -16,6 +17,7 @@ import org.eaxy.MalformedXMLException;
 import org.eaxy.Namespace;
 import org.eaxy.QualifiedName;
 import org.eaxy.StaxReader;
+import org.eaxy.Xml;
 import org.junit.Test;
 
 public class ElementBuilderTest {
@@ -63,6 +65,14 @@ public class ElementBuilderTest {
             .isEqualTo("This is \"<\" - a less than sign");
         assertThat(el("foo", attr("attr", "This is \"<\" - a less than sign")).toXML())
             .isEqualTo("<foo attr=\"This is &quot;&lt;&quot; - a less than sign\" />");
+    }
+
+    @Test
+    public void shouldCreateDocument() throws Exception {
+        Document doc = Xml.doc(Xml.el("empty"));
+        doc.setVersion("1.1");
+        doc.setEncoding("iso-8859-1");
+        assertThat(doc.copy().toXML()).contains("<?xml version=\"1.1\" encoding=\"iso-8859-1\"?>");
     }
 
     @Test
@@ -189,6 +199,15 @@ public class ElementBuilderTest {
                 Document.LINE_SEPARATOR +
                 "<super>Some text<!-- only a comment --></super>";
         assertThat(xml(xml).copy().toXML()).isEqualTo(xml);
+    }
+
+    @Test
+    public void shouldReadEncoding() throws Exception {
+        String xml = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>"
+                + Document.LINE_SEPARATOR
+                + "<empty />";
+        assertThat(StaxReader.read(new ByteArrayInputStream(xml.getBytes())).copy().toXML())
+            .isEqualTo(xml);
     }
 
     @Test
