@@ -26,6 +26,7 @@ public class SaxReader {
         @Override
         public void startDocument() {
             document = new Document();
+
         }
 
         @Override

@@ -307,7 +307,15 @@ public class Element implements Node {
 
     @Override
     public Element copy() {
-        return new Element(this.name, Objects.list(children, Node.class), attributes.values(), namespaces);
+        return new Element(this.name, copyChildren(), attributes.values(), namespaces);
+    }
+
+    private List<Node> copyChildren() {
+        List<Node> list = new ArrayList<Node>();
+        for (Node o : children) {
+            list.add(o.copy());
+        }
+        return list;
     }
 
     Element attrs(Collection<Attribute> attributes) {

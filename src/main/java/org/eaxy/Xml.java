@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
@@ -132,22 +131,12 @@ public abstract class Xml {
         return StaxReader.read(inputStream);
     }
 
-    public static Document readAndClose(InputStream inputStream, Charset charset) throws IOException {
-        try (Reader reader = new InputStreamReader(inputStream, charset)) {
-            return read(reader);
-        }
-    }
-
     public static Document read(Reader reader) throws IOException {
         return StaxReader.read(reader);
     }
 
     public static Document fromDom(org.w3c.dom.Document document) {
         return DomTransformer.fromDom(document);
-    }
-
-    public static org.w3c.dom.Document toDom(Element element) {
-        return DomTransformer.toDom(new Document(element));
     }
 
     public static org.w3c.dom.Document toDom(Document document) {

@@ -22,11 +22,8 @@ public class StaxReader implements XMLStreamConstants {
     private final XMLStreamReader streamReader;
     private final Document document = new Document();
 
-    private StaxReader(Reader reader) throws XMLStreamException {
-        XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-        inputFactory.setProperty(XMLInputFactory.IS_COALESCING, Boolean.FALSE);
-        inputFactory.setProperty(Constants.ZEPHYR_PROPERTY_PREFIX + Constants.STAX_REPORT_CDATA_EVENT, Boolean.TRUE);
-        this.streamReader = inputFactory.createXMLStreamReader(reader);
+    private StaxReader(XMLStreamReader streamReader) {
+        this.streamReader = streamReader;
         if (streamReader.getVersion() != null) {
             document.setVersion(streamReader.getVersion());
         }
@@ -35,22 +32,16 @@ public class StaxReader implements XMLStreamConstants {
         }
     }
 
-    private StaxReader(InputStream inputStream) throws XMLStreamException {
+    private static XMLInputFactory getInputFactory() {
         XMLInputFactory inputFactory = XMLInputFactory.newInstance();
         inputFactory.setProperty(XMLInputFactory.IS_COALESCING, Boolean.FALSE);
         inputFactory.setProperty(Constants.ZEPHYR_PROPERTY_PREFIX + Constants.STAX_REPORT_CDATA_EVENT, Boolean.TRUE);
-        this.streamReader = inputFactory.createXMLStreamReader(inputStream);
-        if (streamReader.getVersion() != null) {
-            document.setVersion(streamReader.getVersion());
-        }
-        if (streamReader.getEncoding() != null) {
-            document.setEncoding(streamReader.getEncoding());
-        }
+        return inputFactory;
     }
 
     public static Document read(Reader reader) {
         try {
-            return new StaxReader(reader).doParse();
+            return new StaxReader(getInputFactory().createXMLStreamReader(reader)).doParse();
         } catch (XMLStreamException e) {
             throw new MalformedXMLException(e.getMessage(), e.getLocation().getLineNumber());
         }
@@ -58,7 +49,7 @@ public class StaxReader implements XMLStreamConstants {
 
     public static Document read(InputStream inputStream) {
         try {
-            return new StaxReader(inputStream).doParse();
+            return new StaxReader(getInputFactory().createXMLStreamReader(inputStream)).doParse();
         } catch (XMLStreamException e) {
             throw new MalformedXMLException(e.getMessage(), e.getLocation().getLineNumber());
         }

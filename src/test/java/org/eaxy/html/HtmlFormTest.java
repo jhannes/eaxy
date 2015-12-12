@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eaxy.Element;
+import org.eaxy.Xml;
 import org.junit.Test;
 
 public class HtmlFormTest {
@@ -240,7 +241,8 @@ public class HtmlFormTest {
                 el("input").name("last_name").type("text"),
                 el("input").name("unchecked_box").type("checkbox"),
                 el("input").name("checked=box").type("checkbox"));
-        HtmlForm form = new HtmlForm(html);
+        Xhtml xhtml = new Xhtml(Xml.doc(el("body", html)));
+        HtmlForm form = xhtml.getForm("form");
         form.deserialize("last_name=O%27Malley&checked%3Dbox=");
         assertThat(form.get("last_name")).isEqualTo("O'Malley");
         assertThat(form.get("checked=box")).isEqualTo("on");

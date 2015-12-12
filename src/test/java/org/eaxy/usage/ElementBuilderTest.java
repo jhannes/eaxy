@@ -11,7 +11,6 @@ import java.io.StringReader;
 import java.util.Map;
 
 import org.eaxy.Document;
-import org.eaxy.DomTransformer;
 import org.eaxy.Element;
 import org.eaxy.MalformedXMLException;
 import org.eaxy.Namespace;
@@ -49,6 +48,11 @@ public class ElementBuilderTest {
         Map<String, String> attrs = el("element", attr("abc", "a"), attr("xyz", "b"), attr("def", "c")).attrs();
         assertThat(attrs.keySet()).containsExactly("abc", "xyz", "def");
         assertThat(attrs.values()).containsExactly("a", "b", "c");
+    }
+
+    @Test
+    public void shouldCreateAttributes() throws Exception {
+        assertThat(el("element", attr("a", "b")).hasAttr("a")).isTrue();
     }
 
     @Test
@@ -222,8 +226,8 @@ public class ElementBuilderTest {
         Element email = StaxReader.read(new StringReader(text))
                 .getRootElement();
 
-        org.w3c.dom.Document dom = DomTransformer.toDom(new Document(email));
-        Element transformed = DomTransformer.fromDom(dom).getRootElement();
+        org.w3c.dom.Document dom = Xml.toDom(new Document(email));
+        Element transformed = Xml.fromDom(dom).getRootElement();
         assertThat(transformed.toXML())
             .isEqualTo(email.toXML());
     }

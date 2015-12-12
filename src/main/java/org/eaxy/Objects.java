@@ -39,11 +39,4 @@ abstract class Objects {
         return string;
     }
 
-    public static String validateNullOrPresent(String string, String name) {
-        if (string != null && string.isEmpty()) {
-            throw new IllegalArgumentException(name + " must be null or present");
-        }
-        return string;
-    }
-
 }

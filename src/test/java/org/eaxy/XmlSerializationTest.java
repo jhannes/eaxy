@@ -3,7 +3,6 @@ package org.eaxy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -57,8 +56,8 @@ public class XmlSerializationTest {
 
     @Test
     public void shouldTransformViaDom() throws Exception {
-        Document doc = DomTransformer.fromDom(DomTransformer.toDom(Xml.read(xmlFile)));
-        assertEquals(DomTransformer.fromDom(DomTransformer.toDom(doc)),
+        Document doc = Xml.fromDom(Xml.toDom(Xml.read(xmlFile)));
+        assertEquals(Xml.fromDom(Xml.toDom(doc)),
                 IOUtils.slurp(xmlFile));
     }
 
