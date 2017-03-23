@@ -1,7 +1,6 @@
 package org.eaxy.html;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringWriter;
 
 import org.eaxy.Document;
@@ -35,8 +34,7 @@ public class Xhtml extends Document {
         return Xml.el("div", text);
     }
 
-    public static Xhtml readAndClose(InputStream stream) throws IOException {
-        return new Xhtml(Xml.readAndClose(stream));
+    public static Xhtml readResource(String name) throws IOException {
+        return new Xhtml(Xml.readResource(name));
     }
-
 }

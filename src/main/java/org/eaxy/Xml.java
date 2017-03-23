@@ -10,6 +10,8 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
 
+import org.eaxy.html.Xhtml;
+
 public abstract class Xml {
 
     public static final Charset UTF_8 = Charset.forName("UTF-8");
@@ -123,12 +125,17 @@ public abstract class Xml {
 
     public static Document read(File file) throws IOException {
         try (FileInputStream inputStream = new FileInputStream(file)) {
-            return readAndClose(inputStream);
+            return StaxReader.read(inputStream);
         }
     }
 
-    public static Document readAndClose(InputStream inputStream) throws IOException {
-        return StaxReader.read(inputStream);
+    public static Document readResource(String name) throws IOException {
+        try(InputStream input = Xhtml.class.getResourceAsStream(name)) {
+            if (input == null) {
+                throw new IllegalArgumentException("Can't load " + name);
+            }
+            return StaxReader.read(input);
+        }
     }
 
     public static Document read(Reader reader) throws IOException {
