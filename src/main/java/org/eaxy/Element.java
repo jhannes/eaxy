@@ -43,8 +43,15 @@ public class Element implements Node {
         return namespaces;
     }
 
-    public Element addAll(Node... content) {
-        for (Node node : content) {
+    public <T extends Node> Element addAll(@SuppressWarnings("unchecked") T... content) {
+        for (T node : content) {
+            add(node);
+        }
+        return this;
+    }
+
+    public <T extends Node> Element addAll(Collection<T> content) {
+        for (T node : content) {
             add(node);
         }
         return this;
@@ -57,12 +64,31 @@ public class Element implements Node {
 
     @Override
     public void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException {
+        writeTo(writer, printedNamespaces, "");
+    }
+
+    @Override
+    public void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces, String indent) throws IOException {
         if (children.isEmpty()) {
-            writer.write("<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + " />");
+            if (indent.isEmpty()) {
+                writer.write("<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + " />");
+            } else {
+                writer.write(indent + "<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + " />\n");
+            }
         } else {
-            writer.write("<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + ">");
-            printContent(writer, printedNamespaces);
-            writer.write("</" + printTag() + ">");
+            if (indent.isEmpty()) {
+                writer.write("<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + ">");
+                printContent(writer, printedNamespaces, indent);
+                writer.write("</" + printTag() + ">");
+            } else if (elements().isEmpty()) {
+                writer.write(indent + "<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + ">");
+                printContent(writer, printedNamespaces, indent);
+                writer.write("</" + printTag() + ">\n");
+            } else {
+                writer.write(indent + "<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + ">\n");
+                printContent(writer, printedNamespaces, indent + "  ");
+                writer.write(indent + "</" + printTag() + ">\n");
+            }
         }
     }
 
@@ -89,12 +115,12 @@ public class Element implements Node {
         return result.toString();
     }
 
-    private void printContent(Writer writer, List<Namespace> printedNamespaces2) throws IOException {
+    private void printContent(Writer writer, List<Namespace> printedNamespaces2, String indent) throws IOException {
         LinkedList<Namespace> printedNamespaces = new LinkedList<Namespace>();
         printedNamespaces.addAll(printedNamespaces2);
         printedNamespaces.addAll(namespaces);
         for (Node element : children) {
-            element.writeTo(writer, printedNamespaces);
+            element.writeTo(writer, printedNamespaces, indent);
         }
     }
 
@@ -165,9 +191,13 @@ public class Element implements Node {
     }
 
     public String toXML() {
+        return toXML("");
+    }
+
+    public String toXML(String indent) {
         try {
             StringWriter result = new StringWriter();
-            writeTo(result);
+            writeTo(result, new LinkedList<Namespace>(), indent);
             return result.toString();
         } catch (IOException e) {
             throw new CanNeverHappenException("StringWriter doesn't throw IOException", e);
@@ -216,7 +246,7 @@ public class Element implements Node {
         return result;
     }
 
-    public Collection<? extends Element> elements() {
+    public List<? extends Element> elements() {
         return Objects.list(children, Element.class);
     }
 

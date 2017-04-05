@@ -13,7 +13,7 @@ public class ElementSet implements Iterable<Element> {
     };
 
     private List<Element> elements = new ArrayList<Element>();
-    private ElementSet parent = NULL_ELEMENT_SET;
+    private ElementSet parentSet = NULL_ELEMENT_SET;
     private final Object filter;
 
     public ElementSet(Element element) {
@@ -22,12 +22,12 @@ public class ElementSet implements Iterable<Element> {
     }
 
     private ElementSet(ElementSet parent, Object filter) {
-        this.parent = parent;
+        this.parentSet = parent;
         this.filter = filter;
     }
 
     private ElementSet(ElementSet parent, ElementQuery filter, List<Element> elements) {
-        this.parent = parent;
+        this.parentSet = parent;
         this.filter = filter;
         this.elements = elements;
     }
@@ -47,9 +47,9 @@ public class ElementSet implements Iterable<Element> {
 
     public ElementSet check() {
         if (!elements.isEmpty()) return this;
-        parent.check();
-        String message = "Can't find <" + filter + "> below " + parent.getPath() + ".";
-        message += " Actual elements: " + parent.printActualChildren();
+        parentSet.check();
+        String message = "Can't find <" + filter + "> below " + parentSet.getPath() + ".";
+        message += " Actual elements: " + parentSet.printActualChildren();
         throw new NonMatchingPathException(message);
     }
 
@@ -65,7 +65,7 @@ public class ElementSet implements Iterable<Element> {
 
     public List<Object> getPath() {
         List<Object> result = new ArrayList<Object>();
-        result.addAll(parent.getPath());
+        result.addAll(parentSet.getPath());
         result.add(filter.toString());
         return result;
     }
@@ -146,6 +146,11 @@ public class ElementSet implements Iterable<Element> {
 
     public String firstTextOrNull() {
         return isPresent() ? first().text() : null;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "{size=" + size() + "}";
     }
 
 }
