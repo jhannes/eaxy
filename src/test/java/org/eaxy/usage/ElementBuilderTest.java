@@ -5,7 +5,6 @@ import static org.eaxy.Xml.attr;
 import static org.eaxy.Xml.el;
 import static org.eaxy.Xml.text;
 import static org.eaxy.Xml.xml;
-
 import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 import java.util.Map;
@@ -138,6 +137,27 @@ public class ElementBuilderTest {
         assertThat(element.toXML()).isEqualTo("<Element>Text with &lt;, &gt; and &amp;</Element>");
         assertThat(element.text()).isEqualTo("Text with <, > and &");
 
+    }
+
+    @Test
+    public void shouldPrintIndentedXml() throws Exception {
+        Document doc = Xml.doc(Xml.el("root",
+                Xml.el("first", "with some text"),
+                Xml.el("empty").attr("foo", "bar"),
+                Xml.el("second", Xml.el("nested", "Indented at level 2"))));
+
+        String nl = Document.LINE_SEPARATOR;
+        assertThat(doc.toIndentedXML("***"))
+            .isEqualTo(
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + nl +
+                    "<root>" + nl +
+                    "***<first>with some text</first>" + nl +
+                    "***<empty foo=\"bar\" />" + nl +
+                    "***<second>" + nl +
+                    "******<nested>Indented at level 2</nested>" + nl +
+                    "***</second>" + nl +
+                    "</root>" + nl
+                    );
     }
 
     @Test(expected=MalformedXMLException.class)

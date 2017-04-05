@@ -8,7 +8,7 @@ public interface Node extends Content {
 
     void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException;
 
-    void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces, String indent) throws IOException;
+    void writeIndentedTo(Writer writer, LinkedList<Namespace> printedNamespaces, String indent, String currentIndent) throws IOException;
 
     CharSequence text();
 

@@ -32,12 +32,12 @@ public abstract class Xml {
 
         @Override
         public void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException {
-            writeTo(writer, printedNamespaces, "");
+            writer.write("<![CDATA[" + text() + "]]>");
         }
 
         @Override
-        public void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces, String indent) throws IOException {
-            writer.write(indent + "<![CDATA[" + text() + "]]>");
+        public void writeIndentedTo(Writer writer, LinkedList<Namespace> printedNamespaces, String indent, String currentIndent) throws IOException {
+            writer.write(currentIndent + "<![CDATA[" + text() + "]]>\n");
         }
 
         @Override
@@ -56,12 +56,12 @@ public abstract class Xml {
 
         @Override
         public void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException {
-            writeTo(writer, printedNamespaces, "");
+            writer.write("<!--" + text() + "-->");
         }
 
         @Override
-        public void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces, String indent) throws IOException {
-            writer.write(indent + "<!--" + text() + "-->");
+        public void writeIndentedTo(Writer writer, LinkedList<Namespace> printedNamespaces, String indent, String currentIndent) throws IOException {
+            writer.write(currentIndent + "<!--" + text() + "-->\n");
         }
 
         @Override
@@ -86,14 +86,14 @@ public abstract class Xml {
 
         @Override
         public void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException {
-            writeTo(writer, printedNamespaces, "");
-        }
-
-        @Override
-        public void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces, String indent) throws IOException {
             writer.write(text().replaceAll("&", "&amp;")
                     .replaceAll("<", "&lt;")
                     .replaceAll(">", "&gt;"));
+        }
+
+        @Override
+        public void writeIndentedTo(Writer writer, LinkedList<Namespace> printedNamespaces, String indent, String currentIndent) throws IOException {
+            writeTo(writer, printedNamespaces);
         }
 
         @Override

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Document {
@@ -76,6 +77,11 @@ public class Document {
     }
 
     public void writeTo(Writer writer) throws IOException {
+        writeHeader(writer);
+        rootElement.writeTo(writer);
+    }
+
+    private void writeHeader(Writer writer) throws IOException {
         writer.append("<?xml version=\"");
         writer.append(getVersion());
         writer.append("\" encoding=\"");
@@ -86,6 +92,20 @@ public class Document {
             writer.append(dtd);
             writer.append(LINE_SEPARATOR);
         }
-        rootElement.writeTo(writer);
+    }
+
+    public String toIndentedXML(String indentation) {
+        StringWriter result = new StringWriter();
+        try {
+            writeIndentedTo(result, indentation, "");
+        } catch (IOException e) {
+            throw new CanNeverHappenException("StringBuilder doesn't throw IOException", e);
+        }
+        return result.toString();
+    }
+
+    private void writeIndentedTo(Writer writer, String indentation, String currentIndent) throws IOException {
+        writeHeader(writer);
+        rootElement.writeIndentedTo(writer, new LinkedList<Namespace>(), indentation, currentIndent);
     }
 }

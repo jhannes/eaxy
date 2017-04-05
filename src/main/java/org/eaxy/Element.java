@@ -64,31 +64,27 @@ public class Element implements Node {
 
     @Override
     public void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException {
-        writeTo(writer, printedNamespaces, "");
+        if (children.isEmpty()) {
+            writer.write("<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + " />");
+        } else {
+            writer.write("<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + ">");
+            printContent(writer, printedNamespaces);
+            writer.write("</" + printTag() + ">");
+        }
     }
 
     @Override
-    public void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces, String indent) throws IOException {
+    public void writeIndentedTo(Writer writer, LinkedList<Namespace> printedNamespaces, String indent, String currentIndent) throws IOException {
         if (children.isEmpty()) {
-            if (indent.isEmpty()) {
-                writer.write("<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + " />");
-            } else {
-                writer.write(indent + "<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + " />\n");
-            }
+            writer.write(currentIndent + "<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + " />" + Document.LINE_SEPARATOR);
+        } else if (elements().isEmpty()) {
+            writer.write(currentIndent + "<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + ">");
+            printContent(writer, printedNamespaces, indent, currentIndent + indent);
+            writer.write("</" + printTag() + ">" + Document.LINE_SEPARATOR);
         } else {
-            if (indent.isEmpty()) {
-                writer.write("<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + ">");
-                printContent(writer, printedNamespaces, indent);
-                writer.write("</" + printTag() + ">");
-            } else if (elements().isEmpty()) {
-                writer.write(indent + "<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + ">");
-                printContent(writer, printedNamespaces, indent);
-                writer.write("</" + printTag() + ">\n");
-            } else {
-                writer.write(indent + "<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + ">\n");
-                printContent(writer, printedNamespaces, indent + "  ");
-                writer.write(indent + "</" + printTag() + ">\n");
-            }
+            writer.write(currentIndent + "<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + ">" + Document.LINE_SEPARATOR);
+            printContent(writer, printedNamespaces, indent, currentIndent + indent);
+            writer.write(currentIndent + "</" + printTag() + ">" + Document.LINE_SEPARATOR);
         }
     }
 
@@ -115,12 +111,21 @@ public class Element implements Node {
         return result.toString();
     }
 
-    private void printContent(Writer writer, List<Namespace> printedNamespaces2, String indent) throws IOException {
+    private void printContent(Writer writer, List<Namespace> printedNamespaces2) throws IOException {
         LinkedList<Namespace> printedNamespaces = new LinkedList<Namespace>();
         printedNamespaces.addAll(printedNamespaces2);
         printedNamespaces.addAll(namespaces);
         for (Node element : children) {
-            element.writeTo(writer, printedNamespaces, indent);
+            element.writeTo(writer, printedNamespaces);
+        }
+    }
+
+    private void printContent(Writer writer, List<Namespace> printedNamespaces2, String indent, String currentIndent) throws IOException {
+        LinkedList<Namespace> printedNamespaces = new LinkedList<Namespace>();
+        printedNamespaces.addAll(printedNamespaces2);
+        printedNamespaces.addAll(namespaces);
+        for (Node element : children) {
+            element.writeIndentedTo(writer, printedNamespaces, indent, currentIndent);
         }
     }
 
@@ -191,13 +196,9 @@ public class Element implements Node {
     }
 
     public String toXML() {
-        return toXML("");
-    }
-
-    public String toXML(String indent) {
         try {
             StringWriter result = new StringWriter();
-            writeTo(result, new LinkedList<Namespace>(), indent);
+            writeTo(result, new LinkedList<Namespace>());
             return result.toString();
         } catch (IOException e) {
             throw new CanNeverHappenException("StringWriter doesn't throw IOException", e);
