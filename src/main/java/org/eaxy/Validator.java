@@ -32,9 +32,14 @@ public class Validator {
         }
     }
 
-    public void validate(Element xml) {
+    /**
+     * Throw an exception if the element does not conform with the schema.
+     * @return element to be validated for easier chaining of method calls
+     */
+    public Element validate(Element xml) {
         try {
             validator.validate(new DOMSource(Xml.toDom(new Document(xml))));
+            return xml;
         } catch (SAXException e) {
             throw new RuntimeException(e.getMessage());
         } catch (IOException e) {
