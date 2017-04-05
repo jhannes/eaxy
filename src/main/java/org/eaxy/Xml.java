@@ -9,6 +9,7 @@ import java.io.StringReader;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
+import java.util.zip.GZIPInputStream;
 
 import org.eaxy.html.Xhtml;
 
@@ -31,7 +32,12 @@ public abstract class Xml {
 
         @Override
         public void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException {
-            writer.write(("<![CDATA[" + text() + "]]>").toString());
+            writeTo(writer, printedNamespaces, "");
+        }
+
+        @Override
+        public void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces, String indent) throws IOException {
+            writer.write(indent + "<![CDATA[" + text() + "]]>");
         }
 
         @Override
@@ -50,7 +56,12 @@ public abstract class Xml {
 
         @Override
         public void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException {
-            writer.write("<!--" + text() + "-->");
+            writeTo(writer, printedNamespaces, "");
+        }
+
+        @Override
+        public void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces, String indent) throws IOException {
+            writer.write(indent + "<!--" + text() + "-->");
         }
 
         @Override
@@ -75,6 +86,11 @@ public abstract class Xml {
 
         @Override
         public void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException {
+            writeTo(writer, printedNamespaces, "");
+        }
+
+        @Override
+        public void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces, String indent) throws IOException {
             writer.write(text().replaceAll("&", "&amp;")
                     .replaceAll("<", "&lt;")
                     .replaceAll(">", "&gt;"));
@@ -124,8 +140,14 @@ public abstract class Xml {
     }
 
     public static Document read(File file) throws IOException {
-        try (FileInputStream inputStream = new FileInputStream(file)) {
-            return StaxReader.read(inputStream);
+        if (file.getName().endsWith(".gz")) {
+            try (InputStream inputStream = new GZIPInputStream(new FileInputStream(file))) {
+                return StaxReader.read(inputStream);
+            }
+        } else {
+            try (InputStream inputStream = new FileInputStream(file)) {
+                return StaxReader.read(inputStream);
+            }
         }
     }
 
@@ -134,7 +156,11 @@ public abstract class Xml {
             if (input == null) {
                 throw new IllegalArgumentException("Can't load " + name);
             }
-            return StaxReader.read(input);
+            if (name.endsWith(".gz")) {
+                return StaxReader.read(new GZIPInputStream(input));
+            } else {
+                return StaxReader.read(input);
+            }
         }
     }
 
