@@ -1,6 +1,7 @@
 package org.eaxy;
 
 import java.util.ArrayList;
+import java.util.List;
 
 abstract class ElementFilter implements ElementQuery {
 
@@ -8,6 +9,11 @@ abstract class ElementFilter implements ElementQuery {
 
     ElementFilter(String filterName) {
         this.filterName = filterName;
+    }
+
+    @Override
+    public boolean matches(List<Element> path, int position) {
+        return position < path.size() && matches(path.get(position));
     }
 
     public abstract boolean matches(Element element);

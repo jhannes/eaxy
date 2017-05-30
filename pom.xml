@@ -107,6 +107,12 @@
             <scope>test</scope>
             <version>2.9.1</version>
         </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.5</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <distributionManagement>

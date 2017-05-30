@@ -1,12 +1,12 @@
 package org.eaxy;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.zip.GZIPInputStream;
@@ -140,12 +140,16 @@ public abstract class Xml {
     }
 
     public static Document read(File file) throws IOException {
-        if (file.getName().endsWith(".gz")) {
-            try (InputStream inputStream = new GZIPInputStream(new FileInputStream(file))) {
+        return read(file.toURI().toURL());
+    }
+
+    public static Document read(URL url) throws IOException {
+        if (url.getFile().endsWith(".gz")) {
+            try (InputStream inputStream = new GZIPInputStream(url.openStream())) {
                 return StaxReader.read(inputStream);
             }
         } else {
-            try (InputStream inputStream = new FileInputStream(file)) {
+            try (InputStream inputStream = url.openStream()) {
                 return StaxReader.read(inputStream);
             }
         }

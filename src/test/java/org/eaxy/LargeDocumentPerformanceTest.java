@@ -6,6 +6,7 @@ import static org.eaxy.Xml.text;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.Random;
 
 import org.junit.Test;
@@ -29,7 +30,7 @@ public class LargeDocumentPerformanceTest {
 
     private static Random random = new Random();
 
-    private final int elementCount = getProperty("elementCount", 1000);
+    private final int elementCount = getProperty("elementCount", 10000);
 
     @Test
     public void shouldBuildLargeDocument() {
@@ -91,6 +92,30 @@ public class LargeDocumentPerformanceTest {
         assertThat(matches.size()).isGreaterThan(elementCount/15).isLessThan(elementCount/8);
         long duration = System.currentTimeMillis()-start;
         return duration;
+    }
+
+    @Test
+    public void shouldIterateContentsInLargeDocument() throws IOException {
+        long duration = iterateInLargeDocument(elementCount);
+        assertThat(duration).isLessThan(elementCount/5+250).as("duration");
+    }
+
+    private static long iterateInLargeDocument(int elementCount) throws IOException {
+        Element root = el("root");
+        for (int i=0; i<elementCount; i++) {
+            int nextInt = random.nextInt(10);
+            String className = "class-" + nextInt;
+            root.add(el("some_element",
+                    el("child").addClass(className).text(nextInt == 0 ? "yes" : "no")));
+            root.add(text("\n"));
+        }
+        long start = System.currentTimeMillis();
+
+        for (Element element : XmlIterator.iterate(ElementFilters.create("some_element", "child.class-0"),
+                new StringReader(new Document(root).toXML()))) {
+            assertThat(element.text()).contains("yes");
+        }
+        return System.currentTimeMillis()-start;
     }
 
     private static String getTmpFile() {

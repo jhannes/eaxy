@@ -108,19 +108,19 @@ public class StaxReader implements XMLStreamConstants {
 
     private Element readElement() {
         QName name = streamReader.getName();
-        Element element = new Element(getName(name));
+        Element element = new Element(toName(name));
 
         for (int i = 0; i < streamReader.getNamespaceCount(); i++) {
             element.namespace(new Namespace(streamReader.getNamespaceURI(i), streamReader.getNamespacePrefix(i)));
         }
 
         for (int i = 0; i < streamReader.getAttributeCount(); i++) {
-            element.attr(getName(streamReader.getAttributeName(i)), streamReader.getAttributeValue(i));
+            element.attr(toName(streamReader.getAttributeName(i)), streamReader.getAttributeValue(i));
         }
         return element;
     }
 
-    static QualifiedName getName(QName name) {
+    static QualifiedName toName(QName name) {
         return new QualifiedName(name.getNamespaceURI(), name.getLocalPart(), name.getPrefix());
     }
 

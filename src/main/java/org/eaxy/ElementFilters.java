@@ -2,6 +2,7 @@ package org.eaxy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,6 +23,18 @@ public class ElementFilters {
             return child.search(parent.search(elements));
         }
 
+        @Override
+        public boolean matches(List<Element> path, int position) {
+            return position < path.size()
+                    && ((ElementFilter)parent).matches(path.get(position))
+                    && child.matches(path, position + 1);
+        }
+
+        @Override
+        public String toString() {
+            return parent + "/" + child;
+        }
+
     }
 
     private static final class ElementDescendantQuery implements ElementQuery {
@@ -33,9 +46,8 @@ public class ElementFilters {
                 this.filter = (ElementFilter) ((ChildQuery)filter).parent;
                 this.next = ((ChildQuery)filter).child;
             } else {
-                // TODO: This look wrong!
-                this.filter = any();
-                this.next = identity();
+                this.filter = (ElementFilter)filter;
+                this.next = new Identity();
             }
         }
 
@@ -46,6 +58,11 @@ public class ElementFilters {
                 findDescendants(element, result);
             }
             return elements.nestedSet(this, result);
+        }
+
+        @Override
+        public boolean matches(List<Element> path, int position) {
+            return position < path.size() && filter.matches(path.get(path.size()-1));
         }
 
         private void findDescendants(Element element, ArrayList<Element> result) {
@@ -59,7 +76,7 @@ public class ElementFilters {
 
         @Override
         public String toString() {
-            return "...//" + filter;
+            return "...//" + filter + "/" + next;
         }
     }
 
@@ -84,6 +101,11 @@ public class ElementFilters {
         }
 
         @Override
+        public boolean matches(List<Element> path, int position) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public String toString() {
             return position.toString();
         }
@@ -97,6 +119,9 @@ public class ElementFilters {
         if (filter.isEmpty() || filter.equals("*")) {
             return any();
         }
+        if (filter.equals("...")) {
+            return new ElementDescendantQuery(any());
+        }
         ElementFilter elementFilter;
         elementFilter = attrFilter(filter);
         if (elementFilter != null) return elementFilter;
@@ -107,30 +132,29 @@ public class ElementFilters {
         return tagName(filter);
     }
 
-    public static ElementQuery create(Object[] path) {
-        ElementQuery query = identity();
-        for (int i = path.length-1; i >= 0 ; i--) {
+    public static ElementQuery create(Object... path) {
+        ElementQuery query = filter(path[path.length-1]);
+        for (int i = path.length-2; i >= 0 ; i--) {
             Object filter = path[i];
-            query = "...".equals(filter) ? descendant(query) : child(query, filter);
+            if (filter.equals("...")) {
+                query = new ElementDescendantQuery(query);
+            } else {
+                query = new ChildQuery(filter(filter), query);
+            }
         }
         return query;
     }
 
-    private static ChildQuery child(ElementQuery query, Object filter) {
-        return new ChildQuery(filter(filter), query);
-    }
+    public static class Identity implements ElementQuery {
+        @Override
+        public ElementSet search(ElementSet elements) {
+            return elements;
+        }
 
-    public static ElementDescendantQuery descendant(ElementQuery query) {
-        return new ElementDescendantQuery(query);
-    }
-
-    private static ElementQuery identity() {
-        return new ElementQuery() {
-            @Override
-            public ElementSet search(ElementSet elements) {
-                return elements;
-            }
-        };
+        @Override
+        public boolean matches(List<Element> path, int position) {
+            return true;
+        }
     }
 
     public static ElementQuery filter(Object filter) {

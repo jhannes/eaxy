@@ -5,9 +5,14 @@ import static org.eaxy.Xml.el;
 import static org.eaxy.Xml.text;
 import static org.junit.Assert.fail;
 
+import java.io.IOException;
+import java.io.StringReader;
+
 import org.eaxy.Element;
+import org.eaxy.ElementFilters;
 import org.eaxy.Namespace;
 import org.eaxy.NonMatchingPathException;
+import org.eaxy.XmlIterator;
 import org.junit.Test;
 
 public class ElementFinderTest {
@@ -50,10 +55,25 @@ public class ElementFinderTest {
                 el("p", "level 1a"),
                 el("div", el("p", "level 2a")),
                 el("p", "level 1b"),
+                el("div", "nonmatch"),
                 el("div", el("div", el("p", "level 3"))),
                 el("div", el("p", "level 2b")));
         assertThat(xml.find("...", "p").texts())
             .containsExactly("level 1a", "level 2a", "level 1b", "level 3", "level 2b");
+    }
+
+    @Test
+    public void shouldIterateDeeplyNestedElements() throws IOException {
+        Element xml = el("div",
+                el("p", "level 1a"),
+                el("div", el("p", "level 2a")),
+                el("p", "level 1b"),
+                el("div", "nonmatch"),
+                el("div", el("div", el("p", "level 3"))),
+                el("div", el("p", "level 2b")));
+        assertThat(XmlIterator.iterate(ElementFilters.create("...", "p"), new StringReader(xml.toXML())))
+            .extracting(e -> e.text())
+            .contains("level 1a", "level 2a", "level 1b", "level 3", "level 2b");
     }
 
     @Test
@@ -137,6 +157,17 @@ public class ElementFinderTest {
                 NS.el("child", "right").attr(NS.name("included"), "true"));
         assertThat(xml.find(NS.attr("included", "true")).firstTextOrNull()).isEqualTo("right");
         assertThat(xml.find("[included=true]").firstTextOrNull()).isEqualTo("right");
+    }
+
+    @Test
+    public void shouldIterateOnAttribute() throws IOException {
+        Namespace NS = new Namespace("uri:a", "a");
+        Element xml = NS.el("parent",
+                NS.el("child", "wrong").attr(NS.name("included"), "false"),
+                NS.el("child", "right").attr(NS.name("included"), "true"));
+        assertThat(XmlIterator.iterate(ElementFilters.create(NS.attr("included", "true")), new StringReader(xml.toXML())))
+            .extracting(e -> e.text())
+            .containsExactly("right");
     }
 
     @Test

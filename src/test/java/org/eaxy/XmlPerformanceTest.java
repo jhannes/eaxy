@@ -14,8 +14,10 @@ import org.junit.runner.RunWith;
 public class XmlPerformanceTest {
 
     private final String contents;
+    private File xmlFile;
 
     public XmlPerformanceTest(File xmlFile) throws IOException {
+        this.xmlFile = xmlFile;
         long startTime = System.currentTimeMillis();
         this.contents = IOUtils.slurp(xmlFile);
         long duration = System.currentTimeMillis() - startTime;
@@ -27,6 +29,11 @@ public class XmlPerformanceTest {
     private int timeout() {
         // 1.5 second + 0.2 seconds/MB
         return Math.min(1500 + contents.length()/5000, 10000);
+    }
+
+    @Test
+    public void readDocument() throws IOException {
+        Xml.read(xmlFile);
     }
 
     @Test
