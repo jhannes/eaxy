@@ -161,7 +161,7 @@ public class XmlIterator implements XMLStreamConstants, Iterator<Element> {
         };
     }
 
-    public static Iterable<Element> iterate(ElementQuery query, Reader reader) throws IOException {
+    public static Iterable<Element> iterate(ElementQuery query, Reader reader) {
         return new Iterable<Element>() {
             @Override
             public Iterator<Element> iterator() {

@@ -100,7 +100,7 @@ public class LargeDocumentPerformanceTest {
         assertThat(duration).isLessThan(elementCount/5+250).as("duration");
     }
 
-    private static long iterateInLargeDocument(int elementCount) throws IOException {
+    private static long iterateInLargeDocument(int elementCount) {
         Element root = el("root");
         for (int i=0; i<elementCount; i++) {
             int nextInt = random.nextInt(10);
@@ -111,8 +111,7 @@ public class LargeDocumentPerformanceTest {
         }
         long start = System.currentTimeMillis();
 
-        for (Element element : XmlIterator.iterate(ElementFilters.create("some_element", "child.class-0"),
-                new StringReader(new Document(root).toXML()))) {
+        for (Element element : ElementFilters.create("some_element", "child.class-0").iterate(new StringReader(new Document(root).toXML()))) {
             assertThat(element.text()).contains("yes");
         }
         return System.currentTimeMillis()-start;
