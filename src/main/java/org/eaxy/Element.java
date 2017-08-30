@@ -68,17 +68,6 @@ public class Element implements Node {
     }
 
     @Override
-    public void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException {
-        if (children.isEmpty()) {
-            writer.write("<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + " />");
-        } else {
-            writer.write("<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + ">");
-            printContent(writer, printedNamespaces);
-            writer.write("</" + printTag() + ">");
-        }
-    }
-
-    @Override
     public void writeIndentedTo(Writer writer, LinkedList<Namespace> printedNamespaces, String indent, String currentIndent) throws IOException {
         if (children.isEmpty()) {
             writer.write(currentIndent + "<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + " />" + Document.LINE_SEPARATOR);
@@ -114,15 +103,6 @@ public class Element implements Node {
             result.append(" ").append(namespace.print());
         }
         return result.toString();
-    }
-
-    private void printContent(Writer writer, List<Namespace> printedNamespaces2) throws IOException {
-        LinkedList<Namespace> printedNamespaces = new LinkedList<Namespace>();
-        printedNamespaces.addAll(printedNamespaces2);
-        printedNamespaces.addAll(namespaces);
-        for (Node element : children) {
-            element.writeTo(writer, printedNamespaces);
-        }
     }
 
     private void printContent(Writer writer, List<Namespace> printedNamespaces2, String indent, String currentIndent) throws IOException {
@@ -194,10 +174,6 @@ public class Element implements Node {
 
     public boolean hasAttr(String name) {
         return attributes.containsKey(new QualifiedName(name));
-    }
-
-    public void writeTo(Writer writer) throws IOException {
-        writeTo(writer, new LinkedList<Namespace>());
     }
 
     public String toXML() {

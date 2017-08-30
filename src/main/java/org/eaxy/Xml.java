@@ -34,11 +34,6 @@ public abstract class Xml {
         }
 
         @Override
-        public void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException {
-            writer.write("<![CDATA[" + text() + "]]>");
-        }
-
-        @Override
         public void writeIndentedTo(Writer writer, LinkedList<Namespace> printedNamespaces, String indent, String currentIndent) throws IOException {
             writer.write(currentIndent + "<![CDATA[" + text() + "]]>\n");
         }
@@ -60,11 +55,6 @@ public abstract class Xml {
         @Override
         public void visit(XmlVisitor visitor) throws IOException {
             visitor.visitComment(this);
-        }
-
-        @Override
-        public void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException {
-            writer.write("<!--" + text() + "-->");
         }
 
         @Override
@@ -98,15 +88,10 @@ public abstract class Xml {
         }
 
         @Override
-        public void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException {
+        public void writeIndentedTo(Writer writer, LinkedList<Namespace> printedNamespaces, String indent, String currentIndent) throws IOException {
             writer.write(text().replaceAll("&", "&amp;")
                     .replaceAll("<", "&lt;")
                     .replaceAll(">", "&gt;"));
-        }
-
-        @Override
-        public void writeIndentedTo(Writer writer, LinkedList<Namespace> printedNamespaces, String indent, String currentIndent) throws IOException {
-            writeTo(writer, printedNamespaces);
         }
 
         @Override

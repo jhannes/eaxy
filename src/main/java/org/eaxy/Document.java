@@ -69,19 +69,18 @@ public class Document {
     public String toXML() {
         StringWriter result = new StringWriter();
         try {
-            writeTo(result);
+            visit(new WriterXmlVisitor(result));
         } catch (IOException e) {
             throw new CanNeverHappenException("StringBuilder doesn't throw IOException", e);
         }
         return result.toString();
     }
 
-    public void writeTo(Writer writer) throws IOException {
-        writeHeader(writer);
-        rootElement.writeTo(writer);
+    public void visit(XmlVisitor visitor) throws IOException {
+        visitor.visitDocument(this);
     }
 
-    private void writeHeader(Writer writer) throws IOException {
+    public void writeHeader(Writer writer) throws IOException {
         writer.append("<?xml version=\"");
         writer.append(getVersion());
         writer.append("\" encoding=\"");

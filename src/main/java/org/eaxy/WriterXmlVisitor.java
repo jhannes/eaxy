@@ -20,6 +20,12 @@ public class WriterXmlVisitor implements XmlVisitor {
     }
 
     @Override
+    public void visitDocument(Document document) throws IOException {
+        document.writeHeader(writer);
+        document.getRootElement().visit(this);
+    }
+
+    @Override
     public void visitCdata(CDataElement cDataElement) throws IOException {
         writer.write("<![CDATA[" + cDataElement.text() + "]]>");
     }
