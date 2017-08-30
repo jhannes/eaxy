@@ -63,6 +63,11 @@ public class Element implements Node {
     }
 
     @Override
+    public void visit(XmlVisitor visitor) throws IOException {
+        visitor.visitElement(this);
+    }
+
+    @Override
     public void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException {
         if (children.isEmpty()) {
             writer.write("<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + " />");
@@ -88,11 +93,11 @@ public class Element implements Node {
         }
     }
 
-    private String printTag() {
+    public String printTag() {
         return name.print();
     }
 
-    private String printAttributes() {
+    String printAttributes() {
         if (attributes.isEmpty()) return "";
         StringBuilder result = new StringBuilder();
         for (Attribute attr : attributes.values()) {
@@ -198,7 +203,7 @@ public class Element implements Node {
     public String toXML() {
         try {
             StringWriter result = new StringWriter();
-            writeTo(result, new LinkedList<Namespace>());
+            this.visit(new WriterXmlVisitor(result));
             return result.toString();
         } catch (IOException e) {
             throw new CanNeverHappenException("StringWriter doesn't throw IOException", e);

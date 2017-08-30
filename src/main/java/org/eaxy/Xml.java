@@ -29,6 +29,11 @@ public abstract class Xml {
         }
 
         @Override
+        public void visit(XmlVisitor visitor) throws IOException {
+            visitor.visitCdata(this);
+        }
+
+        @Override
         public void writeTo(Writer writer, LinkedList<Namespace> printedNamespaces) throws IOException {
             writer.write("<![CDATA[" + text() + "]]>");
         }
@@ -50,6 +55,11 @@ public abstract class Xml {
 
         CommentElement(CharSequence stringContent) {
             this.stringContent = stringContent.toString();
+        }
+
+        @Override
+        public void visit(XmlVisitor visitor) throws IOException {
+            visitor.visitComment(this);
         }
 
         @Override
@@ -80,6 +90,11 @@ public abstract class Xml {
 
         TextElement(CharSequence stringContent) {
             this.stringContent = stringContent.toString();
+        }
+
+        @Override
+        public void visit(XmlVisitor visitor) throws IOException {
+            visitor.visitText(this);
         }
 
         @Override

@@ -14,4 +14,6 @@ public interface Node extends Content {
 
     Node copy();
 
+    void visit(XmlVisitor visitor) throws IOException;
+
 }
