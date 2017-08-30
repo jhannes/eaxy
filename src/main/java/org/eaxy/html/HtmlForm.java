@@ -104,7 +104,6 @@ public class HtmlForm {
                 element.add(Xml.el("option", option.getValue()).val(option.getKey()));
             }
         }
-
     }
 
     public void update(Map<String, String> values) {

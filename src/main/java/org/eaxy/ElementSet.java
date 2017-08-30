@@ -12,13 +12,11 @@ public class ElementSet implements Iterable<Element> {
         public List<Object> getPath() { return new ArrayList<Object>(); }
     };
 
-    private List<Element> elements = new ArrayList<Element>();
     private List<ElementPath> elementPaths = new ArrayList<>();
     private ElementSet parentSet = NULL_ELEMENT_SET;
     private final Object filter;
 
     public ElementSet(Element element) {
-        this.elements.add(element);
         this.elementPaths.add(new ElementPath(null, element));
         this.filter = element.getName().print();
     }
@@ -28,28 +26,27 @@ public class ElementSet implements Iterable<Element> {
         this.filter = filter;
     }
 
-    private ElementSet(ElementSet parent, ElementQuery filter, List<Element> elements, List<ElementPath> elementPaths) {
+    private ElementSet(ElementSet parent, ElementQuery filter, List<ElementPath> elementPaths) {
         this.parentSet = parent;
         this.filter = filter;
-        this.elements = elements;
         this.elementPaths = elementPaths;
     }
 
     @Override
     public Iterator<Element> iterator() {
-        return elements.iterator();
+        return elements().iterator();
     }
 
     public ElementSet find(Object... path) {
         return ElementFilters.create(path).search(this);
     }
 
-    public ElementSet nestedSet(ElementQuery filter, List<Element> elements, List<ElementPath> elementPaths) {
-        return new ElementSet(this, filter, elements, elementPaths);
+    public ElementSet nestedSet(ElementQuery filter, List<ElementPath> elementPaths) {
+        return new ElementSet(this, filter, elementPaths);
     }
 
     public ElementSet check() {
-        if (!elements.isEmpty()) return this;
+        if (!elementPaths.isEmpty()) return this;
         parentSet.check();
         String message = "Can't find <" + filter + "> below " + parentSet.getPath() + ".";
         message += " Actual elements: " + parentSet.printActualChildren();
@@ -58,8 +55,8 @@ public class ElementSet implements Iterable<Element> {
 
     private String printActualChildren() {
         List<String> children = new ArrayList<String>();
-        for (Element element : elements) {
-            for (Element subElement : element.elements()) {
+        for (ElementPath path : elementPaths) {
+            for (Element subElement : path.leafElement().elements()) {
                 children.add(subElement.getName().toString());
             }
         }
@@ -75,24 +72,23 @@ public class ElementSet implements Iterable<Element> {
 
     public List<String> texts() {
         List<String> result = new ArrayList<String>();
-        for (Element element : elements) {
-            result.add(element.text().toString());
+        for (ElementPath element : elementPaths) {
+            result.add(element.leafElement().text().toString());
         }
         return result;
     }
 
     public List<String> attrs(String attrName) {
         List<String> result = new ArrayList<String>();
-        for (Element element : elements) {
-            String attr = element.attr(attrName);
+        for (ElementPath element : elementPaths) {
+            String attr = element.leafElement().attr(attrName);
             if (attr != null) result.add(attr);
         }
         return result;
     }
 
     public Element first() {
-        check();
-        return elements.get(0);
+        return firstPath().leafElement();
     }
 
     public List<ElementPath> getPaths() {
@@ -105,8 +101,8 @@ public class ElementSet implements Iterable<Element> {
     }
 
     public ElementSet attr(String key, String value) {
-        for (Element element : elements) {
-            element.attr(key, value);
+        for (ElementPath element : elementPaths) {
+            element.leafElement().attr(key, value);
         }
         return this;
     }
@@ -125,27 +121,31 @@ public class ElementSet implements Iterable<Element> {
 
     public List<String> tagNames() {
         List<String> result = new ArrayList<String>();
-        for (Element element : elements) {
-            result.add(element.getName().print());
+        for (ElementPath element : elementPaths) {
+            result.add(element.leafElement().getName().print());
         }
         return result;
     }
 
     public Element get(int pos) {
         check();
-        return elements.get(pos);
+        return elementPaths.get(pos).leafElement();
     }
 
     public int size() {
-        return elements.size();
+        return elementPaths.size();
     }
 
-    public Collection<? extends Element> elements() {
+    public Collection<Element> elements() {
+        List<Element> elements = new ArrayList<>();
+        for (ElementPath path : elementPaths) {
+            elements.add(path.leafElement());
+        }
         return elements;
     }
 
     public Element firstOrDefault() {
-        return elements.isEmpty() ? null : first();
+        return isEmpty() ? null : first();
     }
 
     public boolean isEmpty() {

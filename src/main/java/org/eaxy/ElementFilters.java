@@ -59,12 +59,11 @@ public class ElementFilters {
 
         @Override
         public ElementSet search(ElementSet elements) {
-            List<Element> result = new ArrayList<Element>();
             List<ElementPath> elementPaths = new ArrayList<>();
             for (ElementPath element : elements.getPaths()) {
-                findDescendants(element, result, elementPaths);
+                findDescendants(element, elementPaths);
             }
-            return elements.nestedSet(this, result, elementPaths);
+            return elements.nestedSet(this, elementPaths);
         }
 
         @Override
@@ -77,16 +76,15 @@ public class ElementFilters {
             return position < path.size() && filter.matches(path.get(path.size()-1));
         }
 
-        private void findDescendants(ElementPath element, List<Element> result, List<ElementPath> elementPaths) {
+        private void findDescendants(ElementPath element, List<ElementPath> elementPaths) {
             for (Element child : element.leafElement().elements()) {
                 if (filter.matches(child)) {
                     ElementSet search = next.search(new ElementSet(child));
                     for (ElementPath elementPath : search.getPaths()) {
-                        result.add(elementPath.leafElement());
                         elementPaths.add(new ElementPath(element, elementPath.leafElement()));
                     }
                 }
-                findDescendants(new ElementPath(element, child), result, elementPaths);
+                findDescendants(new ElementPath(element, child), elementPaths);
             }
         }
 
@@ -107,9 +105,9 @@ public class ElementFilters {
         public ElementSet search(ElementSet elements) {
             if (intValue() < elements.size()) {
                 ElementPath path = elements.getPaths().get(intValue());
-                return elements.nestedSet(this, Arrays.asList(path.leafElement()), Arrays.asList(path));
+                return elements.nestedSet(this, Arrays.asList(path));
             } else {
-                return elements.nestedSet(this, new ArrayList<Element>(), new ArrayList<>());
+                return elements.nestedSet(this, new ArrayList<>());
             }
         }
 
