@@ -58,6 +58,11 @@ public class ElementFinderTest {
                 el("div", el("p", "level 2b")));
         assertThat(xml.find("...", "p").texts())
             .containsExactly("level 1a", "level 2a", "level 1b", "level 3", "level 2b");
+
+        assertThat(xml.find("...", "p").firstPath().getPath()).extracting(e -> e.tagName())
+            .containsExactly("div", "p");
+        assertThat(xml.find("...", "p").getPaths().get(1).getPath()).extracting(e -> e.tagName())
+            .containsExactly("div", "div", "p");
     }
 
     @Test

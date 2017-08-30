@@ -13,11 +13,13 @@ public class ElementSet implements Iterable<Element> {
     };
 
     private List<Element> elements = new ArrayList<Element>();
+    private List<ElementPath> elementPaths = new ArrayList<>();
     private ElementSet parentSet = NULL_ELEMENT_SET;
     private final Object filter;
 
     public ElementSet(Element element) {
         this.elements.add(element);
+        this.elementPaths.add(new ElementPath(null, element));
         this.filter = element.getName().print();
     }
 
@@ -26,10 +28,11 @@ public class ElementSet implements Iterable<Element> {
         this.filter = filter;
     }
 
-    private ElementSet(ElementSet parent, ElementQuery filter, List<Element> elements) {
+    private ElementSet(ElementSet parent, ElementQuery filter, List<Element> elements, List<ElementPath> elementPaths) {
         this.parentSet = parent;
         this.filter = filter;
         this.elements = elements;
+        this.elementPaths = elementPaths;
     }
 
     @Override
@@ -41,8 +44,8 @@ public class ElementSet implements Iterable<Element> {
         return ElementFilters.create(path).search(this);
     }
 
-    public ElementSet nestedSet(ElementQuery filter, List<Element> elements) {
-        return new ElementSet(this, filter, elements);
+    public ElementSet nestedSet(ElementQuery filter, List<Element> elements, List<ElementPath> elementPaths) {
+        return new ElementSet(this, filter, elements, elementPaths);
     }
 
     public ElementSet check() {
@@ -90,6 +93,15 @@ public class ElementSet implements Iterable<Element> {
     public Element first() {
         check();
         return elements.get(0);
+    }
+
+    public List<ElementPath> getPaths() {
+        return elementPaths;
+    }
+
+    public ElementPath firstPath() {
+        check();
+        return elementPaths.get(0);
     }
 
     public ElementSet attr(String key, String value) {

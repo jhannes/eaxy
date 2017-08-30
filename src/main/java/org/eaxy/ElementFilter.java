@@ -26,15 +26,17 @@ abstract class ElementFilter implements ElementQuery {
 
     @Override
     public final ElementSet search(ElementSet elements) {
-        ArrayList<Element> matchingElements = new ArrayList<Element>();
-        for (Element element : elements) {
-            for (Element child : element.elements()) {
+        List<Element> matchingElements = new ArrayList<Element>();
+        List<ElementPath> elementPaths = new ArrayList<ElementPath>();
+        for (ElementPath element : elements.getPaths()) {
+            for (Element child : element.leafElement().elements()) {
                 if (this.matches(child)) {
                     matchingElements.add(child);
+                    elementPaths.add(new ElementPath(element, child));
                 }
             }
         }
-        return elements.nestedSet(this, matchingElements);
+        return elements.nestedSet(this, matchingElements, elementPaths);
     }
 
     @Override

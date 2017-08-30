@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><Envelope xmlns="urn:envelope" xmlns:foo="urn:foo">
+    <foo:Element>My element</foo:Element>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"/><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#dsa-sha1"/><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><DigestValue>QlZCTMYoVmxjN3SL+jFv+qDR9rA=</DigestValue></Reference></SignedInfo><SignatureValue>g4ON6yukgpaC0yq26imuG7ZgCuVqTu67b+T54htkN5Nf6jDn3PLh8A==</SignatureValue><KeyInfo><KeyValue><DSAKeyValue><P>/KaCzo4Syrom78z3EQ5SbbB4sF7ey80etKII864WF64B81uRpH5t9jQTxeEu0ImbzRMqzVDZkVG9
+xD7nN1kuFw==</P><Q>li7dzDacuo67Jg7mtqEm2TRuOMU=</Q><G>Z4Rxsnqc9E7pGknFFH2xqaryRPBaQ01khpMdLRQnG541Awtx/XPaF5Bpsy4pNWMOHCBiNU0Nogps
+QW5QvnlMpA==</G><Y>h33aP4ix1Cg4kEBe5ei8tpCDCRxpSkV7v3JRTwNnjlHxMs3yZ1zt0A9mrxMnSdC/r7ZfhcJsokPQ
+BOq/Jmo84g==</Y></DSAKeyValue></KeyValue></KeyInfo></Signature></Envelope>

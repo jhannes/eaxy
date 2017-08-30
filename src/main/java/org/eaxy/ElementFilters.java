@@ -59,11 +59,12 @@ public class ElementFilters {
 
         @Override
         public ElementSet search(ElementSet elements) {
-            ArrayList<Element> result = new ArrayList<Element>();
-            for (Element element : elements) {
-                findDescendants(element, result);
+            List<Element> result = new ArrayList<Element>();
+            List<ElementPath> elementPaths = new ArrayList<>();
+            for (ElementPath element : elements.getPaths()) {
+                findDescendants(element, result, elementPaths);
             }
-            return elements.nestedSet(this, result);
+            return elements.nestedSet(this, result, elementPaths);
         }
 
         @Override
@@ -76,12 +77,16 @@ public class ElementFilters {
             return position < path.size() && filter.matches(path.get(path.size()-1));
         }
 
-        private void findDescendants(Element element, ArrayList<Element> result) {
-            for (Element child : element.elements()) {
+        private void findDescendants(ElementPath element, List<Element> result, List<ElementPath> elementPaths) {
+            for (Element child : element.leafElement().elements()) {
                 if (filter.matches(child)) {
-                    result.addAll(next.search(new ElementSet(child)).elements());
+                    ElementSet search = next.search(new ElementSet(child));
+                    for (ElementPath elementPath : search.getPaths()) {
+                        result.add(elementPath.leafElement());
+                        elementPaths.add(new ElementPath(element, elementPath.leafElement()));
+                    }
                 }
-                findDescendants(child, result);
+                findDescendants(new ElementPath(element, child), result, elementPaths);
             }
         }
 
@@ -101,9 +106,10 @@ public class ElementFilters {
         @Override
         public ElementSet search(ElementSet elements) {
             if (intValue() < elements.size()) {
-                return elements.nestedSet(this, Arrays.asList(elements.get(intValue())));
+                ElementPath path = elements.getPaths().get(intValue());
+                return elements.nestedSet(this, Arrays.asList(path.leafElement()), Arrays.asList(path));
             } else {
-                return elements.nestedSet(this, new ArrayList<Element>());
+                return elements.nestedSet(this, new ArrayList<Element>(), new ArrayList<>());
             }
         }
 
@@ -175,6 +181,11 @@ public class ElementFilters {
         @Override
         public Iterable<Element> iterate(Reader reader) {
             return XmlIterator.iterate(this, reader);
+        }
+
+        @Override
+        public String toString() {
+            return ".";
         }
     }
 
