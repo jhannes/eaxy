@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 public class Document {
@@ -96,15 +95,10 @@ public class Document {
     public String toIndentedXML(String indentation) {
         StringWriter result = new StringWriter();
         try {
-            writeIndentedTo(result, indentation, "");
+            visit(new IntentedWriterXmlVisitor(result, indentation));
         } catch (IOException e) {
             throw new CanNeverHappenException("StringBuilder doesn't throw IOException", e);
         }
         return result.toString();
-    }
-
-    private void writeIndentedTo(Writer writer, String indentation, String currentIndent) throws IOException {
-        writeHeader(writer);
-        rootElement.writeIndentedTo(writer, new LinkedList<Namespace>(), indentation, currentIndent);
     }
 }

@@ -1,12 +1,8 @@
 package org.eaxy;
 
 import java.io.IOException;
-import java.io.Writer;
-import java.util.LinkedList;
 
 public interface Node extends Content {
-
-    void writeIndentedTo(Writer writer, LinkedList<Namespace> printedNamespaces, String indent, String currentIndent) throws IOException;
 
     CharSequence text();
 

@@ -5,10 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.Writer;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.LinkedList;
 import java.util.zip.GZIPInputStream;
 
 public abstract class Xml {
@@ -34,11 +32,6 @@ public abstract class Xml {
         }
 
         @Override
-        public void writeIndentedTo(Writer writer, LinkedList<Namespace> printedNamespaces, String indent, String currentIndent) throws IOException {
-            writer.write(currentIndent + "<![CDATA[" + text() + "]]>\n");
-        }
-
-        @Override
         public Node copy() {
             return new CDataElement(stringContent);
         }
@@ -58,11 +51,6 @@ public abstract class Xml {
         }
 
         @Override
-        public void writeIndentedTo(Writer writer, LinkedList<Namespace> printedNamespaces, String indent, String currentIndent) throws IOException {
-            writer.write(currentIndent + "<!--" + text() + "-->\n");
-        }
-
-        @Override
         public String text() {
             return stringContent;
         }
@@ -71,7 +59,6 @@ public abstract class Xml {
         public Node copy() {
             return new CommentElement(stringContent);
         }
-
     }
 
     static class TextElement implements Node {
@@ -85,13 +72,6 @@ public abstract class Xml {
         @Override
         public void visit(XmlVisitor visitor) throws IOException {
             visitor.visitText(this);
-        }
-
-        @Override
-        public void writeIndentedTo(Writer writer, LinkedList<Namespace> printedNamespaces, String indent, String currentIndent) throws IOException {
-            writer.write(text().replaceAll("&", "&amp;")
-                    .replaceAll("<", "&lt;")
-                    .replaceAll(">", "&gt;"));
         }
 
         @Override

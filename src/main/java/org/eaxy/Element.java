@@ -2,11 +2,9 @@ package org.eaxy;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -67,21 +65,6 @@ public class Element implements Node {
         visitor.visitElement(this);
     }
 
-    @Override
-    public void writeIndentedTo(Writer writer, LinkedList<Namespace> printedNamespaces, String indent, String currentIndent) throws IOException {
-        if (children.isEmpty()) {
-            writer.write(currentIndent + "<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + " />" + Document.LINE_SEPARATOR);
-        } else if (elements().isEmpty()) {
-            writer.write(currentIndent + "<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + ">");
-            printContent(writer, printedNamespaces, indent, currentIndent + indent);
-            writer.write("</" + printTag() + ">" + Document.LINE_SEPARATOR);
-        } else {
-            writer.write(currentIndent + "<" + printTag() + printNamespaces(printedNamespaces) + printAttributes() + ">" + Document.LINE_SEPARATOR);
-            printContent(writer, printedNamespaces, indent, currentIndent + indent);
-            writer.write(currentIndent + "</" + printTag() + ">" + Document.LINE_SEPARATOR);
-        }
-    }
-
     public String printTag() {
         return name.print();
     }
@@ -93,25 +76,6 @@ public class Element implements Node {
             result.append(" ").append(attr.toXML());
         }
         return result.toString();
-    }
-
-    private String printNamespaces(LinkedList<Namespace> printedNamespaces) {
-        StringBuilder result = new StringBuilder();
-        for (Namespace namespace : namespaces) {
-            if (!namespace.isNamespace()) throw new IllegalStateException(name());
-            if (printedNamespaces.contains(namespace)) continue;
-            result.append(" ").append(namespace.print());
-        }
-        return result.toString();
-    }
-
-    private void printContent(Writer writer, List<Namespace> printedNamespaces2, String indent, String currentIndent) throws IOException {
-        LinkedList<Namespace> printedNamespaces = new LinkedList<Namespace>();
-        printedNamespaces.addAll(printedNamespaces2);
-        printedNamespaces.addAll(namespaces);
-        for (Node element : children) {
-            element.writeIndentedTo(writer, printedNamespaces, indent, currentIndent);
-        }
     }
 
     @Override
