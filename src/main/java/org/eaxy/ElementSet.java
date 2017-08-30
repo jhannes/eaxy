@@ -91,13 +91,24 @@ public class ElementSet implements Iterable<Element> {
         return firstPath().leafElement();
     }
 
-    public List<ElementPath> getPaths() {
-        return elementPaths;
+    public Element single() {
+        checkMaxOneMatch();
+        return first();
+    }
+
+    private void checkMaxOneMatch() {
+        if (size() <= 1) return;
+        String message = "Too many matches for <" + filter + ">: " + elementPaths;
+        throw new IllegalArgumentException(message);
     }
 
     public ElementPath firstPath() {
         check();
         return elementPaths.get(0);
+    }
+
+    public List<ElementPath> getPaths() {
+        return elementPaths;
     }
 
     public ElementSet attr(String key, String value) {
@@ -154,10 +165,6 @@ public class ElementSet implements Iterable<Element> {
 
     public boolean isPresent() {
         return !isEmpty();
-    }
-
-    public String firstTextOrNull() {
-        return isPresent() ? first().text() : null;
     }
 
     @Override

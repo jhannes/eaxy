@@ -271,7 +271,7 @@ public class ElementBuilderTest {
     public void shouldReadPrefixedNamespace() {
         String xml = "<s:super xmlns:s=\"uri:test\"><s:sub>some data</s:sub></s:super>";
         assertThat(xml(xml).getRootElement().toXML()).isEqualTo(xml);
-        assertThat(xml(xml).find(new Namespace("uri:test", "s").name("sub")).first().text())
+        assertThat(xml(xml).find(new Namespace("uri:test", "s").name("sub")).single().text())
             .isEqualTo("some data");
     }
 

@@ -205,7 +205,7 @@ public class HtmlFormTest {
         Map<String,String> values = new HashMap<String, String>();
         values.put("first_name", "Johannes");
         values.put("last_name", "Brodwall");
-        HtmlForm form = new HtmlForm(html.find("form").first());
+        HtmlForm form = new HtmlForm(html.find("form").single());
         form.update(values);
         assertThat(html.find("form", "[name=first_name]").first().val()).isEqualTo("Johannes");
         assertThat(html.find("form", "[name=last_name]").first().val()).isEqualTo("Brodwall");
@@ -217,9 +217,9 @@ public class HtmlFormTest {
                 el("form").id("form-id").addAll(
                         el("div", el("input").name("first_name")),
                         el("input").name("last_name")));
-        html.find("#form-id", "...", "[name=first_name]").first().val("Johannes");
-        html.find("#form-id", "...", "[name=last_name]").first().val("Brodwall");
-        HtmlForm form = new HtmlForm(html.find("form").first());
+        html.find("#form-id", "...", "[name=first_name]").single().val("Johannes");
+        html.find("#form-id", "...", "[name=last_name]").single().val("Brodwall");
+        HtmlForm form = new HtmlForm(html.find("form").single());
         assertThat(form.toMap().get("first_name")).containsOnly("Johannes");
         assertThat(form.toMap().get("last_name")).containsOnly("Brodwall");
         assertThat(form.serialize())

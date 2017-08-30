@@ -45,7 +45,7 @@ public class HtmlConvenienceTest {
                 el("li", "correct 2").addClass("matchingClass"),
                 el("li", "last element").addClass("lastClass"));
         assertThat(ul.find(".matchingClass").check().texts()).containsOnly("correct 1", "correct 2");
-        assertThat(ul.find("li.lastClass").first().text()).isEqualTo("last element");
+        assertThat(ul.find("li.lastClass").single().text()).isEqualTo("last element");
     }
 
     @Test
@@ -55,7 +55,7 @@ public class HtmlConvenienceTest {
                 el("li", "item 2").id("item-2"),
                 el("li", "item 3").id("item-3"),
                 el("li", "item 4").id("item-4"));
-        assertThat(ul.find("#item-3").first().text()).isEqualTo("item 3");
-        assertThat(ul.find("li#item-3").first().text()).isEqualTo("item 3");
+        assertThat(ul.find("#item-3").single().text()).isEqualTo("item 3");
+        assertThat(ul.find("li#item-3").single().text()).isEqualTo("item 3");
     }
 }

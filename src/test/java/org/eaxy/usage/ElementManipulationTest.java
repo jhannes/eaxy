@@ -23,7 +23,7 @@ public class ElementManipulationTest {
         Element xml = el("div");
         xml.addAll(text("hello "), el("b", "brave"), text(" world"));
         assertThat(xml.text()).isEqualTo("hello brave world");
-        assertThat(xml.find("b").first().text()).isEqualTo("brave");
+        assertThat(xml.find("b").single().text()).isEqualTo("brave");
     }
 
     @Test

@@ -85,9 +85,9 @@ public class ElementFinderTest {
                 el("div").id("not-here").add(text("something")),
                 el("div").id("below-here").add(
                         el("div", el("div", el("p", text("around "), el("span", "HERE"), text(" around"))))));
-        assertThat(xml.find("...", "#below-here", "...", "p", "...").first().text())
+        assertThat(xml.find("...", "#below-here", "...", "p", "...").single().text())
             .isEqualTo("HERE");
-        assertThat(xml.find("...", "p", "...").first().text())
+        assertThat(xml.find("...", "p", "...").single().text())
             .isEqualTo("HERE");
     }
 
@@ -109,7 +109,7 @@ public class ElementFinderTest {
                         el("h2", "nested header 2")),
                 el("h2", "second header 2"));
         assertThat(xml.find("*").tagNames()).contains("h1", "h2", "div", "h2");
-        assertThat(xml.find("*", "h2").first().text()).isEqualTo("nested header 2");
+        assertThat(xml.find("*", "h2").single().text()).isEqualTo("nested header 2");
     }
 
     @Test
@@ -158,8 +158,8 @@ public class ElementFinderTest {
         Element xml = NS.el("parent",
                 NS.el("child", "wrong").attr(NS.name("included"), "false"),
                 NS.el("child", "right").attr(NS.name("included"), "true"));
-        assertThat(xml.find(NS.attr("included", "true")).firstTextOrNull()).isEqualTo("right");
-        assertThat(xml.find("[included=true]").firstTextOrNull()).isEqualTo("right");
+        assertThat(xml.find(NS.attr("included", "true")).single().text()).isEqualTo("right");
+        assertThat(xml.find("[included=true]").single().text()).isEqualTo("right");
     }
 
     @Test
