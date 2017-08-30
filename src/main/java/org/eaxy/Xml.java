@@ -11,8 +11,6 @@ import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.zip.GZIPInputStream;
 
-import org.eaxy.html.Xhtml;
-
 public abstract class Xml {
 
     public static final Charset UTF_8 = Charset.forName("UTF-8");
@@ -156,7 +154,7 @@ public abstract class Xml {
     }
 
     public static Document readResource(String name) throws IOException {
-        try(InputStream input = Xhtml.class.getResourceAsStream(name)) {
+        try(InputStream input = Xml.class.getResourceAsStream(name)) {
             if (input == null) {
                 throw new IllegalArgumentException("Can't load " + name);
             }
