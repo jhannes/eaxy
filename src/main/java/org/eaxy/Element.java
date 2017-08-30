@@ -69,7 +69,7 @@ public class Element implements Node {
         return name.print();
     }
 
-    String printAttributes() {
+    public String printAttributes() {
         if (attributes.isEmpty()) return "";
         StringBuilder result = new StringBuilder();
         for (Attribute attr : attributes.values()) {

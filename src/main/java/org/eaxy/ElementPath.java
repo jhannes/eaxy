@@ -1,7 +1,9 @@
 package org.eaxy;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public class ElementPath {
@@ -27,6 +29,17 @@ public class ElementPath {
         } while (current != null);
         Collections.reverse(path);
         return path;
+    }
+
+    public Collection<Namespace> namespaces() {
+        LinkedHashMap<String,Namespace> namespaces = new LinkedHashMap<>();
+
+        for (Element hierarchy : getPath()) {
+            for (Namespace namespace : hierarchy.getNamespaces()) {
+                namespaces.put(namespace.getPrefix(), namespace);
+            }
+        }
+        return namespaces.values();
     }
 
 }

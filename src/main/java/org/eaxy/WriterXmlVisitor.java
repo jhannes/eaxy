@@ -3,7 +3,6 @@ package org.eaxy;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
-import java.util.List;
 import java.util.Stack;
 
 import org.eaxy.Xml.CDataElement;
@@ -57,7 +56,7 @@ public class WriterXmlVisitor implements XmlVisitor {
         }
     }
 
-    protected String printNamespaces(List<Namespace> namespaces) {
+    protected String printNamespaces(Collection<Namespace> namespaces) {
         StringBuilder result = new StringBuilder();
         for (Namespace namespace : namespaces) {
             if (!namespace.isNamespace()) throw new IllegalStateException("Can't print " + namespace.toString());
