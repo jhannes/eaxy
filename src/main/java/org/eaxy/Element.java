@@ -44,7 +44,7 @@ public class Element implements Node {
 
     public Namespace getNamespace(String prefix) {
         for (Namespace namespace : namespaces) {
-            if (prefix.equals(namespace.getPrefix())) {
+            if (Objects.equals(prefix, namespace.getPrefix())) {
                 return namespace;
             }
         }
@@ -183,9 +183,12 @@ public class Element implements Node {
         if (namespace.getUri() == null) {
             throw new IllegalArgumentException("Invalid namespace " + namespace);
         }
-        if (!namespaces.contains(namespace)) {
-            namespaces.add(namespace);
+        for (Namespace existingNamespace : namespaces) {
+            if (Objects.equals(namespace.getPrefix(), existingNamespace.getPrefix())) {
+                return this;
+            }
         }
+        namespaces.add(namespace);
         return this;
     }
 

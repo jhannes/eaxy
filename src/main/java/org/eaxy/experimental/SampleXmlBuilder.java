@@ -13,6 +13,7 @@ import org.eaxy.Document;
 import org.eaxy.Element;
 import org.eaxy.ElementSet;
 import org.eaxy.Namespace;
+import org.eaxy.QualifiedName;
 import org.eaxy.Xml;
 
 public class SampleXmlBuilder {
@@ -39,6 +40,10 @@ public class SampleXmlBuilder {
     }
 
     public Element createRandomElement(String elementName) {
+        return createRandomElement(targetNamespace().name(elementName));
+    }
+
+    private Element createRandomElement(QualifiedName elementName) {
         Element elementDefinition = elementDefinition(elementName);
         if (elementDefinition.type() != null) {
             return createElement(elementName, complexType(elementDefinition.type()));
@@ -48,12 +53,25 @@ public class SampleXmlBuilder {
         }
     }
 
-    private Element createElement(String fullElementName, Element complexType) {
-        String[] parts = fullElementName.split(":");
-        String name = parts.length > 1 ? parts[1] : parts[0];
-        Element resultElement = targetNamespace().el(name);
+    private Element createElement(QualifiedName elementName, Element complexType) {
+        Element resultElement = Xml.el(elementName);
         populateComplexType(complexType, resultElement);
         return resultElement;
+    }
+
+    private QualifiedName qualifiedName(String fullElementName) {
+        if (fullElementName == null) {
+            return null;
+        }
+        String[] parts = fullElementName.split(":");
+        if (parts.length == 1) {
+            // TODO: Find the correct namespace by looking at namespace declarations of schema
+//            Namespace namespace = schemaDoc.getRootElement().getNamespace(null);
+            return targetNamespace().name(fullElementName);
+        } else {
+            Namespace namespace = schemaDoc.getRootElement().getNamespace(parts[0]);
+            return namespace.name(parts[1]);
+        }
     }
 
     private Element populateComplexType(Element complexType, Element resultElement) {
@@ -76,39 +94,23 @@ public class SampleXmlBuilder {
             } else if (!"required".equals(attrDef.attr("use")) && !full && chance(.50)) {
                 continue;
             }
-            String typeDef = attrDef.attr("ref");
-            if (typeDef != null) {
-                Element attrTypeDef = attributeDefinition(typeDef);
-
-                ElementSet enumerations = attrTypeDef.find("simpleType", "restriction", "enumeration");
-                if (enumerations.isPresent()) {
-                    resultElement
-                            .attr(targetNamespace().attr(attrTypeDef.name(), pickOne(enumerations.attrs("value"))));
-                }
-            } else if (isXsdType(attrDef.type())) {
-                resultElement.attr(attrDef.name(), randomData(attrDef));
+            QualifiedName type = qualifiedName(attrDef.type());
+            if (type == null) {
+                Element attrTypeDef = attributeDefinition(attrDef.attr("ref"));
+                Element simpleType = attrTypeDef.find("simpleType").single();
+                resultElement.attr(targetNamespace().attr(attrTypeDef.name(), randomAttributeText(attrTypeDef.name(), simpleType)));
+            } else if (isXsdType(type)) {
+                resultElement.attr(attrDef.name(), randomAttributeText(attrDef.name(), attrDef));
             } else {
-                String typeNameFull = attrDef.type();
-                String[] nameParts = typeNameFull.split(":");
-                String typeName = nameParts.length > 1 ? nameParts[1] : typeNameFull;
-                Element simpleType = schemaDoc.find("simpleType[name=" + typeName + "]").single();
-
-                String baseType = simpleType.find("restriction").single().attr("base");
-                if (baseType.matches(xsNamespace.name("string").print())) {
-                    resultElement.attr(attrDef.name(), "123-AB");
-                } else {
-                    throw new RuntimeException("Don't know what to do with " + baseType);
-                }
+                Element simpleType = schemaDoc.find("simpleType[name=" + type.getName() + "]").single();
+                resultElement.attr(attrDef.name(), randomAttributeText(attrDef.name(), simpleType));
             }
         }
     }
 
+
     private boolean chance(double p) {
         return random.nextDouble() < p;
-    }
-
-    private Instant randomDateTime() {
-        return ZonedDateTime.now().minusDays(100).plusMinutes(new Random().nextInt(200 * 24 * 60)).toInstant();
     }
 
     private void appendSequence(Element resultElement, Element complexType) {
@@ -125,11 +127,13 @@ public class SampleXmlBuilder {
         for (int i = 0; i < occurances; i++) {
             String typeDef = memberDef.attr("ref");
             if (typeDef != null) {
-                Element elementDef = elementDefinition(typeDef);
-                if (isXsdType(elementDef.type())) {
-                    resultElement.add(targetNamespace().el(elementDef.name(), randomData(elementDef)));
+                Element elementDef = elementDefinition(qualifiedName(typeDef));
+                QualifiedName memberType = qualifiedName(elementDef.type());
+                if (isXsdType(memberType)) {
+                    resultElement.add(targetNamespace().el(elementDef.name(),
+                            randomElementText(elementDef.text(), elementDef)));
                 } else {
-                    resultElement.add(createRandomElement(elementDef.type()));
+                    resultElement.add(createRandomElement(memberType));
                 }
                 continue;
             }
@@ -144,12 +148,12 @@ public class SampleXmlBuilder {
                 } else {
                     Element el = Xml.el(memberDef.name());
                     Element simpleMemberType = memberDef.find("simpleType", "restriction").single();
-                    el.text(randomData(simpleMemberType));
+                    el.text(randomElementText(memberDef.name(), simpleMemberType));
                     resultElement.add(el);
                 }
-            } else if (isXsdType(memberDef.type())) {
-                Element el = Xml.el(memberDef.attr("name"));
-                el.text(randomData(memberDef));
+            } else if (isXsdType(qualifiedName(memberDef.type()))) {
+                Element el = Xml.el(memberDef.name());
+                el.text(randomElementText(memberDef.name(), memberDef));
                 resultElement.add(el);
             } else {
                 Element element = Xml.el(memberDef.name());
@@ -157,6 +161,30 @@ public class SampleXmlBuilder {
                 resultElement.add(element);
             }
         }
+    }
+
+    /**
+     * Override this method to create custom rules for specific attributes
+     * @param attributeName The name of the attribute to write
+     * @param attrDef The element that defines the attribute
+     * @return Random attribute value that fulfills the definition
+     */
+    protected String randomAttributeText(String attributeName, Element attrDef) {
+        return randomData(attrDef);
+    }
+
+    /**
+     * Override this method to create custom rules for specific elements
+     * @param elementName The name of the element to write
+     * @param attrDef The element that defines the attribute
+     * @return Random attribute value that fulfills the definition
+     */
+    protected String randomElementText(String elementName, Element typeDefinition) {
+        return randomData(typeDefinition);
+    }
+
+    private boolean isXsdType(QualifiedName type) {
+        return type != null && type.getNamespace().equals(xsNamespace);
     }
 
     private int occurences(Element seqMemberDef) {
@@ -173,7 +201,26 @@ public class SampleXmlBuilder {
         return occurences;
     }
 
-    private String randomData(Element typeDef) {
+    private Instant randomDateTime() {
+        return ZonedDateTime.now().minusDays(100).plusMinutes(new Random().nextInt(200 * 24 * 60)).toInstant();
+    }
+
+    protected String randomData(Element typeDef) {
+        if ("simpleType".equals(typeDef.tagName())) {
+            String baseType = typeDef.find("restriction").single().attr("base");
+
+            ElementSet enumerations = typeDef.find("restriction", "enumeration");
+            if (enumerations.isPresent()) {
+                return pickOne(enumerations.attrs("value"));
+            }
+
+            if (baseType.matches(xsNamespace.name("string").print())) {
+                return "123-AB";
+            } else {
+                throw new RuntimeException("Don't know what to do with " + baseType);
+            }
+        }
+
         String type = typeDef.type();
         if (type == null)
             type = typeDef.attr("base");
@@ -184,27 +231,20 @@ public class SampleXmlBuilder {
         } else if (type.matches(xsNamespace.name("string").print())) {
             return randomString(10, 20);
         } else if (type.matches(xsNamespace.name("int").print())) {
-            return String.valueOf(random(-1000, 10000));
+            return String.valueOf(random(-10, 10));
         } else if (type.matches(xsNamespace.name("positiveInteger").print())) {
-            return String.valueOf(random(0, 100));
+            return String.valueOf(random(1, 10));
         } else if (type.matches(xsNamespace.name("decimal").print())) {
             return String.valueOf(random(-1000, 10000) / 100);
         } else if (type.matches(xsNamespace.name("float").print())) {
             return String.valueOf(random(-1000, 10000) / 100);
         } else if (type.matches(xsNamespace.name("base64Binary").print())) {
-            return "sdfmsdlgnsd";
+            // data:image/svg+xml;base64,
+            return "PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgZGF0YS1uYW1lPSJMYXllciAxIiBpZD0iTGF5ZXJfMSIgdmlld0JveD0iMCAwIDQ4IDQ4IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxzdHlsZT4uY2xzLTEsLmNscy0ye2ZpbGw6bm9uZTtzdHJva2U6IzIzMWYyMDtzdHJva2UtbWl0ZXJsaW1pdDoxMDtzdHJva2Utd2lkdGg6MnB4O30uY2xzLTJ7c3Ryb2tlLWxpbmVjYXA6cm91bmQ7fS5jbHMtM3tmaWxsOiMyMzFmMjA7fTwvc3R5bGU+PC9kZWZzPjx0aXRsZS8+PGNpcmNsZSBjbGFzcz0iY2xzLTEiIGN4PSIyNCIgY3k9IjI0IiByPSIyMyIvPjxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTE0LDMzczguODMsOS4zMywyMCwwIi8+PGVsbGlwc2UgY2xhc3M9ImNscy0zIiBjeD0iMTciIGN5PSIxOSIgcng9IjMiIHJ5PSI0Ii8+PGVsbGlwc2UgY2xhc3M9ImNscy0zIiBjeD0iMzEiIGN5PSIxOSIgcng9IjMiIHJ5PSI0Ii8+PC9zdmc+";
         } else if (type.matches(xsNamespace.name("NMTOKEN").print())) {
             return typeDef.attr("fixed");
         }
         throw new IllegalArgumentException("Unknown base type " + type);
-    }
-
-    private boolean isXsdType(String type) {
-        if (type.contains(":")) {
-            return type.split(":")[0].equals(xsNamespace.getPrefix());
-        } else {
-            return xsNamespace.getPrefix() == null;
-        }
     }
 
     private LocalDate randomDate() {
@@ -243,36 +283,32 @@ public class SampleXmlBuilder {
     }
 
     private Element attributeDefinition(String typeNameFull) {
-        String[] nameParts = typeNameFull.split(":");
-        String typeName = nameParts.length > 1 ? nameParts[1] : typeNameFull;
+        String typeName = qualifiedName(typeNameFull).getName();
         return schemaDoc.find("attribute[name=" + typeName + "]").single();
     }
 
     private Element complexType(String typeNameFull) {
-        String[] nameParts = typeNameFull.split(":");
-        String typeName = nameParts.length > 1 ? nameParts[1] : typeNameFull;
-        Element typeDefinition = schemaDoc.find("complexType[name=" + typeName + "]").singleOrDefault();
+        Element typeDefinition = schemaDoc.find("complexType[name=" + qualifiedName(typeNameFull).getName() + "]").singleOrDefault();
         if (typeDefinition != null) {
             return typeDefinition;
         }
         for (Document schemaDoc : includedSchemas) {
-            typeDefinition = schemaDoc.find("complexType[name=" + typeName + "]").singleOrDefault();
+            typeDefinition = schemaDoc.find("complexType[name=" + qualifiedName(typeNameFull).getName() + "]").singleOrDefault();
             if (typeDefinition != null) {
                 return typeDefinition;
             }
         }
-        throw new IllegalArgumentException("Can't find type definition of " + typeName);
+        throw new IllegalArgumentException("Can't find type definition of " + qualifiedName(typeNameFull).getName());
     }
 
-    private Element elementDefinition(String elementNameFull) {
-        String[] nameParts = elementNameFull.split(":");
-        String elementName = nameParts.length > 1 ? nameParts[1] : elementNameFull;
-        Element typeDefinition = schemaDoc.find("element[name=" + elementName + "]").singleOrDefault();
+    private Element elementDefinition(QualifiedName elementName) {
+        // TODO: Lookup schema based on elementName namespace
+        Element typeDefinition = schemaDoc.find("element[name=" + elementName.getName() + "]").singleOrDefault();
         if (typeDefinition != null) {
             return typeDefinition;
         }
         for (Document schemaDoc : includedSchemas) {
-            typeDefinition = schemaDoc.find("element[name=" + elementName + "]").singleOrDefault();
+            typeDefinition = schemaDoc.find("element[name=" + elementName.getName() + "]").singleOrDefault();
             if (typeDefinition != null) {
                 return typeDefinition;
             }

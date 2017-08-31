@@ -85,6 +85,10 @@ public abstract class Xml {
         }
     }
 
+    public static Element el(QualifiedName name, Content... contents) {
+        return new Element(name, contents);
+    }
+
     public static Element el(String tagName, Content... contents) {
         return Namespace.NO_NAMESPACE.el(tagName, contents);
     }
