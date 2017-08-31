@@ -3,7 +3,7 @@ package org.eaxy;
 
 public class Namespace implements Content {
 
-    static final Namespace NO_NAMESPACE = new Namespace(null) {
+    public static final Namespace NO_NAMESPACE = new Namespace(null) {
         @Override
         public boolean isNamespace() { return false; }
     };
@@ -55,7 +55,11 @@ public class Namespace implements Content {
     }
 
     public String print() {
-        return "xmlns" + (prefix == null ? "" : ":" + prefix) + "=\"" + uri + "\"";
+        return xmlns() + "=\"" + uri + "\"";
+    }
+
+    String xmlns() {
+        return "xmlns" + (prefix == null ? "" : ":" + prefix);
     }
 
     public String prefix() {

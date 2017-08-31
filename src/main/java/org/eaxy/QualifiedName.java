@@ -99,7 +99,4 @@ public class QualifiedName {
         return name.equals(tagName);
     }
 
-    public String getPrefixedName() {
-        return namespace.getPrefix() + ":" + getName();
-    }
 }

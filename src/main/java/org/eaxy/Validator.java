@@ -32,6 +32,23 @@ public class Validator {
         }
     }
 
+    public Validator(Element schema) {
+        this(new Document(schema));
+    }
+
+    public Validator(Document schemaDoc) {
+        this(Xml.toDom(schemaDoc));
+    }
+
+    public Validator(org.w3c.dom.Document dom) {
+        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        try {
+            validator = schemaFactory.newSchema(new DOMSource(dom)).newValidator();
+        } catch (SAXException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      * Throw an exception if the element does not conform with the schema.
      * @return element to be validated for easier chaining of method calls

@@ -96,6 +96,11 @@ public class ElementSet implements Iterable<Element> {
         return first();
     }
 
+    public Element singleOrDefault() {
+        checkMaxOneMatch();
+        return firstOrDefault();
+    }
+
     private void checkMaxOneMatch() {
         if (size() <= 1) return;
         String message = "Too many matches for <" + filter + ">: " + elementPaths;

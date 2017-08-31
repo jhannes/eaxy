@@ -12,25 +12,26 @@ import java.util.Set;
 public class Element implements Node {
 
     private final QualifiedName name;
-    private final List<Node> children;
+    private final List<Node> children = new ArrayList<>();
     private final Map<QualifiedName,Attribute> attributes = new LinkedHashMap<QualifiedName, Attribute>();
     // TODO: Maybe namespaces should be part of the attributes - are namespaces attributes?
     private final List<Namespace> namespaces = new ArrayList<Namespace>();
 
     Element(QualifiedName name, Content... contents) {
-        this(name, Objects.list(contents, Node.class),
-                Objects.list(contents, Attribute.class),
+        this(name, Objects.list(contents, Attribute.class),
                 Objects.list(contents, Namespace.class));
+        children.addAll(Objects.list(contents, Node.class));
     }
 
-    public Element(QualifiedName name, List<Node> children, Collection<Attribute> attrs, Collection<Namespace> namespaces) {
+    public Element(QualifiedName name, Collection<Attribute> attrs, Collection<Namespace> namespaces) {
         this.name = name;
-        if (name.hasNamespace()) namespace(name.getNamespace());
-        this.children = children;
-        attrs(attrs);
+        if (name.hasNamespace() && !namespaces.contains(name.getNamespace())) {
+            namespace(name.getNamespace());
+        }
         for (Namespace namespace : namespaces) {
             namespace(namespace);
         }
+        attrs(attrs);
     }
 
     public String tagName() {
@@ -39,6 +40,24 @@ public class Element implements Node {
 
     public List<Namespace> getNamespaces() {
         return namespaces;
+    }
+
+    public Namespace getNamespace(String prefix) {
+        for (Namespace namespace : namespaces) {
+            if (prefix.equals(namespace.getPrefix())) {
+                return namespace;
+            }
+        }
+        throw new IllegalArgumentException(prefix + " not found in " + namespaces);
+    }
+
+    public Namespace getNamespaceByUri(String uri) {
+        for (Namespace namespace : namespaces) {
+            if (uri.equals(namespace.getUri())) {
+                return namespace;
+            }
+        }
+        throw new IllegalArgumentException(uri + " not found in " + namespaces);
     }
 
     public <T extends Node> Element addAll(@SuppressWarnings("unchecked") T... content) {
@@ -140,6 +159,16 @@ public class Element implements Node {
         return attributes.containsKey(new QualifiedName(name));
     }
 
+    public String toIndentedXML() {
+        StringWriter result = new StringWriter();
+        try {
+            visit(new IntentedWriterXmlVisitor(result, "  "));
+        } catch (IOException e) {
+            throw new CanNeverHappenException("StringBuilder doesn't throw IOException", e);
+        }
+        return result.toString();
+    }
+
     public String toXML() {
         try {
             StringWriter result = new StringWriter();
@@ -183,7 +212,7 @@ public class Element implements Node {
     }
 
     public Element select(Object filter) {
-        return find("...", filter).first();
+        return find("...", filter).single();
     }
 
     public Element take(Object selector) {
@@ -283,15 +312,15 @@ public class Element implements Node {
 
     @Override
     public Element copy() {
-        return new Element(this.name, copyChildren(), attributes.values(), namespaces);
+        Element element = copyElement();
+        for (Node o : children) {
+            element.children.add(o.copy());
+        }
+        return element;
     }
 
-    private List<Node> copyChildren() {
-        List<Node> list = new ArrayList<Node>();
-        for (Node o : children) {
-            list.add(o.copy());
-        }
-        return list;
+    public Element copyElement() {
+        return new Element(this.name, attributes.values(), namespaces);
     }
 
     Element attrs(Collection<Attribute> attributes) {

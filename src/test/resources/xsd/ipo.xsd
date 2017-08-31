@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="http://www.example.com/IPO" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:ipo="http://www.example.com/IPO" xmlns:adr="http://www.example.com/IPO">
+
+	<xs:annotation>
+		<xs:documentation xml:lang="en">
+			International Purchase order schema for Example.com
+			Copyright 2000 Example.com. All rights reserved.
+		</xs:documentation>
+	</xs:annotation>
+
+	<!-- include address constructs -->
+	<xs:include schemaLocation="address.xsd" />
+
+	<xs:element name="purchaseOrder" type="ipo:PurchaseOrderType" />
+
+	<xs:element name="comment" type="xs:string" />
+
+	<xs:complexType name="PurchaseOrderType">
+		<xs:sequence>
+			<xs:element name="shipTo" type="adr:Address" />
+			<xs:element name="billTo" type="adr:Address" />
+			<xs:element ref="ipo:comment" minOccurs="0" />
+			<xs:element name="items" type="ipo:Items" />
+		</xs:sequence>
+		<xs:attribute name="orderDate" type="xs:date" />
+	</xs:complexType>
+
+	<xs:complexType name="Items">
+		<xs:sequence>
+			<xs:element name="item" minOccurs="2" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="productName" type="xs:string" />
+						<xs:element name="quantity">
+							<xs:simpleType>
+								<xs:restriction base="xs:positiveInteger">
+									<xs:maxExclusive value="100" />
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="USPrice" type="xs:decimal" />
+						<xs:element ref="ipo:comment" minOccurs="0" />
+						<xs:element name="shipDate" type="xs:date" minOccurs="0" />
+					</xs:sequence>
+					<xs:attribute name="partNum" type="ipo:SKU" use="required" />
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:simpleType name="SKU">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="\d{3}-[A-Z]{2}" />
+		</xs:restriction>
+	</xs:simpleType>
+
+</xs:schema>

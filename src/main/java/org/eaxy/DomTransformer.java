@@ -103,24 +103,15 @@ public class DomTransformer {
     }
 
     private static void addAttribute(org.w3c.dom.Element domElement, QualifiedName attrName, String value) {
-        if (attrName.hasNamespace()) {
-            domElement.setAttributeNS(attrName.getNamespace().getUri(), attrName.getPrefixedName(), value);
-        } else {
-            domElement.setAttribute(attrName.getName(), value);
-        }
+        domElement.setAttributeNS(attrName.getNamespace().getUri(), attrName.print(), value);
     }
 
     private static void addNamespace(org.w3c.dom.Element domElement, Namespace namespace) {
-        domElement.setAttributeNS("http://www.w3.org/2000/xmlns/",
-                "xmlns:" + namespace.getPrefix(),
-                namespace.getUri());
+        domElement.setAttributeNS("http://www.w3.org/2000/xmlns/", namespace.xmlns(), namespace.getUri());
     }
 
     private static org.w3c.dom.Element createElement(org.w3c.dom.Document doc, QualifiedName name) {
-        if (!name.hasNamespace()) {
-            return doc.createElement(name.getName());
-        }
-        return doc.createElementNS(name.getNamespace().getUri(), name.getPrefixedName());
+        return doc.createElementNS(name.getNamespace().getUri(), name.print());
     }
 
 }

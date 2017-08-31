@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema
+	targetNamespace="http://www.example.com/IPO"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:adr="http://www.example.com/IPO">
+
+	<xs:complexType name="Address">
+		<xs:sequence>
+			<xs:element name="name" type="xs:string" />
+			<xs:element name="street" type="xs:string" />
+			<xs:element name="city" type="xs:string" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="USAddress">
+		<xs:complexContent>
+			<xs:extension base="adr:Address">
+				<xs:sequence>
+					<xs:element name="state" type="adr:USState" />
+					<xs:element name="zip" type="xs:positiveInteger" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="UKAddress">
+		<xs:complexContent>
+			<xs:extension base="adr:Address">
+				<xs:sequence>
+					<xs:element name="postcode" type="adr:UKPostcode" />
+				</xs:sequence>
+				<xs:attribute name="exportCode" type="xs:positiveInteger" fixed="1" />
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<!-- other Address derivations for more countries -->
+
+	<xs:simpleType name="USState">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="AK" />
+			<xs:enumeration value="AL" />
+			<xs:enumeration value="AR" />
+			<!-- and so on ... -->
+			<xs:enumeration value="MN" />
+			<xs:enumeration value="MO" />
+			<xs:enumeration value="TX" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="Postcode">
+		<xs:restriction base="xs:string">
+			<xs:length value="7" fixed="true" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="UKPostcode">
+		<xs:restriction base="adr:Postcode">
+			<xs:pattern value="[A-Z]{2}\d\s\d[A-Z]{2}" />
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>
