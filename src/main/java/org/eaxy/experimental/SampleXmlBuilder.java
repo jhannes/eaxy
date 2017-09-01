@@ -43,13 +43,13 @@ public class SampleXmlBuilder {
         return createRandomElement(targetNamespace().name(elementName));
     }
 
-    private Element createRandomElement(QualifiedName elementName) {
+    Element createRandomElement(QualifiedName elementName) {
         Element elementDefinition = elementDefinition(elementName);
         if (elementDefinition.type() != null) {
             return createElement(elementName, complexType(elementDefinition.type()));
         } else {
             Element complexMemberType = elementDefinition.find("complexType").single();
-            return populateComplexType(complexMemberType, Xml.el(elementDefinition.name()));
+            return populateComplexType(complexMemberType, Xml.el(elementName));
         }
     }
 
@@ -135,10 +135,7 @@ public class SampleXmlBuilder {
                 } else {
                     resultElement.add(createRandomElement(memberType));
                 }
-                continue;
-            }
-
-            if (memberDef.type() == null) {
+            } else if (memberDef.type() == null) {
                 // TODO: Can be any nested type
                 Element complexMemberType = memberDef.find("complexType").singleOrDefault();
                 if (complexMemberType != null) {
@@ -188,17 +185,28 @@ public class SampleXmlBuilder {
     }
 
     private int occurences(Element seqMemberDef) {
-        int occurences = 1;
-        if (seqMemberDef.hasAttr("maxOccurs") && !seqMemberDef.attr("maxOccurs").equals("1")) {
-            int lowerBound = full ? 2 : 1;
-            occurences = random(lowerBound, 10);
-        }
-        if ("0".equals(seqMemberDef.attr("minOccurs"))) {
-            if (minimal || (!full && chance(.50))) {
-                occurences = 0;
+        int minOccurs = 1;
+        String minOccursAttr = seqMemberDef.attr("minOccurs");
+        if (minOccursAttr != null) {
+            minOccurs = Integer.parseInt(minOccursAttr);
+            if (minimal) {
+                return minOccurs;
             }
         }
-        return occurences;
+
+        int maxOccurs = 1;
+        String maxOccursAttr = seqMemberDef.attr("maxOccurs");
+        if (maxOccursAttr != null) {
+            if (maxOccursAttr.equalsIgnoreCase("unbounded")) {
+                maxOccurs = 10;
+            } else {
+                maxOccurs = Integer.parseInt(maxOccursAttr);
+            }
+        }
+        if (full && minOccurs < 2) {
+            minOccurs = Math.min(2, maxOccurs);
+        }
+        return random(minOccurs, maxOccurs);
     }
 
     private Instant randomDateTime() {
@@ -237,7 +245,7 @@ public class SampleXmlBuilder {
         } else if (type.matches(xsNamespace.name("decimal").print())) {
             return String.valueOf(random(-1000, 10000) / 100);
         } else if (type.matches(xsNamespace.name("float").print())) {
-            return String.valueOf(random(-1000, 10000) / 100);
+            return String.valueOf(random(-1000, 10000) / 100.0);
         } else if (type.matches(xsNamespace.name("base64Binary").print())) {
             // data:image/svg+xml;base64,
             return "PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgZGF0YS1uYW1lPSJMYXllciAxIiBpZD0iTGF5ZXJfMSIgdmlld0JveD0iMCAwIDQ4IDQ4IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxzdHlsZT4uY2xzLTEsLmNscy0ye2ZpbGw6bm9uZTtzdHJva2U6IzIzMWYyMDtzdHJva2UtbWl0ZXJsaW1pdDoxMDtzdHJva2Utd2lkdGg6MnB4O30uY2xzLTJ7c3Ryb2tlLWxpbmVjYXA6cm91bmQ7fS5jbHMtM3tmaWxsOiMyMzFmMjA7fTwvc3R5bGU+PC9kZWZzPjx0aXRsZS8+PGNpcmNsZSBjbGFzcz0iY2xzLTEiIGN4PSIyNCIgY3k9IjI0IiByPSIyMyIvPjxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTE0LDMzczguODMsOS4zMywyMCwwIi8+PGVsbGlwc2UgY2xhc3M9ImNscy0zIiBjeD0iMTciIGN5PSIxOSIgcng9IjMiIHJ5PSI0Ii8+PGVsbGlwc2UgY2xhc3M9ImNscy0zIiBjeD0iMzEiIGN5PSIxOSIgcng9IjMiIHJ5PSI0Ii8+PC9zdmc+";
@@ -262,6 +270,9 @@ public class SampleXmlBuilder {
     }
 
     private int random(int lowerBound, int upperBound) {
+        if (lowerBound == upperBound) {
+            return lowerBound;
+        }
         return lowerBound + random(upperBound - lowerBound);
     }
 
