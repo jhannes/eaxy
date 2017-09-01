@@ -112,7 +112,7 @@ public class SampleXmlBuilderTest {
         */
     }
 
-    private static final Namespace SOAP = new Namespace("http://schemas.xmlsoap.org/wsdl/soap/");
+    private static final Namespace SOAP = new Namespace("http://schemas.xmlsoap.org/soap/envelope/");
 
     @Test
     public void shouldRespondToSoapCall() throws IOException {
@@ -135,7 +135,7 @@ public class SampleXmlBuilderTest {
         Element input = SOAP.el("Envelope",
             SOAP.el("Header"),
             SOAP.el("Body", Xml.el("wrongElement", "Some content")));
-        String soapAction = "http://example.com/GetLastTradePrice";
+        String soapAction = "\"http://example.com/GetLastTradePrice\"";
 
         assertThatThrownBy(() -> builder.processRequest(soapAction, input))
             .isInstanceOf(SchemaValidationException.class)
@@ -154,12 +154,12 @@ public class SampleXmlBuilderTest {
         assertThatThrownBy(() ->
                 builder.processRequest(soapAction, SOAP.el("Envelope", SOAP.el("Header"), input)))
             .isInstanceOf(NonMatchingPathException.class)
-            .hasMessageContaining("http://schemas.xmlsoap.org/wsdl/soap/\":Body");
+            .hasMessageContaining("http://schemas.xmlsoap.org/soap/envelope/\":Body");
         assertThatThrownBy(() ->
                 builder.processRequest(soapAction,
                     SOAP.el("Ennvelopp", SOAP.el("Body", input))))
             .isInstanceOf(NonMatchingPathException.class)
-            .hasMessageContaining("http://schemas.xmlsoap.org/wsdl/soap/\":Envelope");
+            .hasMessageContaining("http://schemas.xmlsoap.org/soap/envelope/\":Envelope");
     }
 
 }

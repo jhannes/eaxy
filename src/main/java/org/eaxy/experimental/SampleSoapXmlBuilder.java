@@ -15,7 +15,8 @@ import org.eaxy.Xml;
 
 public class SampleSoapXmlBuilder {
 
-    private static final Namespace SOAP = new Namespace("http://schemas.xmlsoap.org/wsdl/soap/", "SOAP");
+    private static final Namespace SOAP = new Namespace("http://schemas.xmlsoap.org/soap/envelope/", "SOAP");
+    private static final Namespace SOAP_WSDL = new Namespace("http://schemas.xmlsoap.org/wsdl/soap/", "SOAP");
     private static final Namespace XS = new Namespace("http://www.w3.org/2001/XMLSchema");
 
     public class SoapOperationDefinition {
@@ -149,8 +150,11 @@ public class SampleSoapXmlBuilder {
         }
 
         public SoapOperationDefinition soapAction(String soapAction) {
+            if (soapAction.matches("\".*\"")) {
+                soapAction = soapAction.substring(1, soapAction.length()-1);
+            }
             for (Element operationBinding : binding.find("operation")) {
-                if (operationBinding.find(SOAP.name("operation")).single().attr("soapAction").equals(soapAction)) {
+                if (operationBinding.find(SOAP_WSDL.name("operation")).single().attr("soapAction").equals(soapAction)) {
                     return operation(operationBinding.name());
                 }
             }
