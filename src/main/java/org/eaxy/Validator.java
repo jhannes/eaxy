@@ -58,7 +58,7 @@ public class Validator {
             validator.validate(new DOMSource(Xml.toDom(new Document(xml))));
             return xml;
         } catch (SAXException e) {
-            throw new RuntimeException(e.getMessage());
+            throw new SchemaValidationException(e.getMessage());
         } catch (IOException e) {
             throw new RuntimeException("StringReader should never throw IOException", e);
         }
