@@ -7,6 +7,8 @@ import static org.eaxy.Xml.text;
 import static org.eaxy.Xml.xml;
 import java.io.ByteArrayInputStream;
 import java.io.StringReader;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.eaxy.Document;
@@ -136,7 +138,13 @@ public class ElementBuilderTest {
         Element element = el("Element", "Text with <, > and &");
         assertThat(element.toXML()).isEqualTo("<Element>Text with &lt;, &gt; and &amp;</Element>");
         assertThat(element.text()).isEqualTo("Text with <, > and &");
+    }
 
+    @Test
+    public void shouldMapElementsOverList() {
+        List<String> data = Arrays.asList("a", "b", "c");
+        Element element = el("ul", Xml.map(data, s -> el("li", s)));
+        assertThat(element.toXML()).isEqualTo("<ul><li>a</li><li>b</li><li>c</li></ul>");
     }
 
     @Test

@@ -3,6 +3,9 @@ package org.eaxy;
 import java.io.IOException;
 import java.io.Writer;
 
+import org.eaxy.Xml.CommentElement;
+import org.eaxy.Xml.TextElement;
+
 public class IntentedWriterXmlVisitor extends WriterXmlVisitor implements XmlVisitor {
 
     private final String indentation;
@@ -26,6 +29,18 @@ public class IntentedWriterXmlVisitor extends WriterXmlVisitor implements XmlVis
             visitChildren(element);
             writer.write(currentIndent + "</" + element.printTag() + ">" + Document.LINE_SEPARATOR);
         }
+    }
+
+    @Override
+    public void visitComment(CommentElement comment) throws IOException {
+        writer.write(currentIndent + "<!--" + comment.text() + "-->" + Document.LINE_SEPARATOR);
+    }
+
+    @Override
+    public void visitText(TextElement textElement) throws IOException {
+        writer.write(textElement.text().trim().replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;"));
     }
 
     private void visitChildren(Element element) throws IOException {

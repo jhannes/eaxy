@@ -7,6 +7,8 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.Collection;
+import java.util.function.Function;
 import java.util.zip.GZIPInputStream;
 
 public abstract class Xml {
@@ -168,6 +170,15 @@ public abstract class Xml {
 
     public static Validator validatorFromResource(String... resourcePaths) {
         return new Validator(resourcePaths);
+    }
+
+    public static <T> Content[] map(Collection<T> data, Function<T, Content> f) {
+        Content[] result = new Content[data.size()];
+        int i = 0;
+        for (T t : data) {
+            result[i++] = f.apply(t);
+        }
+        return result;
     }
 
 }
