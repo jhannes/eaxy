@@ -47,6 +47,7 @@ public class SampleSoapXmlBuilder {
             if (messageDefinition.attr("element") != null) {
                 return createSampleMessage(qualifiedName(nsPrefix, messageDefinition.attr("element")));
             } else if (messageDefinition.name() != null) {
+                // TODO: This is not covered by unit tests
                 Element message = wsdlFile.find("message[name=" + messageDefinition.name() + "]").single();
                 return createSampleMessage(qualifiedName(nsPrefix, message.find("part").single().attr("element")));
             } else if (messageDefinition.hasAttr("message")) {

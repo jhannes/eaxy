@@ -311,6 +311,7 @@ public class SampleXmlBuilder {
             return typeDefinition;
         }
         for (Document schemaDoc : includedSchemas) {
+            // TODO: Not covered by test!
             typeDefinition = schemaDoc.find("element[name=" + elementName.getName() + "]").singleOrDefault();
             if (typeDefinition != null) {
                 return typeDefinition;

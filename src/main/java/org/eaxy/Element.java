@@ -51,15 +51,6 @@ public class Element implements Node {
         throw new IllegalArgumentException(prefix + " not found in " + namespaces);
     }
 
-    public Namespace getNamespaceByUri(String uri) {
-        for (Namespace namespace : namespaces) {
-            if (uri.equals(namespace.getUri())) {
-                return namespace;
-            }
-        }
-        throw new IllegalArgumentException(uri + " not found in " + namespaces);
-    }
-
     public <T extends Node> Element addAll(@SuppressWarnings("unchecked") T... content) {
         for (T node : content) {
             add(node);
