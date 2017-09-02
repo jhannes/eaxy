@@ -1,6 +1,11 @@
 package org.eaxy.experimental;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -83,6 +88,26 @@ public class SampleSoapXmlBuilder {
 
         public String getSoapAction() {
             return bindingOperation.find("operation").single().attr("soapAction");
+        }
+
+        public Element sendRandomRequest(URL url) throws IOException {
+            Element input = soapEnvelope(randomInput("m"));
+
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setDoOutput(true);
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("SOAPAction", getSoapAction());
+            connection.setRequestProperty("Content-type", "text/xml");
+
+            try (Writer writer = new OutputStreamWriter(connection.getOutputStream())) {
+                writer.write(input.toIndentedXML());
+            }
+            int responseCode = connection.getResponseCode();
+            System.out.println(responseCode);
+
+            try (Reader reader = new InputStreamReader(connection.getInputStream())) {
+                return Xml.read(reader).getRootElement();
+            }
         }
     }
 

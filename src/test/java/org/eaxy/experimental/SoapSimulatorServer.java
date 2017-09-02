@@ -81,8 +81,9 @@ public class SoapSimulatorServer extends WebServer {
         writeXmlResponse(response, exchange);
     }
 
-    void addSoapEndpoint(String url, Document wsdl) throws IOException {
+    URL addSoapEndpoint(String url, Document wsdl) throws IOException {
         soapEndpoints.put(url, new SampleSoapXmlBuilder(wsdl));
+        return new URL(getUrl(), url);
     }
 
     public static void main(String[] args) throws IOException {
