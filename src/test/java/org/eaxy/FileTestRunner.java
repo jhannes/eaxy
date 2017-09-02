@@ -6,6 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.runner.Runner;
@@ -20,7 +21,9 @@ public class FileTestRunner extends Suite {
     @Target(ElementType.TYPE)
     public @interface Directory {
 
-        String value();
+        String[] value();
+
+        String extension() default "";
 
     }
 
@@ -66,17 +69,19 @@ public class FileTestRunner extends Suite {
         if (directoryAnnotation == null) {
             throw new InitializationError(testClass + " must annotation " + Directory.class.getName());
         }
-        File directory = new File(directoryAnnotation.value());
-        if (!directory.isDirectory()) {
-            throw new InitializationError(directory + " must be a directory");
-        }
-        for (File file : directory.listFiles()) {
-            if (file.isFile()) {
-                runners.add(new TestRunner(testClass, file));
+        for (String value : directoryAnnotation.value()) {
+            File directory = new File(value);
+            if (!directory.isDirectory()) {
+                throw new InitializationError(directory + " must be a directory");
+            }
+            for (File file : directory.listFiles()) {
+                if (file.isFile() && file.getName().endsWith(directoryAnnotation.extension())) {
+                    runners.add(new TestRunner(testClass, file));
+                }
             }
         }
         if (runners.isEmpty()) {
-            throw new InitializationError("No files in " + directory);
+            throw new InitializationError("No files in " + Arrays.asList(directoryAnnotation.value()));
         }
         return runners;
     }

@@ -85,6 +85,7 @@ public class StaxReader implements XMLStreamConstants {
                 elementStack.pop();
                 break;
             case COMMENT:
+                // TODO: Deal with comments outside the root element (currently throws EmptyStackException)
                 current().add(comment(streamReader.getText()));
                 break;
             case START_DOCUMENT:

@@ -7,7 +7,9 @@ import java.io.Reader;
 import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eaxy.Document;
@@ -125,6 +127,18 @@ public class SampleSoapXmlBuilder {
             return itfElement.find("operation[name=" + name + "]").single();
         }
 
+        public List<SoapOperationDefinition> getOperations() {
+            List<SoapOperationDefinition> result = new ArrayList<>();
+            for (Element operation : itfElement.find("operation")) {
+                Element bindingOperation = null;
+                if (binding != null) {
+                    bindingOperation = binding.find("operation[name=" + operation.name() + "]").single();
+                }
+                result.add(new SoapOperationDefinition(operation, bindingOperation));
+            }
+            return result;
+        }
+
         public SoapOperationDefinition operation(String name) {
             Element bindingOperation = null;
             if (binding != null) {
@@ -141,7 +155,8 @@ public class SampleSoapXmlBuilder {
                 itfElement = wsdlFile.find("interface[name=" + itfName + "]").single();
                 // TODO: We will get a NullPointerException in soapAction because binding isn't set
             } else if (service.find("port").isPresent()) {
-                String itf = service.select("port").attr("binding");
+                // TODO: Use namespace of //port/address to select correct binding
+                String itf = service.find("port").first().attr("binding");
                 String[] parts = itf.split(":");
                 String itfName = parts.length == 1 ? parts[0] : parts[1];
                 binding = wsdlFile.find("binding[name=" + itfName + "]").single();
@@ -162,6 +177,7 @@ public class SampleSoapXmlBuilder {
             }
             return null;
         }
+
     }
 
     private Document wsdlFile;
@@ -187,6 +203,9 @@ public class SampleSoapXmlBuilder {
     }
 
     private SampleXmlBuilder getXmlBuilder(QualifiedName qualifiedName) {
+        if (!builders.containsKey(qualifiedName.getNamespace().getUri())) {
+            throw new IllegalArgumentException("Unknown namespace schema " + qualifiedName + " " + builders.keySet());
+        }
         return builders.get(qualifiedName.getNamespace().getUri());
     }
 
@@ -217,10 +236,12 @@ public class SampleSoapXmlBuilder {
         this.wsdlFile = wsdlFile;
         for (Element schema : wsdlFile.find("types", "schema")) {
             Element importEl = schema.find("import").firstOrDefault();
-            if (importEl != null) {
+            if (importEl != null && importEl.hasAttr("schemaLocation")) {
                 addSchema(new Namespace(importEl.attr("namespace")),
                         Xml.read(new URL(resource, importEl.attr("schemaLocation"))).getRootElement());
             } else {
+                schema = schema.copy();
+                schema.getNamespaces().addAll(wsdlFile.getRootElement().getNamespaces());
                 addSchema(new Namespace(schema.attr("targetNamespace")), schema);
             }
         }
@@ -235,7 +256,7 @@ public class SampleSoapXmlBuilder {
     }
 
     public SoapServiceDefinition getService() {
-        return new SoapServiceDefinition(wsdlFile.find("service").first());
+        return new SoapServiceDefinition(wsdlFile.find("service").single());
     }
 
     public String getPortName() {
