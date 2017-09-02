@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.function.Function;
 import java.util.zip.GZIPInputStream;
 
-public abstract class Xml {
+public interface Xml {
 
     public static final Charset UTF_8 = Charset.forName("UTF-8");
 
@@ -91,16 +91,20 @@ public abstract class Xml {
         return new Element(name, contents);
     }
 
+    public static Element el(QualifiedName name, String stringContent) {
+        return el(name, text(stringContent));
+    }
+
     public static Element el(String tagName, Content... contents) {
         return Namespace.NO_NAMESPACE.el(tagName, contents);
     }
 
-    public static Node comment(String string) {
-        return new Xml.CommentElement(string);
-    }
-
     public static Element el(String tagName, String stringContent) {
         return el(tagName, text(stringContent));
+    }
+
+    public static Node comment(String string) {
+        return new Xml.CommentElement(string);
     }
 
     public static Node text(CharSequence stringContent) {

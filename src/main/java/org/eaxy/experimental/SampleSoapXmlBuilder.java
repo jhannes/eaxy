@@ -120,6 +120,18 @@ public class SampleSoapXmlBuilder {
         private final Element itfElement;
         private Element binding;
 
+        public SoapServiceDefinition(String name) {
+            this(wsdlFile.find("service[name=" + name + "]").single());
+        }
+
+        public Element operationElement(String name) {
+            return itfElement.find("operation[name=" + name + "]").single();
+        }
+
+        public SoapOperationDefinition operation(String name) {
+            return new SoapOperationDefinition(operationElement(name));
+        }
+
         public SoapServiceDefinition(Element service) {
             if (service.hasAttr("interface")) {
                 String itf = service.attr("interface");
@@ -135,18 +147,6 @@ public class SampleSoapXmlBuilder {
             } else {
                 throw new IllegalArgumentException("What to do with " + service);
             }
-        }
-
-        public SoapServiceDefinition(String name) {
-            this(wsdlFile.find("service[name=" + name + "]").single());
-        }
-
-        public Element operationElement(String name) {
-            return itfElement.find("operation[name=" + name + "]").single();
-        }
-
-        public SoapOperationDefinition operation(String name) {
-            return new SoapOperationDefinition(operationElement(name));
         }
 
         public SoapOperationDefinition soapAction(String soapAction) {

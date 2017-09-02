@@ -43,22 +43,6 @@ public class SampleXmlBuilder {
         return createRandomElement(targetNamespace().name(elementName));
     }
 
-    Element createRandomElement(QualifiedName elementName) {
-        Element elementDefinition = elementDefinition(elementName);
-        if (elementDefinition.type() != null) {
-            return createElement(elementName, complexType(elementDefinition.type()));
-        } else {
-            Element complexMemberType = elementDefinition.find("complexType").single();
-            return populateComplexType(complexMemberType, Xml.el(elementName));
-        }
-    }
-
-    private Element createElement(QualifiedName elementName, Element complexType) {
-        Element resultElement = Xml.el(elementName);
-        populateComplexType(complexType, resultElement);
-        return resultElement;
-    }
-
     private QualifiedName qualifiedName(String fullElementName) {
         if (fullElementName == null) {
             return null;
@@ -115,48 +99,59 @@ public class SampleXmlBuilder {
 
     private void appendSequence(Element resultElement, Element complexType) {
         for (Element seqMemberDef : complexType.find("sequence", "*")) {
-            appendChildElements(resultElement, seqMemberDef);
+            appendChildElement(resultElement, seqMemberDef);
         }
         for (Element seqMemberDef : complexType.find("all", "*")) {
-            appendChildElements(resultElement, seqMemberDef);
+            appendChildElement(resultElement, seqMemberDef);
         }
     }
 
-    private void appendChildElements(Element resultElement, Element memberDef) {
+    private void appendChildElement(Element resultElement, Element memberDef) {
         int occurances = occurences(memberDef);
         for (int i = 0; i < occurances; i++) {
-            String typeDef = memberDef.attr("ref");
-            if (typeDef != null) {
-                Element elementDef = elementDefinition(qualifiedName(typeDef));
-                QualifiedName memberType = qualifiedName(elementDef.type());
-                if (isXsdType(memberType)) {
-                    resultElement.add(targetNamespace().el(elementDef.name(),
-                            randomElementText(elementDef.text(), elementDef)));
-                } else {
-                    resultElement.add(createRandomElement(memberType));
-                }
-            } else if (memberDef.type() == null) {
-                // TODO: Can be any nested type
-                Element complexMemberType = memberDef.find("complexType").singleOrDefault();
-                if (complexMemberType != null) {
-                    Element element = Xml.el(memberDef.name());
-                    populateComplexType(complexMemberType, element);
-                    resultElement.add(element);
-                } else {
-                    Element el = Xml.el(memberDef.name());
-                    Element simpleMemberType = memberDef.find("simpleType", "restriction").single();
-                    el.text(randomElementText(memberDef.name(), simpleMemberType));
-                    resultElement.add(el);
-                }
-            } else if (isXsdType(qualifiedName(memberDef.type()))) {
-                Element el = Xml.el(memberDef.name());
-                el.text(randomElementText(memberDef.name(), memberDef));
-                resultElement.add(el);
+            resultElement.add(addChildElement(memberDef));
+        }
+    }
+
+    Element createRandomElement(QualifiedName elementName) {
+        Element elementDefinition = elementDefinition(elementName);
+        Element complexType;
+        if (elementDefinition.type() != null) {
+            complexType = complexType(elementDefinition.type());
+        } else {
+            complexType = elementDefinition.find("complexType").single();
+        }
+        return createComplexType(elementName, complexType);
+    }
+
+    private Element createComplexType(QualifiedName elementName, Element complexType) {
+        return populateComplexType(complexType, Xml.el(elementName));
+    }
+
+    private Element addChildElement(Element memberDef) {
+        String typeDef = memberDef.attr("ref");
+        if (typeDef != null) {
+            Element elementDef = elementDefinition(qualifiedName(typeDef));
+            QualifiedName memberType = qualifiedName(elementDef.type());
+            if (isXsdType(memberType)) {
+                return targetNamespace().el(elementDef.name(),
+                        randomElementText(elementDef.text(), elementDef));
             } else {
-                Element element = Xml.el(memberDef.name());
-                populateComplexType(complexType(memberDef.type()), element);
-                resultElement.add(element);
+                return createRandomElement(memberType);
             }
+        } else if (memberDef.type() == null) {
+            Element complexMemberType = memberDef.find("complexType").singleOrDefault();
+            if (complexMemberType != null) {
+                return createComplexType(Namespace.NO_NAMESPACE.name(memberDef.name()), complexMemberType);
+            } else {
+                // TODO: This looks wrong
+                Element simpleMemberType = memberDef.find("simpleType", "restriction").single();
+                return Xml.el(Namespace.NO_NAMESPACE.name(memberDef.name()), randomElementText(memberDef.name(), simpleMemberType));
+            }
+        } else if (isXsdType(qualifiedName(memberDef.type()))) {
+            return Xml.el(Namespace.NO_NAMESPACE.name(memberDef.name()), randomElementText(memberDef.name(), memberDef));
+        } else {
+            return createComplexType(Namespace.NO_NAMESPACE.name(memberDef.name()), complexType(memberDef.type()));
         }
     }
 
