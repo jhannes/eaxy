@@ -5,7 +5,11 @@ import static org.eaxy.Xml.el;
 import static org.eaxy.Xml.text;
 import static org.junit.Assert.fail;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.StringReader;
+import java.net.URL;
+import java.util.Iterator;
 
 import org.eaxy.Element;
 import org.eaxy.ElementFilters;
@@ -199,6 +203,38 @@ public class ElementFinderTest {
                 .doesNotContain("foo")
                 .contains("\"http://a.org/b/\":actual-child");
         }
+    }
+
+    @Test
+    public void shouldIterateOverFiles() {
+        URL file = getClass().getResource("/medsample-mini.xml");
+        Iterator<Element> it = ElementFilters.create("MedlineCitation").iterate(file).iterator();
+        int count = 0;
+        while (it.hasNext()) {
+            it.next();
+            count++;
+        }
+        assertThat(count).isEqualTo(1);
+    }
+
+    @Test
+    public void scansShouldBeFast() throws IOException {
+        long startTime = System.currentTimeMillis();
+        URL file = new File("src/test/xml/performance-suite/medsamp2012.xml.gz").toURI().toURL();
+        int maxReferences = Integer.MIN_VALUE;
+        Element mostReferenced = null;
+        for (Element element : ElementFilters.create("MedlineCitation").iterate(file)) {
+            Element references = element.find("NumberOfReferences").singleOrDefault();
+            if (references != null) {
+                int numberOfReferences = Integer.parseInt(references.text());
+                if (numberOfReferences > maxReferences) {
+                    mostReferenced = element;
+                }
+            }
+        }
+        assertThat(System.currentTimeMillis() - startTime).as("millis").isLessThan(1000);
+        assertThat(mostReferenced.find("Article", "ArticleTitle").single().text())
+            .isEqualTo("Outcome of patients with sepsis and septic shock after ICU treatment.");
     }
 
 }

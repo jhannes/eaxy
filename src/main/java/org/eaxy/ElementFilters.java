@@ -1,6 +1,7 @@
 package org.eaxy;
 
 import java.io.Reader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,12 +36,6 @@ public class ElementFilters {
         public String toString() {
             return parent + "/" + child;
         }
-
-        @Override
-        public Iterable<Element> iterate(Reader reader) {
-            return XmlIterator.iterate(this, reader);
-        }
-
     }
 
     private static final class ElementDescendantQuery implements ElementQuery {
@@ -64,11 +59,6 @@ public class ElementFilters {
                 findDescendants(element, elementPaths);
             }
             return elements.nestedSet(this, elementPaths);
-        }
-
-        @Override
-        public Iterable<Element> iterate(Reader reader) {
-            return XmlIterator.iterate(this, reader);
         }
 
         @Override
@@ -117,6 +107,11 @@ public class ElementFilters {
 
         @Override
         public Iterable<Element> iterate(Reader reader) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Iterable<Element> iterate(URL url) {
             throw new UnsupportedOperationException();
         }
 
@@ -174,11 +169,6 @@ public class ElementFilters {
         @Override
         public boolean matches(List<Element> path, int position) {
             return true;
-        }
-
-        @Override
-        public Iterable<Element> iterate(Reader reader) {
-            return XmlIterator.iterate(this, reader);
         }
 
         @Override

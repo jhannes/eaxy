@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
-
 import org.eaxy.utils.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;

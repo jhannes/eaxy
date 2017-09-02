@@ -6,9 +6,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
 import org.assertj.core.api.StringAssert;
 import org.eaxy.utils.IOUtils;
 import org.junit.Test;
@@ -59,6 +59,16 @@ public class XmlSerializationTest {
         Document doc = Xml.fromDom(Xml.toDom(Xml.read(xmlFile)));
         assertEquals(Xml.fromDom(Xml.toDom(doc)),
                 IOUtils.slurp(xmlFile));
+    }
+
+    @Test
+    public void shouldIterate() throws IOException {
+        int elementCount = 0;
+        ElementQuery filter = ElementFilters.create("*");
+        for (@SuppressWarnings("unused") Element element : filter.iterate(xmlFile.toURI().toURL())) {
+            elementCount++;
+        }
+        assertThat(elementCount).isEqualTo(Xml.read(xmlFile).find(filter).size());
     }
 
     private StringAssert assertEquals(Document document, String fileContents) {

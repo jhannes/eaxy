@@ -4,12 +4,13 @@ import static org.eaxy.Xml.cdata;
 import static org.eaxy.Xml.comment;
 import static org.eaxy.Xml.text;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
+import java.net.URL;
 import java.util.Iterator;
 import java.util.Stack;
+import java.util.zip.GZIPInputStream;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
@@ -145,20 +146,31 @@ public class XmlIterator implements XMLStreamConstants, Iterator<Element> {
         return new QualifiedName(name.getNamespaceURI(), name.getLocalPart(), name.getPrefix());
     }
 
-    public static Iterable<Element> iterate(ElementQuery query, File file) {
+    @SuppressWarnings("resource")
+    public static Iterable<Element> iterate(ElementQuery query, URL url) {
+        final InputStream inputStream = openStream(url);
         return new Iterable<Element>() {
-            @SuppressWarnings("resource")
             @Override
             public Iterator<Element> iterator() {
                 try {
-                    return new XmlIterator(getInputFactory().createXMLStreamReader(new FileInputStream(file)), query);
+                    return new XmlIterator(getInputFactory().createXMLStreamReader(inputStream), query);
                 } catch (XMLStreamException e) {
                     throw new MalformedXMLException(e.getMessage(), e.getLocation().getLineNumber());
-                } catch (IOException e) {
-                    throw new RuntimeException("Can't open " + file, e);
                 }
             }
         };
+    }
+
+    private static InputStream openStream(URL url) {
+        try {
+            if (url.getFile().endsWith(".gz")) {
+                return new GZIPInputStream(url.openStream());
+            } else {
+                return url.openStream();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Can't open " + url, e);
+        }
     }
 
     public static Iterable<Element> iterate(ElementQuery query, Reader reader) {

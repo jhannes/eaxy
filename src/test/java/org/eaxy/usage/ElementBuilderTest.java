@@ -40,7 +40,7 @@ public class ElementBuilderTest {
 
     @Test
     public void shouldSerializeAttributes() {
-        assertThat(el("foo", el("bar", "gz").attr("href", "http://a.com")).attr("alt", "test").toXML())
+        assertThat(el("foo", el("bar", text("gz"), attr("href", "http://a.com"))).attr("alt", "test").toXML())
             .isEqualTo("<foo alt=\"test\"><bar href=\"http://a.com\">gz</bar></foo>");
     }
 
@@ -123,7 +123,6 @@ public class ElementBuilderTest {
             .isEqualTo("<a:Ancestor xmlns:a=\"http://a.com\">" +
                     "<b:Child xmlns:b=\"http://b.com\"><a:GrandChild /></b:Child>" +
                     "</a:Ancestor>");
-
     }
 
     @Test
