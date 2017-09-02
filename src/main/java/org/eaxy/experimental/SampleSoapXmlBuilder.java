@@ -23,9 +23,11 @@ public class SampleSoapXmlBuilder {
     public class SoapOperationDefinition {
 
         private Element operationElement;
+        private Element bindingOperation;
 
-        public SoapOperationDefinition(Element operationElement) {
+        private SoapOperationDefinition(Element operationElement, Element bindingOperation) {
             this.operationElement = operationElement;
+            this.bindingOperation = bindingOperation;
         }
 
         public Element randomOutput(String nsPrefix) {
@@ -70,10 +72,6 @@ public class SampleSoapXmlBuilder {
             return getSchema(getNamespace());
         }
 
-        public String getSoapAction() {
-            return null;
-        }
-
         public Element processRequest(Element soapRequest) {
             if (!soapRequest.getName().equals(SOAP.name("Envelope"))) {
                 throw new NonMatchingPathException("Didn't find root element " + SOAP.name("Envelope"));
@@ -83,6 +81,9 @@ public class SampleSoapXmlBuilder {
             return soapEnvelope(randomOutput("msg"));
         }
 
+        public String getSoapAction() {
+            return bindingOperation.find("operation").single().attr("soapAction");
+        }
     }
 
     public class SoapServiceDefinition {
@@ -99,7 +100,11 @@ public class SampleSoapXmlBuilder {
         }
 
         public SoapOperationDefinition operation(String name) {
-            return new SoapOperationDefinition(operationElement(name));
+            Element bindingOperation = null;
+            if (binding != null) {
+                bindingOperation = binding.find("operation[name=" + name + "]").single();
+            }
+            return new SoapOperationDefinition(operationElement(name), bindingOperation);
         }
 
         public SoapServiceDefinition(Element service) {
@@ -209,5 +214,9 @@ public class SampleSoapXmlBuilder {
 
     public Element processRequest(String soapAction, Element input) {
         return getService().soapAction(soapAction).processRequest(input);
+    }
+
+    public Element processRequest(String soapAction, Document input) {
+        return getService().soapAction(soapAction).processRequest(input.getRootElement());
     }
 }
