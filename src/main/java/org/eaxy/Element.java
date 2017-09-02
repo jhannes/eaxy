@@ -208,7 +208,6 @@ public class Element implements Node {
         return name.hashCode();
     }
 
-    // TODO: Would an event based finder (instead of returning a set) be more efficient?
     // TODO: Will the paths pretty much always be "...", something?
     public ElementSet find(Object... path) {
         return new ElementSet(this).find(path);

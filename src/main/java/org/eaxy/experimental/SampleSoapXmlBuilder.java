@@ -165,6 +165,7 @@ public class SampleSoapXmlBuilder {
 
     private Document wsdlFile;
     private Map<String, Element> schemas = new HashMap<>();
+    private Map<String, SampleXmlBuilder> builders = new HashMap<>();
 
     public SampleSoapXmlBuilder(String wsdlResource) throws IOException {
         this(Xml.readResource("/" + wsdlResource), null);
@@ -181,8 +182,11 @@ public class SampleSoapXmlBuilder {
     }
 
     private Element createSampleMessage(QualifiedName qualifiedName) {
-        Element schema = getSchema(qualifiedName.getNamespace());
-        return new SampleXmlBuilder(new Document(schema), qualifiedName.getNamespace().getPrefix()).createRandomElement(qualifiedName);
+        return getXmlBuilder(qualifiedName).createRandomElement(qualifiedName);
+    }
+
+    private SampleXmlBuilder getXmlBuilder(QualifiedName qualifiedName) {
+        return builders.get(qualifiedName.getNamespace().getUri());
     }
 
     private Element getSchema(Namespace namespace) {
@@ -193,8 +197,9 @@ public class SampleSoapXmlBuilder {
         }
     }
 
-    private void addSchema(Namespace namespace, Element schema) {
+    private void addSchema(Namespace namespace, Element schema) throws IOException {
         schemas.put(namespace.getUri(), schema);
+        builders.put(namespace.getUri(), new SampleXmlBuilder(new Document(schema), namespace.getPrefix()));
     }
 
     public Element soapEnvelope(Element payload) {
@@ -207,7 +212,6 @@ public class SampleSoapXmlBuilder {
         this(Xml.read(resource), resource);
     }
 
-    // TODO: It would be so much nicer if Document had it's base resource!
     public SampleSoapXmlBuilder(Document wsdlFile, URL resource) throws IOException {
         this.wsdlFile = wsdlFile;
         for (Element schema : wsdlFile.find("types", "schema")) {

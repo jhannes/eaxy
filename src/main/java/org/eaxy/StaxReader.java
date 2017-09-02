@@ -8,6 +8,7 @@ import com.sun.org.apache.xerces.internal.impl.Constants;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.net.URL;
 import java.util.Stack;
 
 import javax.xml.namespace.QName;
@@ -22,9 +23,10 @@ public class StaxReader implements XMLStreamConstants {
 
     private final Stack<Element> elementStack = new Stack<Element>();
     private final XMLStreamReader streamReader;
-    private final Document document = new Document();
+    private final Document document;
 
-    private StaxReader(XMLStreamReader streamReader) {
+    private StaxReader(URL baseUrl, XMLStreamReader streamReader) {
+        this.document = new Document(baseUrl);
         this.streamReader = streamReader;
         if (streamReader.getVersion() != null) {
             document.setVersion(streamReader.getVersion());
@@ -43,15 +45,15 @@ public class StaxReader implements XMLStreamConstants {
 
     public static Document read(Reader reader) {
         try {
-            return new StaxReader(getInputFactory().createXMLStreamReader(reader)).doParse();
+            return new StaxReader(null, getInputFactory().createXMLStreamReader(reader)).doParse();
         } catch (XMLStreamException e) {
             throw new MalformedXMLException(e.getMessage(), e.getLocation().getLineNumber());
         }
     }
 
-    public static Document read(InputStream inputStream) {
+    public static Document read(InputStream inputStream, URL resourceBase) {
         try {
-            return new StaxReader(getInputFactory().createXMLStreamReader(inputStream)).doParse();
+            return new StaxReader(resourceBase, getInputFactory().createXMLStreamReader(inputStream)).doParse();
         } catch (XMLStreamException e) {
             throw new MalformedXMLException(e.getMessage(), e.getLocation().getLineNumber());
         }

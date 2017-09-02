@@ -23,20 +23,18 @@ public class SampleXmlBuilder {
     private Random random = new Random();
     private String nsPrefix;
 
-    public SampleXmlBuilder(Document schemaDoc, String nsPrefix) {
+    public SampleXmlBuilder(Document schemaDoc, String nsPrefix) throws IOException {
         this.schemaDoc = schemaDoc;
         this.nsPrefix = nsPrefix;
 
         xsNamespace = schemaDoc.getRootElement().getName().getNamespace();
+        for (Element xsdInclude : schemaDoc.find("include")) {
+            this.includedSchemas.add(Xml.read(new URL(schemaDoc.getBaseUrl(), xsdInclude.attr("schemaLocation"))));
+        }
     }
 
     public SampleXmlBuilder(URL resource, String nsPrefix) throws IOException {
-        this.nsPrefix = nsPrefix;
-        this.schemaDoc = Xml.read(resource);
-        xsNamespace = schemaDoc.getRootElement().getNamespaceByUri("http://www.w3.org/2001/XMLSchema");
-        for (Element xsdInclude : schemaDoc.find("include")) {
-            this.includedSchemas.add(Xml.read(new URL(resource, xsdInclude.attr("schemaLocation"))));
-        }
+        this(Xml.read(resource), nsPrefix);
     }
 
     public Element createRandomElement(String elementName) {
@@ -91,7 +89,6 @@ public class SampleXmlBuilder {
             }
         }
     }
-
 
     private boolean chance(double p) {
         return random.nextDouble() < p;

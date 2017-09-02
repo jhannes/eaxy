@@ -3,6 +3,7 @@ package org.eaxy;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,12 +14,21 @@ public class Document {
     private Element rootElement;
     private final List<String> dtds = new ArrayList<String>();
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
+    private URL baseUrl;
 
     public Document(Element root) {
         rootElement = root;
     }
 
     public Document() {
+    }
+
+    public Document(URL baseUrl) {
+        this.baseUrl = baseUrl;
+    }
+
+    public URL getBaseUrl() {
+        return baseUrl;
     }
 
     public String getVersion() {

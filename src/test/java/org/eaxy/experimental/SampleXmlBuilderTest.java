@@ -100,16 +100,6 @@ public class SampleXmlBuilderTest {
         assertThat(output.tagName()).isEqualTo("TradePrice");
         assertThat(output.find("price").single().text()).isNotEmpty();
         Float.parseFloat(output.find("price").single().text());
-
-        /*
-        SoapOperationDefinition operation = xmlBuilder.getService().soapAction(exchange.getRequestHeaders().getFirst("SOAPAction"));
-        if (operation != null) {
-            Document input = readXmlRequest(exchange);
-            // TODO: validate
-            writeXmlResponse(soapEnvelope(operation.randomOutput("msg")), exchange);
-            return;
-        }
-        */
     }
 
     private static final Namespace SOAP = new Namespace("http://schemas.xmlsoap.org/soap/envelope/");

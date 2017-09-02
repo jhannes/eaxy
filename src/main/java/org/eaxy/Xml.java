@@ -134,24 +134,25 @@ public interface Xml {
     public static Document read(URL url) throws IOException {
         if (url.getFile().endsWith(".gz")) {
             try (InputStream inputStream = new GZIPInputStream(url.openStream())) {
-                return StaxReader.read(inputStream);
+                return StaxReader.read(inputStream, url);
             }
         } else {
             try (InputStream inputStream = url.openStream()) {
-                return StaxReader.read(inputStream);
+                return StaxReader.read(inputStream, url);
             }
         }
     }
 
     public static Document readResource(String name) throws IOException {
-        try(InputStream input = Xml.class.getResourceAsStream(name)) {
+        URL baseUrl = Xml.class.getResource(name);
+        try(InputStream input = baseUrl.openStream()) {
             if (input == null) {
                 throw new IllegalArgumentException("Can't load " + name);
             }
             if (name.endsWith(".gz")) {
-                return StaxReader.read(new GZIPInputStream(input));
+                return StaxReader.read(new GZIPInputStream(input), baseUrl);
             } else {
-                return StaxReader.read(input);
+                return StaxReader.read(input, baseUrl);
             }
         }
     }

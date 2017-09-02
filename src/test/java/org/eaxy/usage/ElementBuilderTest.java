@@ -238,7 +238,7 @@ public class ElementBuilderTest {
         String xml = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>"
                 + Document.LINE_SEPARATOR
                 + "<empty />";
-        assertThat(StaxReader.read(new ByteArrayInputStream(xml.getBytes())).copy().toXML())
+        assertThat(StaxReader.read(new ByteArrayInputStream(xml.getBytes()), null).copy().toXML())
             .isEqualTo(xml);
     }
 
