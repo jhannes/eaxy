@@ -10,6 +10,7 @@ import org.eaxy.Element;
 import org.eaxy.ElementSet;
 import org.eaxy.Namespace;
 import org.eaxy.NonMatchingPathException;
+import org.eaxy.QualifiedName;
 import org.eaxy.Validator;
 import org.eaxy.Xml;
 
@@ -28,60 +29,29 @@ public class SampleSoapXmlBuilder {
         }
 
         public Element randomOutput(String nsPrefix) {
-            Element input = operationElement.find("output").single();
-            if (input.attr("element") != null) {
-                String[] inputRefParts = input.attr("element").split(":");
-                return new SampleXmlBuilder(new Document(targetSchema()), nsPrefix).createRandomElement(inputRefParts[1]);
-            } else if (input.name() != null) {
-                Element message = wsdlFile.find("message[name=" + input.name() + "]").single();
-                Element part = message.find("part").single();
-                String[] elementRefParts = part.attr("element").split(":");
-                Namespace namespace = wsdlFile.getRootElement().getNamespace(elementRefParts[0]);
-
-                return new SampleXmlBuilder(new Document(getSchema(namespace)), nsPrefix)
-                        .createRandomElement(elementRefParts[1]);
-            } else if (input.hasAttr("message")) {
-                String[] messageQname = input.attr("message").split(":");
-                Element message = wsdlFile.find("message[name=" + messageQname[1] + "]").single();
-                Element part = message.find("part").single();
-                String[] elementRefParts = part.attr("element").split(":");
-                Namespace namespace = wsdlFile.getRootElement().getNamespace(elementRefParts[0]);
-                Namespace outputNamespace = new Namespace(namespace.getUri(), nsPrefix);
-                return new SampleXmlBuilder(new Document(getSchema(namespace)), nsPrefix)
-                        .createRandomElement(outputNamespace.name(elementRefParts[1]));
-            } else {
-                throw new IllegalArgumentException("Don't know what to do with " + input);
-            }
+            return randomMessage(nsPrefix, operationElement.find("output").single());
         }
 
         public Element randomInput(String nsPrefix) {
-            Element input = operationElement.find("input").single();
-            if (input.attr("element") != null) {
-                String[] inputRefParts = input.attr("element").split(":");
-                return new SampleXmlBuilder(new Document(targetSchema()), nsPrefix).createRandomElement(inputRefParts[1]);
-            } else if (input.name() != null) {
-                Element message = wsdlFile.find("message[name=" + input.name() + "]").single();
-                Element part = message.find("part").single();
-                String[] elementRefParts = part.attr("element").split(":");
-                Namespace namespace = wsdlFile.getRootElement().getNamespace(elementRefParts[0]);
+            return randomMessage(nsPrefix, operationElement.find("input").single());
+        }
 
-                return new SampleXmlBuilder(new Document(getSchema(namespace)), nsPrefix)
-                        .createRandomElement(elementRefParts[1]);
-            } else if (input.hasAttr("message")) {
-                String[] messageQname = input.attr("message").split(":");
+        private Element randomMessage(String nsPrefix, Element messageDefinition) {
+            if (messageDefinition.attr("element") != null) {
+                return createSampleMessage(qualifiedName(nsPrefix, messageDefinition.attr("element")));
+            } else if (messageDefinition.name() != null) {
+                Element message = wsdlFile.find("message[name=" + messageDefinition.name() + "]").single();
+                return createSampleMessage(qualifiedName(nsPrefix, message.find("part").single().attr("element")));
+            } else if (messageDefinition.hasAttr("message")) {
+                String[] messageQname = messageDefinition.attr("message").split(":");
                 Element message = wsdlFile.find("message[name=" + messageQname[1] + "]").single();
-                Element part = message.find("part").single();
-                String[] elementRefParts = part.attr("element").split(":");
-                Namespace namespace = wsdlFile.getRootElement().getNamespace(elementRefParts[0]);
-
-                return new SampleXmlBuilder(new Document(getSchema(namespace)), nsPrefix)
-                        .createRandomElement(elementRefParts[1]);
+                return createSampleMessage(qualifiedName(nsPrefix, message.find("part").single().attr("element")));
             } else {
-                throw new IllegalArgumentException("Don't know what to do with " + input);
+                throw new IllegalArgumentException("Don't know what to do with " + messageDefinition);
             }
         }
 
-        public Namespace getNamespace() {
+        private Namespace getNamespace() {
             Element input = operationElement.find("input").single();
             if (input.attr("element") != null) {
                 String[] inputRefParts = input.attr("element").split(":");
@@ -138,6 +108,7 @@ public class SampleSoapXmlBuilder {
                 String[] parts = itf.split(":");
                 String itfName = parts.length == 1 ? parts[0] : parts[1];
                 itfElement = wsdlFile.find("interface[name=" + itfName + "]").single();
+                // TODO: We will get a NullPointerException in soapAction because binding isn't set
             } else if (service.find("port").isPresent()) {
                 String itf = service.select("port").attr("binding");
                 String[] parts = itf.split(":");
@@ -160,7 +131,6 @@ public class SampleSoapXmlBuilder {
             }
             return null;
         }
-
     }
 
     private Document wsdlFile;
@@ -171,6 +141,18 @@ public class SampleSoapXmlBuilder {
         for (Element schema : wsdlFile.find("types", XS.name("schema"))) {
             addSchema(new Namespace(schema.attr("targetNamespace")), schema);
         }
+    }
+
+    private QualifiedName qualifiedName(String nsPrefix, String elementName) {
+        String[] elementRefParts = elementName.split(":");
+        Namespace namespace = wsdlFile.getRootElement().getNamespace(elementRefParts[0]);
+        Namespace resultNamespace = new Namespace(namespace.getUri(), nsPrefix);
+        return resultNamespace.name(elementRefParts[1]);
+    }
+
+    private Element createSampleMessage(QualifiedName qualifiedName) {
+        Element schema = getSchema(qualifiedName.getNamespace());
+        return new SampleXmlBuilder(new Document(schema), qualifiedName.getNamespace().getPrefix()).createRandomElement(qualifiedName);
     }
 
     private Element getSchema(Namespace namespace) {
@@ -228,5 +210,4 @@ public class SampleSoapXmlBuilder {
     public Element processRequest(String soapAction, Element input) {
         return getService().soapAction(soapAction).processRequest(input);
     }
-
 }
