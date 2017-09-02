@@ -42,4 +42,9 @@ public class ElementPath {
         return namespaces.values();
     }
 
+    @Override
+    public String toString() {
+        return "..." + element;
+    }
+
 }

@@ -185,7 +185,7 @@ public class Element implements Node {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{" + printTag() + "}";
+        return "<" + printTag() + printAttributes() + " />";
     }
 
     @Override
