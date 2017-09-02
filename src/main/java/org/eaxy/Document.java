@@ -102,6 +102,10 @@ public class Document {
         }
     }
 
+    public String toIndentedXML() {
+        return toIndentedXML("  ");
+    }
+
     public String toIndentedXML(String indentation) {
         StringWriter result = new StringWriter();
         try {

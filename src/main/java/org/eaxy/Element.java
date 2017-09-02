@@ -199,7 +199,6 @@ public class Element implements Node {
         return name.hashCode();
     }
 
-    // TODO: Will the paths pretty much always be "...", something?
     public ElementSet find(Object... path) {
         return new ElementSet(this).find(path);
     }
