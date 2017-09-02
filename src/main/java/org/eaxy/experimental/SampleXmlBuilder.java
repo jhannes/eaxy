@@ -112,13 +112,16 @@ public class SampleXmlBuilder {
 
     Element createRandomElement(QualifiedName elementName) {
         Element elementDefinition = elementDefinition(elementName);
-        Element complexType;
         if (elementDefinition.type() != null) {
-            complexType = complexType(elementDefinition.type());
+            if (isXsdType(qualifiedName(elementDefinition.type()))) {
+                return Xml.el(elementName,
+                    randomElementText(elementName.getName(), elementDefinition));
+            } else {
+                return createComplexType(elementName, complexType(elementDefinition.type()));
+            }
         } else {
-            complexType = elementDefinition.find("complexType").single();
+            return createComplexType(elementName, elementDefinition.find("complexType").single());
         }
-        return createComplexType(elementName, complexType);
     }
 
     private Element createComplexType(QualifiedName elementName, Element complexType) {
@@ -148,7 +151,13 @@ public class SampleXmlBuilder {
         } else if (isXsdType(qualifiedName(memberDef.type()))) {
             return Xml.el(Namespace.NO_NAMESPACE.name(memberDef.name()), randomElementText(memberDef.name(), memberDef));
         } else {
-            return createComplexType(Namespace.NO_NAMESPACE.name(memberDef.name()), complexType(memberDef.type()));
+            Element simpleType = schemaDoc.find("simpleType[name=" + qualifiedName(memberDef.type()).getName() + "]").singleOrDefault();
+            if (simpleType != null) {
+                return Xml.el(Namespace.NO_NAMESPACE.name(memberDef.name()), randomElementText(memberDef.name(), simpleType));
+            } else {
+                return createComplexType(Namespace.NO_NAMESPACE.name(memberDef.name()),
+                    complexType(memberDef.type()));
+            }
         }
     }
 
@@ -202,7 +211,7 @@ public class SampleXmlBuilder {
     }
 
     private Instant randomDateTime() {
-        return ZonedDateTime.now().minusDays(100).plusMinutes(new Random().nextInt(200 * 24 * 60)).toInstant();
+        return ZonedDateTime.now().minusDays(100).plusMinutes(random.nextInt(200 * 24 * 60)).toInstant();
     }
 
     protected String randomData(Element typeDef) {
@@ -228,6 +237,8 @@ public class SampleXmlBuilder {
             return randomDate().toString();
         } else if (type.matches(xsNamespace.name("dateTime").print())) {
             return randomDateTime().toString();
+        } else if (type.matches(xsNamespace.name("boolean").print())) {
+            return String.valueOf(random.nextBoolean());
         } else if (type.matches(xsNamespace.name("string").print())) {
             return randomString(10, 20);
         } else if (type.matches(xsNamespace.name("int").print())) {
@@ -237,6 +248,8 @@ public class SampleXmlBuilder {
         } else if (type.matches(xsNamespace.name("decimal").print())) {
             return String.valueOf(random(-1000, 10000) / 100);
         } else if (type.matches(xsNamespace.name("float").print())) {
+            return String.valueOf(random(-1000, 10000) / 100.0);
+        } else if (type.matches(xsNamespace.name("double").print())) {
             return String.valueOf(random(-1000, 10000) / 100.0);
         } else if (type.matches(xsNamespace.name("base64Binary").print())) {
             // data:image/svg+xml;base64,
@@ -291,17 +304,18 @@ public class SampleXmlBuilder {
     }
 
     private Element complexType(String typeNameFull) {
-        Element typeDefinition = schemaDoc.find("complexType[name=" + qualifiedName(typeNameFull).getName() + "]").singleOrDefault();
+        QualifiedName qualifiedName = qualifiedName(typeNameFull);
+        Element typeDefinition = schemaDoc.find("complexType[name=" + qualifiedName.getName() + "]").singleOrDefault();
         if (typeDefinition != null) {
             return typeDefinition;
         }
         for (Document schemaDoc : includedSchemas) {
-            typeDefinition = schemaDoc.find("complexType[name=" + qualifiedName(typeNameFull).getName() + "]").singleOrDefault();
+            typeDefinition = schemaDoc.find("complexType[name=" + qualifiedName.getName() + "]").singleOrDefault();
             if (typeDefinition != null) {
                 return typeDefinition;
             }
         }
-        throw new IllegalArgumentException("Can't find type definition of " + qualifiedName(typeNameFull).getName());
+        throw new IllegalArgumentException("Can't find type definition of " + qualifiedName);
     }
 
     private Element elementDefinition(QualifiedName elementName) {

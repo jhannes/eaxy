@@ -23,6 +23,7 @@ public class SampleXmlBuilderTest {
         SoapOperationDefinition operation = builder.service("reservationService").operation("opCheckAvailability");
         Validator validator = new Validator(operation.targetSchema());
         validator.validate(operation.randomInput("gh"));
+        validator.validate(operation.randomOutput("gh"));
     }
 
     @Test
