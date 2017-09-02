@@ -2,6 +2,7 @@ package org.eaxy.experimental;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -13,8 +14,6 @@ import java.util.Map;
 import org.eaxy.Document;
 import org.eaxy.Element;
 import org.eaxy.Xml;
-import org.eaxy.utils.IOUtils;
-
 import com.sun.net.httpserver.HttpExchange;
 
 @SuppressWarnings("restriction")
@@ -69,7 +68,7 @@ public class SoapSimulatorServer extends WebServer {
     private void soapContext(HttpExchange exchange) throws IOException {
         String path = exchange.getRequestURI().getPath();
         String soapAction = exchange.getRequestHeaders().getFirst("SOAPAction");
-        Document xmlRequest = Xml.xml(IOUtils.slurp(exchange.getRequestBody()));
+        Document xmlRequest = Xml.read(new InputStreamReader(exchange.getRequestBody()));
 
         if (!soapEndpoints.containsKey(path)) {
             exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, -1);
