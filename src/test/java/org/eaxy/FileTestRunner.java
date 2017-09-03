@@ -71,8 +71,12 @@ public class FileTestRunner extends Suite {
         }
         for (String value : directoryAnnotation.value()) {
             File directory = new File(value);
-            if (!directory.isDirectory() && directoryAnnotation.value().length <= 1) {
-                throw new InitializationError(directory + " must be a directory");
+            if (!directory.isDirectory()) {
+                if (directoryAnnotation.value().length <= 1) {
+                    throw new InitializationError(directory + " must be a directory");
+                } else {
+                    continue;
+                }
             }
             for (File file : directory.listFiles()) {
                 if (file.isFile() && file.getName().endsWith(directoryAnnotation.extension())) {
