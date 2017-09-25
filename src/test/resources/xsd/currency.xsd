@@ -1,0 +1,12 @@
+<s:schema elementFormDefault="qualified"
+	xmlns:s="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="http://www.webserviceX.NET/cur"
+	xmlns="http://www.webserviceX.NET/cur">
+	<s:simpleType name="Currency">
+		<s:restriction base="s:string">
+			<s:enumeration value="EUR" />
+			<s:enumeration value="NOK" />
+			<s:enumeration value="SEK" />
+		</s:restriction>
+	</s:simpleType>
+</s:schema>

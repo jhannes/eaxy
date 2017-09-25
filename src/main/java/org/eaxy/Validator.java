@@ -1,14 +1,18 @@
 package org.eaxy;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.SchemaFactory;
 
+import org.eaxy.utils.IOUtils;
 import org.xml.sax.SAXException;
 
 public class Validator {
@@ -22,6 +26,7 @@ public class Validator {
             if (url == null) {
                 throw new RuntimeException("Missing resource " + resourcePaths[i]);
             }
+
             sources[i] = new StreamSource(url.toExternalForm());
         }
         SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
@@ -38,6 +43,57 @@ public class Validator {
 
     public Validator(Document schemaDoc) {
         this(Xml.toDom(schemaDoc));
+    }
+
+    /**
+     * Create a Validator consisting of several documents that may have imports to each other.
+     * To facilitate &lt;import&gt;, the schemas are saved to temporary storage.
+     * TODO: Is it possible to solve this more elegantly?
+     */
+    public Validator(List<Document> includedSchemas) throws IOException {
+        int index = 0;
+
+        Map<Namespace, Document> schemas = new HashMap<>();
+        for (Document document : includedSchemas) {
+            schemas.put(new Namespace(document.getRootElement().attr("targetNamespace")), document);
+        }
+
+        for (Document document : includedSchemas) {
+            saveImportedSchemas(schemas, document);
+        }
+
+        Source[] sources = new Source[includedSchemas.size()];
+        for (Document schema : includedSchemas) {
+            sources[index++] = new StreamSource(schema.getBaseUrl().toExternalForm());
+        }
+
+        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        try {
+            validator = schemaFactory.newSchema(sources).newValidator();
+        } catch (SAXException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void saveImportedSchemas(Map<Namespace, Document> schemas, Document document) throws IOException {
+        for (Element importElement : document.getRootElement().find("import")) {
+            if (!importElement.hasAttr("schemaLocation")) {
+                Document imported = schemas.get(new Namespace(importElement.attr("namespace")));
+                if (imported == null) {
+                    throw new IllegalArgumentException("Can't find namespace " + importElement.attr("namespace") + " in " + schemas.keySet());
+                }
+                saveImportedSchemas(schemas, imported);
+                importElement.attr("schemaLocation", imported.getBaseUrl().toExternalForm());
+            }
+        }
+        ensureBaseUrl(document);
+    }
+
+    private void ensureBaseUrl(Document schema) throws IOException {
+        if (schema.getBaseUrl() == null) {
+            File schemaFile = IOUtils.toTmpFile(schema.toIndentedXML(), "eaxy-schema-", ".xsd");
+            schema.setBaseUrl(schemaFile.toURI().toURL());
+        }
     }
 
     public Validator(org.w3c.dom.Document dom) {

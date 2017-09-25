@@ -46,4 +46,15 @@ public class ValidationTest {
         validator.validate(email);
     }
 
+    private final static Namespace CONV = new Namespace("http://www.webserviceX.NET/", "conv");
+
+    @Test
+    public void shouldValidateImportingXsds() throws Exception {
+        Validator validator = new Validator(new String[] {
+            "xsd/currencyConversionRate.xsd", "xsd/currency.xsd"
+        });
+        validator.validate(CONV.el("ConversionRate",
+            CONV.el("FromCurrency", "NOK"),
+            CONV.el("ToCurrency", "EUR")));
+    }
 }
