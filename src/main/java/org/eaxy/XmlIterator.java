@@ -147,7 +147,7 @@ public class XmlIterator implements XMLStreamConstants, Iterator<Element> {
     }
 
     @SuppressWarnings("resource")
-    public static Iterable<Element> iterate(ElementQuery query, URL url) {
+    public static Iterable<Element> iterate(final ElementQuery query, URL url) {
         final InputStream inputStream = openStream(url);
         return new Iterable<Element>() {
             @Override
@@ -173,7 +173,7 @@ public class XmlIterator implements XMLStreamConstants, Iterator<Element> {
         }
     }
 
-    public static Iterable<Element> iterate(ElementQuery query, Reader reader) {
+    public static Iterable<Element> iterate(final ElementQuery query, final Reader reader) {
         return new Iterable<Element>() {
             @Override
             public Iterator<Element> iterator() {

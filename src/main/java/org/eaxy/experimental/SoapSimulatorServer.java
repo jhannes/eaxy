@@ -66,7 +66,7 @@ public class SoapSimulatorServer extends WebServer {
         server.createContext("/soap", handleErrors(this::soapContext));
     }
 
-    private com.sun.net.httpserver.HttpHandler handleErrors(com.sun.net.httpserver.HttpHandler httpHandler) {
+    private com.sun.net.httpserver.HttpHandler handleErrors(final com.sun.net.httpserver.HttpHandler httpHandler) {
         return new com.sun.net.httpserver.HttpHandler() {
             @Override
             public void handle(HttpExchange exchange) throws IOException {

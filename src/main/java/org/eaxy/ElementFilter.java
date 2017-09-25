@@ -1,5 +1,7 @@
 package org.eaxy;
 
+import java.io.Reader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,5 +36,15 @@ abstract class ElementFilter implements ElementQuery {
             }
         }
         return elements.nestedSet(this, elementPaths);
+    }
+
+    @Override
+    public Iterable<Element> iterate(Reader reader) {
+        return XmlIterator.iterate(this, reader);
+    }
+
+    @Override
+    public Iterable<Element> iterate(URL url) {
+        return XmlIterator.iterate(this, url);
     }
 }

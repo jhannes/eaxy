@@ -12,7 +12,7 @@ import org.eaxy.Namespace;
 import org.eaxy.Node;
 import org.eaxy.WriterXmlVisitor;
 
-public interface XmlFormatter {
+public abstract class XmlFormatter {
 
     static class CanonicalInclusiveVisitor extends WriterXmlVisitor {
 
@@ -47,7 +47,7 @@ public interface XmlFormatter {
         }
     }
 
-    static class CanonicalInclusive implements XmlFormatter {
+    static class CanonicalInclusive extends XmlFormatter {
         private static String NAME = "http://www.w3.org/TR/2001/REC-xml-c14n-20010315";
 
         @Override
@@ -64,7 +64,7 @@ public interface XmlFormatter {
         }
     }
 
-    default String toXML(ElementPath elementPath) {
+    public String toXML(ElementPath elementPath) {
         try {
             StringWriter writer = new StringWriter();
             format(writer, elementPath);
@@ -74,6 +74,6 @@ public interface XmlFormatter {
         }
     }
 
-    void format(Writer writer, ElementPath elementPath) throws IOException;
+    public abstract void format(Writer writer, ElementPath elementPath) throws IOException;
 
 }

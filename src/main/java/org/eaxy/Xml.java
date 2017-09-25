@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.function.Function;
 import java.util.zip.GZIPInputStream;
 
-public interface Xml {
+public class Xml {
 
     public static final Charset UTF_8 = Charset.forName("UTF-8");
 

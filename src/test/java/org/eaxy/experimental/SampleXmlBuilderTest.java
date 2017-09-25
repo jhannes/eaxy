@@ -125,7 +125,7 @@ public class SampleXmlBuilderTest {
 
     @Test
     public void shouldValidateSoapInput() throws IOException {
-        SampleSoapXmlBuilder builder = new SampleSoapXmlBuilder(Xml.readResource("/xsd/StockQuoteService.wsdl"));
+        final SampleSoapXmlBuilder builder = new SampleSoapXmlBuilder(Xml.readResource("/xsd/StockQuoteService.wsdl"));
         Element input = SOAP.el("Envelope",
             SOAP.el("Header"),
             SOAP.el("Body", Xml.el("wrongElement", "Some content")));

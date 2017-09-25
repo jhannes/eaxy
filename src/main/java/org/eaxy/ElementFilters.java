@@ -36,6 +36,16 @@ public class ElementFilters {
         public String toString() {
             return parent + "/" + child;
         }
+
+        @Override
+        public Iterable<Element> iterate(Reader reader) {
+            return XmlIterator.iterate(this, reader);
+        }
+
+        @Override
+        public Iterable<Element> iterate(URL url) {
+            return XmlIterator.iterate(this, url);
+        }
     }
 
     private static final class ElementDescendantQuery implements ElementQuery {
@@ -82,6 +92,16 @@ public class ElementFilters {
         public String toString() {
             return "...//" + filter + "/" + next;
         }
+
+        @Override
+        public Iterable<Element> iterate(Reader reader) {
+            return XmlIterator.iterate(this, reader);
+        }
+
+        @Override
+        public Iterable<Element> iterate(URL url) {
+            return XmlIterator.iterate(this, url);
+        }
     }
 
     private static final class ElementPositionFilter implements ElementQuery {
@@ -97,7 +117,7 @@ public class ElementFilters {
                 ElementPath path = elements.getPaths().get(intValue());
                 return elements.nestedSet(this, Arrays.asList(path));
             } else {
-                return elements.nestedSet(this, new ArrayList<>());
+                return elements.nestedSet(this, new ArrayList<ElementPath>());
             }
         }
 
@@ -174,6 +194,16 @@ public class ElementFilters {
         @Override
         public String toString() {
             return ".";
+        }
+
+        @Override
+        public Iterable<Element> iterate(Reader reader) {
+            return XmlIterator.iterate(this, reader);
+        }
+
+        @Override
+        public Iterable<Element> iterate(URL url) {
+            return XmlIterator.iterate(this, url);
         }
     }
 

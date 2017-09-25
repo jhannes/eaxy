@@ -10,12 +10,9 @@ public interface ElementQuery {
 
     boolean matches(List<Element> path, int position);
 
-    default Iterable<Element> iterate(Reader reader) {
-        return XmlIterator.iterate(this, reader);
-    }
+    Iterable<Element> iterate(Reader reader);
 
-    default Iterable<Element> iterate(URL url) {
-        return XmlIterator.iterate(this, url);
-    }
+    Iterable<Element> iterate(URL url);
+
 
 }
