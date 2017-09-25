@@ -1,48 +1,67 @@
 package org.eaxy.experimental;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.eaxy.FileTestRunner;
+import org.eaxy.Element;
 import org.eaxy.experimental.SampleSoapXmlBuilder.SoapOperationDefinition;
-import org.eaxy.experimental.SampleSoapXmlBuilder.SoapServiceDefinition;
-import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
-@RunWith(FileTestRunner.class)
-@FileTestRunner.Directory(value = {"src/test/xml/wsdl-suite", "src/local/xml/wsdl-suite"}, extension = ".wsdl")
+@RunWith(Parameterized.class)
 public class SoapXmlBuilderDirectoryTest {
 
-    private File wsdlFile;
+    @Parameters(name = "{0}")
+    public static List<Object[]> suite() throws IOException {
+        ArrayList<Object[]> result = new ArrayList<>();
 
-    public SoapXmlBuilderDirectoryTest(File wsdlFile) {
-        this.wsdlFile = wsdlFile;
-        Assume.assumeTrue(wsdlFile.getName().endsWith(".wsdl"));
+        File directory = new File("src/test/xml/wsdl-suite");
+        if (directory.isDirectory()) {
+            for (File file : directory.listFiles()) {
+                if (!file.getName().endsWith(".wsdl")) continue;
+                SampleSoapXmlBuilder builder = new SampleSoapXmlBuilder(file.toURI().toURL());
+                for (SoapOperationDefinition operationDefinition : builder.getService().getOperations()) {
+                    result.add(new Object[] { operationDefinition });
+                }
+            }
+        }
+        directory = new File("src/local/xml/wsdl-suite");
+        if (directory.isDirectory()) {
+            for (File file : directory.listFiles()) {
+                if (!file.getName().endsWith(".wsdl")) continue;
+                SampleSoapXmlBuilder builder = new SampleSoapXmlBuilder(file.toURI().toURL());
+                for (SoapOperationDefinition operationDefinition : builder.getService().getOperations()) {
+                    result.add(new Object[] { operationDefinition });
+                }
+            }
+        }
+
+
+        return result;
+    }
+
+    private SoapOperationDefinition operation;
+
+    public SoapXmlBuilderDirectoryTest(SoapOperationDefinition operation) {
+        this.operation = operation;
     }
 
     @Test
     public void shouldGenerateInput() throws IOException {
-        SampleSoapXmlBuilder builder = new SampleSoapXmlBuilder(wsdlFile.toURI().toURL());
-
-        SoapServiceDefinition service = builder.getService();
-        for (SoapOperationDefinition operation : service.getOperations()) {
-            operation.randomInput("m");
-        }
-        assertThat(service.getOperations()).isNotEmpty();
+        Element msg = operation.randomInput("m");
+        System.out.println(msg.toIndentedXML());
+        operation.getValidator().validate(msg);
     }
 
     @Test
     public void shouldGenerateOutput() throws IOException {
-        SampleSoapXmlBuilder builder = new SampleSoapXmlBuilder(wsdlFile.toURI().toURL());
-
-        SoapServiceDefinition service = builder.getService();
-        for (SoapOperationDefinition operation : service.getOperations()) {
-            operation.randomOutput("o");
-        }
-        assertThat(service.getOperations()).isNotEmpty();
+        Element msg = operation.randomOutput("o");
+        System.out.println(msg.toIndentedXML());
+        operation.getValidator().validate(msg);
     }
 
 
