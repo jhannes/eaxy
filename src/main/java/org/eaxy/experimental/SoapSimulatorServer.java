@@ -3,6 +3,7 @@ package org.eaxy.experimental;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -62,7 +63,22 @@ public class SoapSimulatorServer extends WebServer {
 
     public SoapSimulatorServer(int port) throws IOException {
         super(port);
-        server.createContext("/soap", this::soapContext);
+        server.createContext("/soap", handleErrors(this::soapContext));
+    }
+
+    private com.sun.net.httpserver.HttpHandler handleErrors(com.sun.net.httpserver.HttpHandler httpHandler) {
+        return new com.sun.net.httpserver.HttpHandler() {
+            @Override
+            public void handle(HttpExchange exchange) throws IOException {
+                try {
+                    httpHandler.handle(exchange);
+                } catch (Exception e) {
+                    exchange.sendResponseHeaders(500, -1);
+                    e.printStackTrace(new PrintWriter(exchange.getResponseBody()));
+                    e.printStackTrace();
+                }
+            }
+        };
     }
 
     private void soapContext(HttpExchange exchange) throws IOException {
@@ -83,6 +99,13 @@ public class SoapSimulatorServer extends WebServer {
     URL addSoapEndpoint(String url, Document wsdl) throws IOException {
         soapEndpoints.put(url, new SampleSoapXmlBuilder(wsdl));
         return new URL(getUrl(), url);
+    }
+
+    protected URL addSoapEndpoint(URL url) throws IOException {
+        SampleSoapXmlBuilder builder = new SampleSoapXmlBuilder(url);
+        String path = "/soap" + builder.getPortUrlPath();
+        soapEndpoints.put(path, builder);
+        return new URL(getUrl(), path);
     }
 
     public static void main(String[] args) throws IOException {

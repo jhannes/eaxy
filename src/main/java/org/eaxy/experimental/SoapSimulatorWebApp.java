@@ -29,7 +29,7 @@ public class SoapSimulatorWebApp extends SoapSimulatorServer {
             exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, -1);
             exchange.close();
         } else {
-            sendRedirect(exchange, "/doc/");
+            sendRedirect(exchange, "/doc");
         }
     }
 
@@ -38,15 +38,18 @@ public class SoapSimulatorWebApp extends SoapSimulatorServer {
             Map<String, String> formData = parseMultipart(exchange);
             addSoapEndpoint(formData.get("\"soapRouterUrl\""),
                     Xml.xml(formData.get("\"wsdlFile\"")));
-            sendRedirect(exchange, "/doc/");
-        } else {
+            sendRedirect(exchange, "/doc");
+        } else if (exchange.getRequestURI().getPath().equals("/doc")) {
             writeXmlResponse(indexPage(), "text/html", exchange);
+        } else {
+            SampleSoapXmlBuilder builder = soapEndpoints.get(exchange.getRequestURI().getPath().substring("/doc".length()));
+            writeXmlResponse(builder.getWsdl().getRootElement(), exchange);
         }
     }
 
     private Element indexPage() {
         Content[] endpointList = Xml.map(soapEndpoints.keySet(),
-            endpoint -> Xml.el("li", Xml.el("a", Xml.attr("href", endpoint),
+            endpoint -> Xml.el("li", Xml.el("a", Xml.attr("href", "/doc" + endpoint),
                             Xml.text(soapEndpoints.get(endpoint).getPortName()))));
         return Xml.el("html",
             Xml.el("head", Xml.el("title", "Hello world")),
@@ -63,13 +66,6 @@ public class SoapSimulatorWebApp extends SoapSimulatorServer {
                     Xml.el("label", "Enabled"),
                     Xml.el("input").type("checkbox").name("enabled"),
                     Xml.el("button", "Upload"))));
-    }
-
-    public static void main(String[] args) throws IOException {
-        SoapSimulatorWebApp server = new SoapSimulatorWebApp(10080);
-        server.addSoapEndpoint("/soap/stockQuote",
-            Xml.read(new File("src/test/resources/xsd/StockQuoteService.wsdl")));
-        server.start();
     }
 
     protected static Map<String, String> parseMultipart(HttpExchange exchange) throws IOException {
@@ -132,4 +128,18 @@ public class SoapSimulatorWebApp extends SoapSimulatorServer {
         }
         return formData;
     }
+
+    public static void main(String[] args) throws IOException {
+        SoapSimulatorWebApp server = new SoapSimulatorWebApp(10080);
+        server.addSoapEndpoint("/soap/stockQuote",
+            Xml.read(new File("src/test/resources/xsd/StockQuoteService.wsdl")));
+        server.start();
+
+        for (File file : new File(".").listFiles()) {
+            if (file.getName().endsWith(".wsdl")) {
+                server.addSoapEndpoint(file.toURI().toURL());
+            }
+        }
+    }
+
 }
