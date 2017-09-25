@@ -1,11 +1,14 @@
 package org.eaxy.experimental;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,6 +56,7 @@ public class SampleSoapXmlBuilder {
                 Element message = wsdlFile.find("message[name=" + messageDefinition.name() + "]").single();
                 return createSampleMessage(qualifiedName(nsPrefix, message.find("part").single().attr("element")));
             } else if (messageDefinition.hasAttr("message")) {
+                // TODO: Proper QName split
                 String[] messageQname = messageDefinition.attr("message").split(":");
                 Element message = wsdlFile.find("message[name=" + messageQname[1] + "]").single();
                 return createSampleMessage(qualifiedName(nsPrefix, message.find("part").single().attr("element")));
@@ -69,7 +73,7 @@ public class SampleSoapXmlBuilder {
             } else if (input.attr("message") != null) {
                 String[] messageRefParts = input.attr("message").split(":");
                 ElementSet messageDef = wsdlFile.find("message[name=" + messageRefParts[1] + "]");
-                String[] inputRefParts = messageDef.find("part[name=body]").single().attr("element").split(":");
+                String[] inputRefParts = messageDef.find("part").single().attr("element").split(":");
                 return wsdlFile.getRootElement().getNamespace(inputRefParts[0]);
             } else {
                 throw new IllegalArgumentException("Don't know what to do with " + input);
@@ -111,6 +115,17 @@ public class SampleSoapXmlBuilder {
             try (Reader reader = new InputStreamReader(connection.getInputStream())) {
                 return Xml.read(reader).getRootElement();
             }
+        }
+
+        public Validator getValidator() throws IOException {
+            return getXmlBuilder(getNamespace()).getValidator();
+        }
+
+        @Override
+        public String toString() {
+            return getClass().getSimpleName() + "{" +
+                    getFilename() + " - " +
+                    operationElement.name() + "}";
         }
     }
 
@@ -185,7 +200,7 @@ public class SampleSoapXmlBuilder {
     private Map<String, SampleXmlBuilder> builders = new HashMap<>();
 
     public SampleSoapXmlBuilder(String wsdlResource) throws IOException {
-        this(Xml.readResource("/" + wsdlResource), null);
+        this.wsdlFile = Xml.readResource("/" + wsdlResource);
         for (Element schema : wsdlFile.find("types", XS.name("schema"))) {
             addSchema(new Namespace(schema.attr("targetNamespace")), schema);
         }
@@ -199,14 +214,32 @@ public class SampleSoapXmlBuilder {
     }
 
     private Element createSampleMessage(QualifiedName qualifiedName) {
-        return getXmlBuilder(qualifiedName).createRandomElement(qualifiedName);
+        return getXmlBuilder(qualifiedName.getNamespace()).createRandomElement(qualifiedName);
     }
 
-    private SampleXmlBuilder getXmlBuilder(QualifiedName qualifiedName) {
-        if (!builders.containsKey(qualifiedName.getNamespace().getUri())) {
-            throw new IllegalArgumentException("Unknown namespace schema " + qualifiedName + " " + builders.keySet());
+    private SampleXmlBuilder getXmlBuilder(Namespace namespace) {
+        if (!builders.containsKey(namespace.getUri())) {
+            throw new IllegalArgumentException("Unknown namespace schema " + namespace + " " + builders.keySet());
         }
-        return builders.get(qualifiedName.getNamespace().getUri());
+        try {
+            Element schema = schemas.get(namespace.getUri());
+            SampleXmlBuilder xmlBuilder = new SampleXmlBuilder(new Document(schema), namespace.getPrefix());
+            xmlBuilder.setFull(true);
+
+            addImportedSchemas(schema, xmlBuilder);
+
+            return xmlBuilder;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void addImportedSchemas(Element schema, SampleXmlBuilder xmlBuilder) {
+        for (Element schemaImport : schema.find(XS.name("import"))) {
+            Element importedSchema = schemas.get(schemaImport.attr("namespace"));
+            xmlBuilder.addSchema(importedSchema);
+            addImportedSchemas(importedSchema, xmlBuilder);
+        }
     }
 
     private Element getSchema(Namespace namespace) {
@@ -234,6 +267,9 @@ public class SampleSoapXmlBuilder {
 
     public SampleSoapXmlBuilder(Document wsdlFile, URL resource) throws IOException {
         this.wsdlFile = wsdlFile;
+        for (Element schema : wsdlFile.find("types", XS.name("schema"))) {
+            addSchema(new Namespace(schema.attr("targetNamespace")), schema);
+        }
         for (Element schema : wsdlFile.find("types", "schema")) {
             Element importEl = schema.find("import").firstOrDefault();
             if (importEl != null && importEl.hasAttr("schemaLocation")) {
@@ -241,7 +277,7 @@ public class SampleSoapXmlBuilder {
                         Xml.read(new URL(resource, importEl.attr("schemaLocation"))).getRootElement());
             } else {
                 schema = schema.copy();
-                schema.getNamespaces().addAll(wsdlFile.getRootElement().getNamespaces());
+                schema.extendNamespaces(wsdlFile.getRootElement().getNamespaces());
                 addSchema(new Namespace(schema.attr("targetNamespace")), schema);
             }
         }
@@ -269,5 +305,22 @@ public class SampleSoapXmlBuilder {
 
     public Element processRequest(String soapAction, Document input) {
         return getService().soapAction(soapAction).processRequest(input.getRootElement());
+    }
+
+    public String getPortUrlPath() throws MalformedURLException {
+        String serviceLocation = wsdlFile.find("service", "port", SOAP_WSDL.name("address")).single().attr("location");
+        return new URL(serviceLocation).getPath();
+    }
+
+    public Document getWsdl() {
+        return wsdlFile;
+    }
+
+    private String getFilename() {
+        try {
+            return new File(wsdlFile.getBaseUrl().toURI()).getName();
+        } catch (URISyntaxException e) {
+            return wsdlFile.getBaseUrl().toString();
+        }
     }
 }

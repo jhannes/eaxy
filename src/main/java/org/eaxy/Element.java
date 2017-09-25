@@ -51,6 +51,13 @@ public class Element implements Node {
         throw new IllegalArgumentException(prefix + " not found in " + namespaces);
     }
 
+    public void extendNamespaces(List<Namespace> additionalNamespaces) {
+        for (Namespace namespace : additionalNamespaces) {
+            namespace(namespace);
+        }
+    }
+
+
     public <T extends Node> Element addAll(@SuppressWarnings("unchecked") T... content) {
         for (T node : content) {
             add(node);
@@ -185,7 +192,11 @@ public class Element implements Node {
 
     @Override
     public String toString() {
-        return "<" + printTag() + printAttributes() + " />";
+        if (children.isEmpty()) {
+            return "<" + printTag() + printAttributes() + " />";
+        } else {
+            return "<" + printTag() + printAttributes() + " >...</" + printTag() + ">";
+        }
     }
 
     @Override
@@ -329,6 +340,7 @@ public class Element implements Node {
     public Set<QualifiedName> attrNames() {
         return attributes.keySet();
     }
+
 
 }
 

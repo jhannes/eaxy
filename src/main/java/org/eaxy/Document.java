@@ -31,6 +31,10 @@ public class Document {
         return baseUrl;
     }
 
+    public void setBaseUrl(URL baseUrl) {
+        this.baseUrl = baseUrl;
+    }
+
     public String getVersion() {
         return version;
     }
@@ -73,6 +77,11 @@ public class Document {
         result.encoding = encoding;
         result.dtds.addAll(dtds);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Document{" + getRootElement() + "}";
     }
 
     public String toXML() {

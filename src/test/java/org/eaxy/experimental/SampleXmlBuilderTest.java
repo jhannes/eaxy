@@ -3,7 +3,9 @@ package org.eaxy.experimental;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.eaxy.Document;
 import org.eaxy.Element;
@@ -21,9 +23,10 @@ public class SampleXmlBuilderTest {
     public void shouldGenerateMessageFromWsdl() throws IOException {
         SampleSoapXmlBuilder builder = new SampleSoapXmlBuilder("xsd/greath-reservation.wsdl");
         SoapOperationDefinition operation = builder.service("reservationService").operation("opCheckAvailability");
-        Validator validator = new Validator(operation.targetSchema());
+        Validator validator = operation.getValidator();
         validator.validate(operation.randomInput("gh"));
         validator.validate(operation.randomOutput("gh"));
+
     }
 
     @Test
@@ -41,13 +44,12 @@ public class SampleXmlBuilderTest {
         SampleXmlBuilder generator = new SampleXmlBuilder(schemaDoc, "msg");
         generator.setFull(true);
         Element element = generator.createRandomElement("message");
-        new Validator(schemaDoc).validate(element);
+        generator.getValidator().validate(element);
         assertThat(element.find("recipients", "recipient").size()).isGreaterThan(1);
     }
 
     @Test
     public void shouldBuildFull() throws IOException {
-        Document schemaDoc = Xml.readResource("/xsd/po.xsd");
         SampleXmlBuilder generator = new SampleXmlBuilder(getClass().getResource("/xsd/po.xsd"), "po");
         generator.setFull(true);
         Element el = generator.createRandomElement("purchaseOrder");
@@ -55,7 +57,7 @@ public class SampleXmlBuilderTest {
         assertThat(el.find("comment")).isNotEmpty();
         assertThat(el.find("items").check().find("item")).isNotEmpty();
         assertThat(el.find("shipTo").single().attr("country")).isEqualTo("US");
-        new Validator(schemaDoc).validate(el);
+        generator.getValidator().validate(el);
     }
 
     @Test
@@ -67,14 +69,15 @@ public class SampleXmlBuilderTest {
         assertThat(el.hasAttr("orderDate")).isFalse();
         assertThat(el.find("comment")).isEmpty();
         assertThat(el.find("items").check().find("item")).isEmpty();
-        new Validator(schemaDoc).validate(el);
+        generator.getValidator().validate(el);
     }
 
     @Test
-    public void shouldGenerateFromMultipleFiles() throws IOException {
+    public void shouldGenerateFromMultipleFiles() throws Exception {
         SampleXmlBuilder generator = new SampleXmlBuilder(getClass().getResource("/xsd/ipo.xsd"), "ipo");
         Element element = generator.createRandomElement("purchaseOrder");
-        new Validator(new String[] { "xsd/ipo.xsd", "xsd/address.xsd" }).validate(element);
+        new Validator(new String[] { "xsd/ipo.xsd" }).validate(element);
+        generator.getValidator().validate(element);
     }
 
     @Test
@@ -117,7 +120,7 @@ public class SampleXmlBuilderTest {
 
         assertThat(soapOutput.getName()).isEqualTo(SOAP.name("Envelope"));
         Element output = soapOutput.find(SOAP.name("Body"), "TradePrice").single();
-        new Validator(operation.targetSchema()).validate(output);
+        operation.getValidator().validate(output);
     }
 
     @Test
@@ -131,6 +134,16 @@ public class SampleXmlBuilderTest {
         assertThatThrownBy(() -> builder.processRequest(soapAction, input))
             .isInstanceOf(SchemaValidationException.class)
             .hasMessageContaining("wrongElement");
+    }
+
+    @Test
+    public void shouldGenerateCurrencyConversion() throws IOException {
+        SampleSoapXmlBuilder builder = new SampleSoapXmlBuilder(
+            new File("src/test/xml/wsdl-suite/currencyconvertor-multischema.wsdl").toURI().toURL());
+
+        SoapOperationDefinition operation = builder.service("CurrencyConvertor").operation("ConversionRate");
+        operation.getValidator().validate(operation.randomInput("msg"));
+        operation.getValidator().validate(operation.randomOutput("msg"));
     }
 
     @Test
@@ -153,4 +166,52 @@ public class SampleXmlBuilderTest {
             .hasMessageContaining("http://schemas.xmlsoap.org/soap/envelope/\":Envelope");
     }
 
+    private static final Namespace XS = new Namespace("http://www.w3.org/2001/XMLSchema", "xs");
+
+    @Test
+    public void shouldGenerateComplexTypeFromOtherSchema() throws IOException {
+        Element rootSchema = XS.el("schema",
+            Xml.attr("targetNamespace", "http://eaxy.org/response"),
+            Xml.attr("elementFormDefault", "qualified"),
+            new Namespace("http://eaxy.org/response", "tns"),
+            new Namespace("http://eaxy.org/a", "a"));
+        rootSchema.addAll(
+            XS.el("import").attr("namespace", "http://eaxy.org/a"),
+            XS.el("complexType", Xml.attr("name", "Response"),
+                XS.el("sequence",
+                    XS.el("element").name("Result").type("a:Result"))),
+            XS.el("element").name("Response").type("tns:Response"));
+
+        Element elementSchema = XS.el("schema",
+            Xml.attr("targetNamespace", "http://eaxy.org/a"),
+            Xml.attr("elementFormDefault", "qualified"),
+            new Namespace("http://eaxy.org/name", "name"),
+            new Namespace("http://eaxy.org/a", "tns"));
+        elementSchema.addAll(
+            XS.el("import").attr("namespace", "http://eaxy.org/name"),
+            XS.el("complexType", Xml.attr("name", "Result"),
+                XS.el("sequence",
+                    XS.el("element").name("RequestId").type("xs:string").attr("minOccurs", "0"),
+                    XS.el("element").name("FullNameEl").type("name:FullName"),
+                    XS.el("element").name("UserId").type("xs:string"))),
+            XS.el("element").name("Result").type("tns:Result"));
+
+        Element nameSchema = XS.el("schema",
+            Xml.attr("targetNamespace", "http://eaxy.org/name"),
+            Xml.attr("elementFormDefault", "qualified"),
+            new Namespace("http://eaxy.org/name", "tns"));
+        nameSchema.addAll(
+            XS.el("complexType", Xml.attr("name", "FullName"),
+                XS.el("sequence",
+                    XS.el("element").name("FirstName").type("xs:string").attr("minOccurs", "0"),
+                    XS.el("element").name("LastName").type("xs:string"))),
+            XS.el("element").name("FullName").type("tns:FullName"));
+
+
+        SampleXmlBuilder builder = new SampleXmlBuilder("msg",
+            new Document(rootSchema),
+            Arrays.asList(new Document(elementSchema), new Document(nameSchema)));
+        Element msg = builder.createRandomElement("Response");
+        builder.getValidator().validate(msg);
+    }
 }

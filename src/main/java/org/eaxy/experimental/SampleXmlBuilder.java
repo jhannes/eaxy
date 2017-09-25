@@ -14,6 +14,7 @@ import org.eaxy.Element;
 import org.eaxy.ElementSet;
 import org.eaxy.Namespace;
 import org.eaxy.QualifiedName;
+import org.eaxy.Validator;
 import org.eaxy.Xml;
 
 public class SampleXmlBuilder {
@@ -28,13 +29,28 @@ public class SampleXmlBuilder {
         this.nsPrefix = nsPrefix;
 
         xsNamespace = schemaDoc.getRootElement().getName().getNamespace();
+        for (Element xsdInclude : schemaDoc.find("import")) {
+            // import != include!
+            if (schemaDoc.getBaseUrl() != null && xsdInclude.hasAttr("schemaLocation")) {
+                this.includedSchemas.add(Xml.read(new URL(schemaDoc.getBaseUrl(), xsdInclude.attr("schemaLocation"))));
+            }
+        }
         for (Element xsdInclude : schemaDoc.find("include")) {
-            this.includedSchemas.add(Xml.read(new URL(schemaDoc.getBaseUrl(), xsdInclude.attr("schemaLocation"))));
+            if (schemaDoc.getBaseUrl() != null && xsdInclude.hasAttr("schemaLocation")) {
+                this.includedSchemas.add(Xml.read(new URL(schemaDoc.getBaseUrl(), xsdInclude.attr("schemaLocation"))));
+            }
         }
     }
 
     public SampleXmlBuilder(URL resource, String nsPrefix) throws IOException {
         this(Xml.read(resource), nsPrefix);
+    }
+
+    public SampleXmlBuilder(String nsPrefix, Document schemaDoc, List<Document> includedSchemas) {
+        this.schemaDoc = schemaDoc;
+        this.nsPrefix = nsPrefix;
+        xsNamespace = schemaDoc.getRootElement().getName().getNamespace();
+        this.includedSchemas.addAll(includedSchemas);
     }
 
     public Element createRandomElement(String elementName) {
@@ -51,26 +67,34 @@ public class SampleXmlBuilder {
 //            Namespace namespace = schemaDoc.getRootElement().getNamespace(null);
             return targetNamespace().name(fullElementName);
         } else {
-            Namespace namespace = schemaDoc.getRootElement().getNamespace(parts[0]);
-            return namespace.name(parts[1]);
+            for (Namespace namespace : schemaDoc.getRootElement().getNamespaces()) {
+                if (java.util.Objects.equals(parts[0], namespace.getPrefix())) {
+                    return namespace.name(parts[1]);
+                }
+            }
+            throw new IllegalArgumentException(fullElementName + " not found in " + schemaDoc.getRootElement().getNamespaces());
         }
     }
 
-    private Element populateComplexType(Element complexType, Element resultElement) {
+    private Element populateComplexType(ComplexTypeDefinition complexTypeDefinition, Element resultElement) {
+        Element complexType = complexTypeDefinition.getElement();
         if (complexType.find("complexContent").isPresent()) {
             Element extension = complexType.find("complexContent", "extension").single();
-            Element baseType = complexType(extension.attr("base"));
-            populateAttributes(resultElement, baseType);
-            appendSequence(resultElement, baseType);
-            appendSequence(resultElement, extension);
+            QualifiedName baseTypeName = qualifiedName(extension.attr("base"));
+            ComplexTypeDefinition baseType = complexType(baseTypeName);
+            SampleXmlBuilder builder = findXmlBuilder(baseTypeName);
+            builder.populateAttributes(resultElement, baseType);
+            builder.appendSequence(resultElement, baseType);
+            this.appendSequence(resultElement, new ComplexTypeDefinition(extension, schemaDoc));
         }
-        appendSequence(resultElement, complexType);
-        populateAttributes(resultElement, complexType);
+        appendSequence(resultElement, complexTypeDefinition);
+        populateAttributes(resultElement, complexTypeDefinition);
         return resultElement;
     }
 
-    private void populateAttributes(Element resultElement, Element complexType) {
-        for (Element attrDef : complexType.find("attribute")) {
+    private void populateAttributes(Element resultElement, ComplexTypeDefinition baseTypeDefinition) {
+        Element baseType = baseTypeDefinition.getElement();
+        for (Element attrDef : baseType.find("attribute")) {
             if (!"required".equals(attrDef.attr("use")) && minimal) {
                 continue;
             } else if (!"required".equals(attrDef.attr("use")) && !full && chance(.50)) {
@@ -94,19 +118,19 @@ public class SampleXmlBuilder {
         return random.nextDouble() < p;
     }
 
-    private void appendSequence(Element resultElement, Element complexType) {
-        for (Element seqMemberDef : complexType.find("sequence", "*")) {
-            appendChildElement(resultElement, seqMemberDef);
+    private void appendSequence(Element resultElement, ComplexTypeDefinition baseType) {
+        for (Element seqMemberDef : baseType.getElement().find("sequence", "*")) {
+            appendChildElement(resultElement, seqMemberDef, baseType);
         }
-        for (Element seqMemberDef : complexType.find("all", "*")) {
-            appendChildElement(resultElement, seqMemberDef);
+        for (Element seqMemberDef : baseType.getElement().find("all", "*")) {
+            appendChildElement(resultElement, seqMemberDef, baseType);
         }
     }
 
-    private void appendChildElement(Element resultElement, Element memberDef) {
+    private void appendChildElement(Element resultElement, Element memberDef, ComplexTypeDefinition typeDef) {
         int occurances = occurences(memberDef);
         for (int i = 0; i < occurances; i++) {
-            resultElement.add(addChildElement(memberDef));
+            resultElement.add(addChildElement(memberDef, typeDef.targetNamespace()));
         }
     }
 
@@ -117,47 +141,67 @@ public class SampleXmlBuilder {
                 return Xml.el(elementName,
                     randomElementText(elementName.getName(), elementDefinition));
             } else {
-                return createComplexType(elementName, complexType(elementDefinition.type()));
+                return createComplexType(elementName, complexType(qualifiedName(elementDefinition.type())));
             }
         } else {
-            return createComplexType(elementName, elementDefinition.find("complexType").single());
+            return createComplexType(elementName, new ComplexTypeDefinition(elementDefinition.find("complexType").single(), schemaDoc));
         }
     }
 
-    private Element createComplexType(QualifiedName elementName, Element complexType) {
+    private Element createComplexType(QualifiedName elementName, ComplexTypeDefinition complexType) {
         return populateComplexType(complexType, Xml.el(elementName));
     }
 
-    private Element addChildElement(Element memberDef) {
+    private Element addChildElement(Element memberDef, Namespace targetNamespace) {
         String typeDef = memberDef.attr("ref");
         if (typeDef != null) {
             Element elementDef = elementDefinition(qualifiedName(typeDef));
             QualifiedName memberType = qualifiedName(elementDef.type());
             if (isXsdType(memberType)) {
                 return targetNamespace().el(elementDef.name(),
-                        randomElementText(elementDef.text(), elementDef));
+                        randomElementText(elementDef.text(), elementDef)); // TODO: parse elementDef.text() namespace
             } else {
                 return createRandomElement(memberType);
             }
-        } else if (memberDef.type() == null) {
+        }
+
+        QualifiedName qname = Namespace.NO_NAMESPACE.name(memberDef.name());
+        if ("qualified".equals(schemaDoc.getRootElement().attr("elementFormDefault"))) {
+            qname = targetNamespace.name(memberDef.name());
+        }
+        if (memberDef.type() == null) {
             Element complexMemberType = memberDef.find("complexType").singleOrDefault();
             if (complexMemberType != null) {
-                return createComplexType(Namespace.NO_NAMESPACE.name(memberDef.name()), complexMemberType);
+                return createComplexType(qname, new ComplexTypeDefinition(complexMemberType, schemaDoc));
             } else {
                 // TODO: This looks wrong
                 Element simpleMemberType = memberDef.find("simpleType", "restriction").single();
-                return Xml.el(Namespace.NO_NAMESPACE.name(memberDef.name()), randomElementText(memberDef.name(), simpleMemberType));
+                return Xml.el(qname, randomElementText(memberDef.name(), simpleMemberType));
             }
         } else if (isXsdType(qualifiedName(memberDef.type()))) {
-            return Xml.el(Namespace.NO_NAMESPACE.name(memberDef.name()), randomElementText(memberDef.name(), memberDef));
+            return Xml.el(qname, randomElementText(memberDef.name(), memberDef));
         } else {
-            Element simpleType = schemaDoc.find("simpleType[name=" + qualifiedName(memberDef.type()).getName() + "]").singleOrDefault();
+            SampleXmlBuilder builder = findXmlBuilder(qualifiedName(memberDef.type()));
+            Element simpleType = builder.schemaDoc.find("simpleType[name=" + qualifiedName(memberDef.type()).getName() + "]").singleOrDefault();
             if (simpleType != null) {
-                return Xml.el(Namespace.NO_NAMESPACE.name(memberDef.name()), randomElementText(memberDef.name(), simpleType));
+                return Xml.el(qname, randomElementText(memberDef.name(), simpleType));
             } else {
-                return createComplexType(Namespace.NO_NAMESPACE.name(memberDef.name()),
-                    complexType(memberDef.type()));
+                return builder.createComplexType(qname, builder.complexType(qualifiedName(memberDef.type())));
             }
+        }
+    }
+
+    private SampleXmlBuilder findXmlBuilder(QualifiedName qualifiedName) {
+        if (qualifiedName.getNamespace().equals(targetNamespace())) {
+            return this;
+        } else {
+            for (Document schemaDoc : includedSchemas) {
+                if (schemaDoc.getRootElement().attr("targetNamespace").equals(qualifiedName.getNamespace().getUri())) {
+                    // TODO: Slooow down there - we should perhaps not include ALL the schemas?
+                    return new SampleXmlBuilder(qualifiedName.getNamespace().getPrefix(), schemaDoc, includedSchemas);
+                }
+            }
+            throw new IllegalArgumentException("Don't know about " + qualifiedName + " in " + includedSchemas);
         }
     }
 
@@ -278,7 +322,7 @@ public class SampleXmlBuilder {
         if (lowerBound == upperBound) {
             return lowerBound;
         }
-        return lowerBound + random(upperBound - lowerBound);
+        return lowerBound + random(upperBound - lowerBound + 1);
     }
 
     private <T> T pickOne(List<T> candidates) {
@@ -303,16 +347,16 @@ public class SampleXmlBuilder {
         return schemaDoc.find("attribute[name=" + typeName + "]").single();
     }
 
-    private Element complexType(String typeNameFull) {
-        QualifiedName qualifiedName = qualifiedName(typeNameFull);
+    private ComplexTypeDefinition complexType(QualifiedName qualifiedName) {
+        // TODO: Use the namespace to lookup the schema - but it could be included as well!
         Element typeDefinition = schemaDoc.find("complexType[name=" + qualifiedName.getName() + "]").singleOrDefault();
         if (typeDefinition != null) {
-            return typeDefinition;
+            return new ComplexTypeDefinition(typeDefinition, schemaDoc);
         }
         for (Document schemaDoc : includedSchemas) {
             typeDefinition = schemaDoc.find("complexType[name=" + qualifiedName.getName() + "]").singleOrDefault();
             if (typeDefinition != null) {
-                return typeDefinition;
+                return new ComplexTypeDefinition(typeDefinition, schemaDoc);
             }
         }
         throw new IllegalArgumentException("Can't find type definition of " + qualifiedName);
@@ -342,7 +386,7 @@ public class SampleXmlBuilder {
             "that", "the", "their", "them", "then", "there", "these", "they", "thing", "think", "this", "those", "time",
             "to", "two", "up", "use", "very", "want", "way", "we", "well", "what", "when", "which", "who", "will",
             "with", "would", "year", "you", "your", };
-    private Namespace xsNamespace;
+    private final Namespace xsNamespace;
     private boolean minimal;
     private boolean full;
 
@@ -352,5 +396,16 @@ public class SampleXmlBuilder {
 
     public void setFull(boolean full) {
         this.full = full;
+    }
+
+    public void addSchema(Element schema) {
+        this.includedSchemas.add(new Document(schema));
+    }
+
+    public Validator getValidator() throws IOException {
+        List<Document> schemaDocs = new ArrayList<>();
+        schemaDocs.add(schemaDoc);
+        schemaDocs.addAll(includedSchemas);
+        return new Validator(schemaDocs);
     }
 }
