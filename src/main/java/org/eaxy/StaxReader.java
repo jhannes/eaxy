@@ -18,7 +18,6 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 
-@SuppressWarnings("restriction")
 public class StaxReader implements XMLStreamConstants {
 
     private final Stack<Element> elementStack = new Stack<Element>();

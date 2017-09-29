@@ -17,7 +17,6 @@ import org.eaxy.Element;
 import org.eaxy.Xml;
 import com.sun.net.httpserver.HttpExchange;
 
-@SuppressWarnings("restriction")
 class WebServer {
 
     protected final com.sun.net.httpserver.HttpServer server;
@@ -57,7 +56,6 @@ class WebServer {
     }
 }
 
-@SuppressWarnings("restriction")
 public class SoapSimulatorServer extends WebServer {
     protected final Map<String, SampleSoapXmlBuilder> soapEndpoints = new HashMap<>();
 

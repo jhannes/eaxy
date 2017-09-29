@@ -21,7 +21,6 @@ import javax.xml.stream.XMLStreamReader;
 
 import com.sun.org.apache.xerces.internal.impl.Constants;
 
-@SuppressWarnings("restriction")
 public class XmlIterator implements XMLStreamConstants, Iterator<Element> {
 
     private final Stack<Element> elementStack = new Stack<Element>();
