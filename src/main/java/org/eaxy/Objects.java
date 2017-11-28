@@ -26,7 +26,7 @@ abstract class Objects {
         return list;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked") @Nonnull
     public static<T,U> List<U> list(Iterable<T> fullList, Class<U> filteredType) {
         List<U> list = new ArrayList<U>();
         for (T o : fullList) {

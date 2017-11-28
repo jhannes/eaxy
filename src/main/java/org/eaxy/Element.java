@@ -10,10 +10,14 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 
+@ParametersAreNonnullByDefault
 public class Element implements Node {
 
     private final QualifiedName name;
+    @Nonnull
     private final List<Node> children = new ArrayList<>();
     private final Map<QualifiedName,Attribute> attributes = new LinkedHashMap<QualifiedName, Attribute>();
     // TODO: Maybe namespaces should be part of the attributes - are namespaces attributes?
@@ -43,6 +47,7 @@ public class Element implements Node {
 		this.lineNumber = lineNumber;
 	}
 
+    @Nonnull
 	public String tagName() {
         return name.getName();
     }
@@ -119,6 +124,7 @@ public class Element implements Node {
         return this;
     }
 
+    @Nonnull
     public Map<String, String> attrs() {
         LinkedHashMap<String, String> result = new LinkedHashMap<String, String>();
         for (QualifiedName attrName : attributes.keySet()) {
@@ -127,10 +133,12 @@ public class Element implements Node {
         return result;
     }
 
+    //@Nullable
     public String attr(String attrName) {
         return attr(new QualifiedName(attrName));
     }
 
+    @Nullable
     public String attr(QualifiedName key) {
         if (!key.hasNamespace()) {
             for (Attribute attr : attributes.values()) {
@@ -186,6 +194,7 @@ public class Element implements Node {
         }
     }
 
+    @Nonnull
     Element namespace(Namespace namespace) {
         if (namespace.getUri() == null) {
             throw new IllegalArgumentException("Invalid namespace " + namespace);
@@ -224,20 +233,24 @@ public class Element implements Node {
         return new ElementSet(this).find(path);
     }
 
+    @Nonnull
     public Element select(Object filter) {
         return find("...", filter).single();
     }
 
+    @Nonnull
     public Element take(Object selector) {
         Element result = select(selector);
         children.remove(result);
         return result;
     }
 
+    @Nonnull
     public List<? extends Element> elements() {
         return Objects.list(children, Element.class);
     }
 
+    @Nonnull
     public List<Node> children() {
         return children;
     }
@@ -277,6 +290,7 @@ public class Element implements Node {
         return attr("id", id);
     }
 
+    //@Nullable
     public String type() {
         return attr("type");
     }

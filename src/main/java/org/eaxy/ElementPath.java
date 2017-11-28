@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+
 public class ElementPath {
 
 	@Nonnull
@@ -24,6 +25,7 @@ public class ElementPath {
         return element;
     }
 
+    @Nonnull
     public List<Element> getPath() {
         ArrayList<Element> path = new ArrayList<Element>();
         ElementPath current = this;
@@ -35,6 +37,7 @@ public class ElementPath {
         return path;
     }
 
+	@Nonnull
     public Collection<Namespace> namespaces() {
         LinkedHashMap<String,Namespace> namespaces = new LinkedHashMap<>();
 

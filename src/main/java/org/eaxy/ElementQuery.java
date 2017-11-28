@@ -13,9 +13,11 @@ public interface ElementQuery {
 
     boolean matches(List<Element> path, int position);
 
-    Iterable<Element> iterate(Reader reader);
+    @Nonnull
+    Iterable<Element> iterate(@Nonnull Reader reader);
 
-    Iterable<Element> iterate(URL url);
+    @Nonnull
+    Iterable<Element> iterate(@Nonnull URL url);
 
 
 }

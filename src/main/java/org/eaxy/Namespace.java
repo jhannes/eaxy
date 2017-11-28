@@ -1,5 +1,6 @@
 package org.eaxy;
 
+import javax.annotation.Nonnull;
 
 public class Namespace implements Content {
 
@@ -42,10 +43,12 @@ public class Namespace implements Content {
         return getClass().getSimpleName() + "{uri=" + uri + ",prefix=" + prefix + "}";
     }
 
+    @Nonnull
     public Element el(String tagName, Content... contents) {
         return new Element(name(tagName), contents);
     }
 
+    @Nonnull
     public Element el(String tagName, String stringContent) {
         return el(tagName, Xml.text(stringContent));
     }
@@ -74,10 +77,12 @@ public class Namespace implements Content {
         return prefix;
     }
 
+    @Nonnull
     public QualifiedName name(String name) {
         return new QualifiedName(this, name);
     }
 
+    @Nonnull
     public Attribute attr(String localName, String value) {
         return new Attribute(name(localName), value);
     }

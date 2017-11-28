@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 
+@ParametersAreNonnullByDefault
 abstract class ElementFilter implements ElementQuery {
 
     private final String filterName;
@@ -41,13 +43,13 @@ abstract class ElementFilter implements ElementQuery {
         return elements.nestedSet(this, elementPaths);
     }
 
-    @Override
-    public Iterable<Element> iterate(Reader reader) {
+    @Override @Nonnull
+    public Iterable<Element> iterate(@Nonnull Reader reader) {
         return XmlIterator.iterate(this, reader);
     }
 
-    @Override
-    public Iterable<Element> iterate(URL url) {
+    @Override @Nonnull
+    public Iterable<Element> iterate(@Nonnull URL url) {
         return XmlIterator.iterate(this, url);
     }
 }

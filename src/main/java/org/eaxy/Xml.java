@@ -11,6 +11,10 @@ import java.util.Collection;
 import java.util.function.Function;
 import java.util.zip.GZIPInputStream;
 
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
+
+@ParametersAreNonnullByDefault
 public class Xml {
 
     public static final Charset UTF_8 = Charset.forName("UTF-8");
@@ -87,34 +91,42 @@ public class Xml {
         }
     }
 
+    @Nonnull
     public static Element el(QualifiedName name, Content... contents) {
         return new Element(name, contents);
     }
 
+    @Nonnull
     public static Element el(QualifiedName name, String stringContent) {
         return el(name, text(stringContent));
     }
 
+    @Nonnull
     public static Element el(String tagName, Content... contents) {
         return Namespace.NO_NAMESPACE.el(tagName, contents);
     }
 
+    @Nonnull
     public static Element el(String tagName, String stringContent) {
         return el(tagName, text(stringContent));
     }
 
+    @Nonnull
     public static Node comment(String string) {
         return new Xml.CommentElement(string);
     }
 
+    @Nonnull
     public static Node text(CharSequence stringContent) {
         return new Xml.TextElement(stringContent);
     }
 
+    @Nonnull
     public static Node cdata(CharSequence stringContent) {
         return new Xml.CDataElement(stringContent);
     }
 
+    @Nonnull
     public static Attribute attr(String key, String value) {
         return Namespace.NO_NAMESPACE.attr(key, value);
     }

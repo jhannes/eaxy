@@ -9,6 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class ElementFilters {
 
@@ -39,13 +40,13 @@ public class ElementFilters {
             return parent + "/" + child;
         }
 
-        @Override
-        public Iterable<Element> iterate(Reader reader) {
+        @Override @Nonnull
+        public Iterable<Element> iterate(@Nonnull Reader reader) {
             return XmlIterator.iterate(this, reader);
         }
 
-        @Override
-        public Iterable<Element> iterate(URL url) {
+        @Override @Nonnull
+        public Iterable<Element> iterate(@Nonnull URL url) {
             return XmlIterator.iterate(this, url);
         }
     }
@@ -96,13 +97,13 @@ public class ElementFilters {
             return "...//" + filter + "/" + next;
         }
 
-        @Override
-        public Iterable<Element> iterate(Reader reader) {
+        @Override @Nonnull
+        public Iterable<Element> iterate(@Nonnull Reader reader) {
             return XmlIterator.iterate(this, reader);
         }
 
-        @Override
-        public Iterable<Element> iterate(URL url) {
+        @Override @Nonnull
+        public Iterable<Element> iterate(@Nonnull URL url) {
             return XmlIterator.iterate(this, url);
         }
     }
@@ -128,13 +129,13 @@ public class ElementFilters {
             return position.intValue();
         }
 
-        @Override
-        public Iterable<Element> iterate(Reader reader) {
+        @Override @Nonnull
+        public Iterable<Element> iterate(@Nonnull Reader reader) {
             throw new UnsupportedOperationException();
         }
 
-        @Override
-        public Iterable<Element> iterate(URL url) {
+        @Override @Nonnull
+        public Iterable<Element> iterate(@Nonnull URL url) {
             throw new UnsupportedOperationException();
         }
 
@@ -199,13 +200,13 @@ public class ElementFilters {
             return ".";
         }
 
-        @Override
-        public Iterable<Element> iterate(Reader reader) {
+        @Override @Nonnull
+        public Iterable<Element> iterate(@Nonnull Reader reader) {
             return XmlIterator.iterate(this, reader);
         }
 
-        @Override
-        public Iterable<Element> iterate(URL url) {
+        @Override @Nonnull
+        public Iterable<Element> iterate(@Nonnull URL url) {
             return XmlIterator.iterate(this, url);
         }
     }
@@ -228,6 +229,7 @@ public class ElementFilters {
         return new ElementPositionFilter(filter);
     }
 
+    @Nullable
     public static ElementFilter idFilter(String filter) {
         Matcher matcher = ID_PATTERN.matcher(filter);
         if (matcher.matches()) {
@@ -238,6 +240,7 @@ public class ElementFilters {
         return null;
     }
 
+    @Nullable
     public static ElementFilter classNameFilter(String filter) {
         Matcher matcher = CLASS_NAME_PATTERN.matcher(filter);
         if (matcher.matches()) {
@@ -248,6 +251,7 @@ public class ElementFilters {
         return null;
     }
 
+    @Nullable
     public static ElementFilter attrFilter(String filter) {
         Matcher matcher = ATTRIBUTE_PATTERN.matcher(filter);
         if (matcher.matches()) {

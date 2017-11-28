@@ -5,14 +5,16 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class ElementSet implements Iterable<Element> {
 
     private static ElementSet NULL_ELEMENT_SET = new ElementSet(null, null) {
-        @Override
+        @Override @Nonnull
         public List<Object> getPath() { return new ArrayList<Object>(); }
     };
 
+    @Nonnull
     private List<ElementPath> elementPaths = new ArrayList<>();
     private ElementSet parentSet = NULL_ELEMENT_SET;
     private final Object filter;
@@ -66,6 +68,7 @@ public class ElementSet implements Iterable<Element> {
         return children.toString();
     }
 
+    @Nonnull
     public List<Object> getPath() {
         List<Object> result = new ArrayList<Object>();
         result.addAll(parentSet.getPath());
@@ -81,6 +84,7 @@ public class ElementSet implements Iterable<Element> {
         return result;
     }
 
+    @Nonnull
     public List<String> attrs(String attrName) {
         List<String> result = new ArrayList<String>();
         for (ElementPath element : elementPaths) {
@@ -92,7 +96,7 @@ public class ElementSet implements Iterable<Element> {
 
     @Nonnull
     public Element first() {
-        return firstPath().leafElement();
+        return Objects.nonnull(firstPath(), "firstPath").leafElement();
     }
 
     @Nonnull
@@ -101,6 +105,7 @@ public class ElementSet implements Iterable<Element> {
         return first();
     }
 
+    @Nullable
     public Element singleOrDefault() {
         checkMaxOneMatch();
         return firstOrDefault();
@@ -112,6 +117,7 @@ public class ElementSet implements Iterable<Element> {
         throw new IllegalArgumentException(message);
     }
 
+    @Nullable
     public ElementPath firstPath() {
         check();
         return elementPaths.get(0);
@@ -121,6 +127,7 @@ public class ElementSet implements Iterable<Element> {
         return elementPaths;
     }
 
+    @Nonnull
     public ElementSet attr(String key, String value) {
         for (ElementPath element : elementPaths) {
             element.leafElement().attr(key, value);
@@ -157,6 +164,7 @@ public class ElementSet implements Iterable<Element> {
         return elementPaths.size();
     }
 
+    @Nonnull
     public List<Element> elements() {
         List<Element> elements = new ArrayList<>();
         for (ElementPath path : elementPaths) {
@@ -165,6 +173,7 @@ public class ElementSet implements Iterable<Element> {
         return elements;
     }
 
+    @Nullable
     public Element firstOrDefault() {
         return isEmpty() ? null : first();
     }

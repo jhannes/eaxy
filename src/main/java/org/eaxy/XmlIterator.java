@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.Stack;
 import java.util.zip.GZIPInputStream;
 
+import javax.annotation.Nonnull;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -147,7 +148,8 @@ public class XmlIterator implements XMLStreamConstants, Iterator<Element> {
     }
 
     @SuppressWarnings("resource")
-    public static Iterable<Element> iterate(final ElementQuery query, URL url) {
+    @Nonnull
+    public static Iterable<Element> iterate(@Nonnull final ElementQuery query, @Nonnull URL url) {
         final InputStream inputStream = openStream(url);
         return new Iterable<Element>() {
             @Override
@@ -173,7 +175,8 @@ public class XmlIterator implements XMLStreamConstants, Iterator<Element> {
         }
     }
 
-    public static Iterable<Element> iterate(final ElementQuery query, final Reader reader) {
+    @Nonnull
+    public static Iterable<Element> iterate(@Nonnull final ElementQuery query, @Nonnull final Reader reader) {
         return new Iterable<Element>() {
             @Override
             public Iterator<Element> iterator() {

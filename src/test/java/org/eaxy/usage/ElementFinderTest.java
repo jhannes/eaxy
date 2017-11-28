@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.URL;
 import java.util.Iterator;
+import java.util.Objects;
 
 import org.eaxy.Element;
 import org.eaxy.ElementFilters;
@@ -63,7 +64,7 @@ public class ElementFinderTest {
         assertThat(xml.find("...", "p").texts())
             .containsExactly("level 1a", "level 2a", "level 1b", "level 3", "level 2b");
 
-        assertThat(xml.find("...", "p").firstPath().getPath()).extracting(e -> e.tagName())
+        assertThat(Objects.requireNonNull(xml.find("...", "p").firstPath()).getPath()).extracting(e -> e.tagName())
             .containsExactly("div", "p");
         assertThat(xml.find("...", "p").getPaths().get(1).getPath()).extracting(e -> e.tagName())
             .containsExactly("div", "div", "p");
