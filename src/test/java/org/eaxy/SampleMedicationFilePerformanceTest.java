@@ -37,12 +37,10 @@ public class SampleMedicationFilePerformanceTest {
 
     @Test
     public void shouldFindElementsInHugeFile() throws Exception {
-        System.out.println("downloading");
         File medicationsZip = new File("target/data/fest251.zip");
         download(new URL("https://www.legemiddelsok.no/_layouts/15/FESTmelding/fest251.zip"),
                 medicationsZip, new File("target/data/tmp/"));
 
-        System.out.println("Scanning");
         List<String> ritalinSubstitutes = new ArrayList<>();
 
         try (ZipFile zipFile = new ZipFile(medicationsZip)) {
@@ -55,7 +53,7 @@ public class SampleMedicationFilePerformanceTest {
             }
         }
 
-        System.out.println("checking");
+
         assertThat(ritalinSubstitutes).contains("Medikinet Tab 5 mg", "Concerta DEPOTtab 18 mg");
     }
 

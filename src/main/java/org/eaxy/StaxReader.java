@@ -24,6 +24,7 @@ public class StaxReader implements XMLStreamConstants {
     private final Stack<Element> elementStack = new Stack<Element>();
     private final XMLStreamReader streamReader;
     private final Document document;
+    private Element rootElement = null;
 
     private StaxReader(URL baseUrl, XMLStreamReader streamReader) {
         this.document = new Document(baseUrl);
@@ -69,8 +70,10 @@ public class StaxReader implements XMLStreamConstants {
 
                 if (!elementStack.isEmpty())
                     current().add(element);
-                if (document.getRootElement() == null)
-                    document.setRootElement(element);
+                if (rootElement == null) {
+                	rootElement = element;
+                	document.setRootElement(element);
+                }
 
                 elementStack.push(element);
                 break;
@@ -111,7 +114,7 @@ public class StaxReader implements XMLStreamConstants {
 
     private Element readElement() {
         QName name = streamReader.getName();
-        Element element = new Element(toName(name));
+        Element element = new Element(toName(name), streamReader.getLocation().getLineNumber());
 
         for (int i = 0; i < streamReader.getNamespaceCount(); i++) {
             element.namespace(new Namespace(streamReader.getNamespaceURI(i), streamReader.getNamespacePrefix(i)));

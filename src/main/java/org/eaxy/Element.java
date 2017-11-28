@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+
 public class Element implements Node {
 
     private final QualifiedName name;
@@ -16,15 +18,17 @@ public class Element implements Node {
     private final Map<QualifiedName,Attribute> attributes = new LinkedHashMap<QualifiedName, Attribute>();
     // TODO: Maybe namespaces should be part of the attributes - are namespaces attributes?
     private final List<Namespace> namespaces = new ArrayList<Namespace>();
+	private Integer lineNumber;
 
     Element(QualifiedName name, Content... contents) {
         this(name, Objects.list(contents, Attribute.class),
-                Objects.list(contents, Namespace.class));
+                Objects.list(contents, Namespace.class), null);
         children.addAll(Objects.list(contents, Node.class));
     }
 
-    public Element(QualifiedName name, Collection<Attribute> attrs, Collection<Namespace> namespaces) {
+    Element(QualifiedName name, Collection<Attribute> attrs, Collection<Namespace> namespaces, Integer lineNumber) {
         this.name = name;
+		this.lineNumber = lineNumber;
         if (name.hasNamespace() && !namespaces.contains(name.getNamespace())) {
             namespace(name.getNamespace());
         }
@@ -34,7 +38,12 @@ public class Element implements Node {
         attrs(attrs);
     }
 
-    public String tagName() {
+    public Element(QualifiedName name, int lineNumber) {
+    	this(name, new Content[0]);
+		this.lineNumber = lineNumber;
+	}
+
+	public String tagName() {
         return name.getName();
     }
 
@@ -193,9 +202,9 @@ public class Element implements Node {
     @Override
     public String toString() {
         if (children.isEmpty()) {
-            return "<" + printTag() + printAttributes() + " />";
+            return "<" + printTag() + printAttributes() + " />" + (lineNumber != null ? "@" + lineNumber : "");
         } else {
-            return "<" + printTag() + printAttributes() + " >...</" + printTag() + ">";
+            return "<" + printTag() + printAttributes() + ">...</" + printTag() + ">" + (lineNumber != null ? "@" + lineNumber : "");
         }
     }
 
@@ -210,6 +219,7 @@ public class Element implements Node {
         return name.hashCode();
     }
 
+    @Nonnull
     public ElementSet find(Object... path) {
         return new ElementSet(this).find(path);
     }
@@ -323,7 +333,7 @@ public class Element implements Node {
     }
 
     public Element copyElement() {
-        return new Element(this.name, attributes.values(), namespaces);
+        return new Element(this.name, attributes.values(), namespaces, lineNumber);
     }
 
     Element attrs(Collection<Attribute> attributes) {

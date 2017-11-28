@@ -5,6 +5,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 abstract class ElementFilter implements ElementQuery {
 
     private final String filterName;
@@ -25,11 +27,12 @@ abstract class ElementFilter implements ElementQuery {
         return filterName;
     }
 
-    @Override
+    @SuppressWarnings("null")
+	@Override @Nonnull
     public final ElementSet search(ElementSet elements) {
         List<ElementPath> elementPaths = new ArrayList<ElementPath>();
         for (ElementPath element : elements.getPaths()) {
-            for (Element child : element.leafElement().elements()) {
+            for (@Nonnull Element child : element.leafElement().elements()) {
                 if (this.matches(child)) {
                     elementPaths.add(new ElementPath(element, child));
                 }

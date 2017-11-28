@@ -180,7 +180,7 @@ public class ElementFinderTest {
     @Test
     public void shouldKeepFullPath() {
         Element xml = el("root", el("a", el("b", el("c"))));
-        assertThat(xml.find("a").find("b", "c").getPath()).containsExactly("root", "a", "b", "c");
+        assertThat(xml.find("a").find("b", "c").getPath()).containsExactly("<root>...</root>", "a", "b", "c");
     }
 
     @Test
@@ -198,7 +198,7 @@ public class ElementFinderTest {
             fail("expected exception");
         } catch (NonMatchingPathException e) {
             assertThat(e.getMessage())
-                .contains("below [root, top, parent]")
+                .contains("below [<root>...</root>, top, parent]")
                 .contains("Can't find <searched-child>")
                 .doesNotContain("foo")
                 .contains("\"http://a.org/b/\":actual-child");
@@ -232,7 +232,10 @@ public class ElementFinderTest {
                 }
             }
         }
-        assertThat(System.currentTimeMillis() - startTime).as("millis").isLessThan(1000);
+        assertThat(System.currentTimeMillis() - startTime).as("millis").isLessThan(6000);
+        if (mostReferenced == null) {
+        	throw new IllegalArgumentException("Not found");
+        }
         assertThat(mostReferenced.find("Article", "ArticleTitle").single().text())
             .isEqualTo("Outcome of patients with sepsis and septic shock after ICU treatment.");
     }

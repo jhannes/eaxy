@@ -6,16 +6,20 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 public class ElementPath {
 
-    private Element element;
+	@Nonnull
+    private final Element element;
     private ElementPath parent;
 
-    public ElementPath(ElementPath parent, Element element) {
+    public ElementPath(ElementPath parent, @Nonnull Element element) {
         this.element = element;
         this.parent = parent;
     }
 
+    @Nonnull
     public Element leafElement() {
         return element;
     }

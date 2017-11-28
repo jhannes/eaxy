@@ -1,13 +1,16 @@
 package org.eaxy;
 
+import javax.annotation.Nonnull;
 
 public class QualifiedName {
 
     private final Namespace namespace;
+
+    @Nonnull
     private final String name;
 
 
-    public QualifiedName(String uri, String localPart, String prefix) {
+    public QualifiedName(String uri, @Nonnull String localPart, String prefix) {
         Objects.validatePresent(localPart, "localPart");
         if (uri == null || uri.isEmpty()) {
             this.namespace = Namespace.NO_NAMESPACE;
@@ -21,7 +24,8 @@ public class QualifiedName {
         }
     }
 
-    public QualifiedName(String uri, String fullyQualifiedName) {
+    @SuppressWarnings("null")
+	public QualifiedName(String uri, @Nonnull String fullyQualifiedName) {
         Objects.validatePresent(fullyQualifiedName, "name");
         if (uri == null || uri.isEmpty()) {
             this.namespace = Namespace.NO_NAMESPACE;
@@ -53,6 +57,7 @@ public class QualifiedName {
         }
     }
 
+    @Nonnull
     public String getName() {
         return name;
     }

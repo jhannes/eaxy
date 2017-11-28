@@ -113,10 +113,14 @@ public class SoapSimulatorServer extends WebServer {
         server.addSoapEndpoint("/soap/stockQuote",
             Xml.read(new File("src/test/resources/xsd/StockQuoteService.wsdl")));
         server.start();
+        System.out.println(server.getAddress() + " started");
     }
 
-    void start() {
+    private InetSocketAddress getAddress() {
+		return server.getAddress();
+	}
+
+	void start() {
         server.start();
-        System.out.println(server.getAddress() + " started");
     }
 }

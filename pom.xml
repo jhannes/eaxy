@@ -124,6 +124,11 @@
             <version>2.5</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+          <groupId>net.sourceforge.findbugs</groupId>
+          <artifactId>jsr305</artifactId>
+          <version>1.3.7</version>
+        </dependency>
     </dependencies>
 
     <distributionManagement>

@@ -53,14 +53,12 @@ public class SoapXmlBuilderDirectoryTest {
     @Test
     public void shouldGenerateInput() throws IOException {
         Element msg = operation.randomInput("m");
-        System.out.println(msg.toIndentedXML());
         operation.getValidator().validate(msg);
     }
 
     @Test
     public void shouldGenerateOutput() throws IOException {
         Element msg = operation.randomOutput("o");
-        System.out.println(msg.toIndentedXML());
         operation.getValidator().validate(msg);
     }
 

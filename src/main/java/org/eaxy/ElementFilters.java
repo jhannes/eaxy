@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nonnull;
+
 public class ElementFilters {
 
     private static class ChildQuery implements ElementQuery {
@@ -20,8 +22,8 @@ public class ElementFilters {
             this.child = child;
         }
 
-        @Override
-        public ElementSet search(ElementSet elements) {
+        @Override @Nonnull
+        public ElementSet search(@Nonnull ElementSet elements) {
             return child.search(parent.search(elements));
         }
 
@@ -62,8 +64,8 @@ public class ElementFilters {
             }
         }
 
-        @Override
-        public ElementSet search(ElementSet elements) {
+        @Override @Nonnull
+        public ElementSet search(@Nonnull ElementSet elements) {
             List<ElementPath> elementPaths = new ArrayList<>();
             for (ElementPath element : elements.getPaths()) {
                 findDescendants(element, elementPaths);
@@ -76,7 +78,8 @@ public class ElementFilters {
             return position < path.size() && filter.matches(path.get(path.size()-1));
         }
 
-        private void findDescendants(ElementPath element, List<ElementPath> elementPaths) {
+        @SuppressWarnings("null")
+		private void findDescendants(ElementPath element, List<ElementPath> elementPaths) {
             for (Element child : element.leafElement().elements()) {
                 if (filter.matches(child)) {
                     ElementSet search = next.search(new ElementSet(child));
@@ -111,8 +114,8 @@ public class ElementFilters {
             this.position = position;
         }
 
-        @Override
-        public ElementSet search(ElementSet elements) {
+        @Override @Nonnull
+        public ElementSet search(@Nonnull ElementSet elements) {
             if (intValue() < elements.size()) {
                 ElementPath path = elements.getPaths().get(intValue());
                 return elements.nestedSet(this, Arrays.asList(path));
@@ -181,8 +184,8 @@ public class ElementFilters {
     }
 
     public static class Identity implements ElementQuery {
-        @Override
-        public ElementSet search(ElementSet elements) {
+        @Override @Nonnull
+        public ElementSet search(@Nonnull ElementSet elements) {
             return elements;
         }
 

@@ -4,9 +4,12 @@ import java.io.Reader;
 import java.net.URL;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 public interface ElementQuery {
 
-    ElementSet search(ElementSet elements);
+	@Nonnull
+    ElementSet search(@Nonnull ElementSet elements);
 
     boolean matches(List<Element> path, int position);
 

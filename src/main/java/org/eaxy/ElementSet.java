@@ -1,9 +1,10 @@
 package org.eaxy;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+
+import javax.annotation.Nonnull;
 
 public class ElementSet implements Iterable<Element> {
 
@@ -16,9 +17,9 @@ public class ElementSet implements Iterable<Element> {
     private ElementSet parentSet = NULL_ELEMENT_SET;
     private final Object filter;
 
-    public ElementSet(Element element) {
+    public ElementSet(@Nonnull Element element) {
         this.elementPaths.add(new ElementPath(null, element));
-        this.filter = element.getName().print();
+        this.filter = element.toString();
     }
 
     private ElementSet(ElementSet parent, Object filter) {
@@ -37,10 +38,12 @@ public class ElementSet implements Iterable<Element> {
         return elements().iterator();
     }
 
+    @Nonnull
     public ElementSet find(Object... path) {
         return ElementFilters.create(path).search(this);
     }
 
+    @Nonnull
     public ElementSet nestedSet(ElementQuery filter, List<ElementPath> elementPaths) {
         return new ElementSet(this, filter, elementPaths);
     }
@@ -87,10 +90,12 @@ public class ElementSet implements Iterable<Element> {
         return result;
     }
 
+    @Nonnull
     public Element first() {
         return firstPath().leafElement();
     }
 
+    @Nonnull
     public Element single() {
         checkMaxOneMatch();
         return first();
@@ -152,7 +157,7 @@ public class ElementSet implements Iterable<Element> {
         return elementPaths.size();
     }
 
-    public Collection<Element> elements() {
+    public List<Element> elements() {
         List<Element> elements = new ArrayList<>();
         for (ElementPath path : elementPaths) {
             elements.add(path.leafElement());

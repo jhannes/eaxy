@@ -110,7 +110,9 @@ public class SampleSoapXmlBuilder {
                 writer.write(input.toIndentedXML());
             }
             int responseCode = connection.getResponseCode();
-            System.out.println(responseCode);
+            if (responseCode >= 400) {
+            	throw new IOException(connection.getResponseMessage());
+            }
 
             try (Reader reader = new InputStreamReader(connection.getInputStream())) {
                 return Xml.read(reader).getRootElement();
@@ -224,7 +226,7 @@ public class SampleSoapXmlBuilder {
         try {
             Element schema = schemas.get(namespace.getUri());
             SampleXmlBuilder xmlBuilder = new SampleXmlBuilder(new Document(schema), namespace.getPrefix());
-            xmlBuilder.setFull(true);
+            xmlBuilder.setFull(false);
 
             addImportedSchemas(schema, xmlBuilder);
 

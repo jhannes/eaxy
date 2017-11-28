@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 abstract class Objects {
 
     static<T> boolean equals(T a, T b) {
@@ -32,11 +35,20 @@ abstract class Objects {
         return list;
     }
 
-    public static String validatePresent(String string, String name) {
+    @Nonnull
+    public static String validatePresent(@Nullable String string, @Nonnull String name) {
         if (string == null || string.isEmpty()) {
             throw new IllegalArgumentException(name + " can't be empty");
         }
         return string;
     }
+
+    @Nonnull
+	public static <T> T nonnull(@Nullable T o, String name) {
+		if (o == null) {
+			throw new IllegalArgumentException(name + " should not be null");
+		}
+		return o;
+	}
 
 }

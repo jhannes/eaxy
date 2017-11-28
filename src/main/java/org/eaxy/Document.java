@@ -7,6 +7,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 public class Document {
 
     private String version = "1.0";
@@ -55,8 +57,9 @@ public class Document {
         this.rootElement = rootElement;
     }
 
+    @Nonnull
     public Element getRootElement() {
-        return rootElement;
+		return Objects.nonnull(rootElement, "rootElement");
     }
 
     public void addDTD(String dtdString) {
