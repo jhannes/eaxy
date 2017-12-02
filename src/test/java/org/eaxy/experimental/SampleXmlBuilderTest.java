@@ -74,6 +74,7 @@ public class SampleXmlBuilderTest {
 
     @Test
     public void shouldGenerateFromMultipleFiles() throws Exception {
+    	// TODO: This used regex for SKU - would be very cool if we could support a simplified regex generator
         SampleXmlBuilder generator = new SampleXmlBuilder(getClass().getResource("/xsd/ipo.xsd"), "ipo");
         Element element = generator.createRandomElement("purchaseOrder");
         new Validator(new String[] { "xsd/ipo.xsd" }).validate(element);

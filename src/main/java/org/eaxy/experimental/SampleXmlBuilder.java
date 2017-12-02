@@ -8,6 +8,9 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Stack;
+
+import javax.annotation.Nonnull;
 
 import org.eaxy.Document;
 import org.eaxy.Element;
@@ -78,118 +81,138 @@ public class SampleXmlBuilder {
 
     private Element populateComplexType(ComplexTypeDefinition complexTypeDefinition, Element resultElement) {
         Element complexType = complexTypeDefinition.getElement();
+
+        if (complexType.find("simpleContent").isPresent()) {
+            populateAttributes(resultElement, complexType.find("simpleContent", "extension").single());
+            resultElement.text(randomElementText(resultElement.tagName(), complexType.find("simpleContent", "*").single()));
+            return resultElement;
+        }
+
         if (complexType.find("complexContent").isPresent()) {
             Element extension = complexType.find("complexContent", "extension").single();
             QualifiedName baseTypeName = qualifiedName(extension.attr("base"));
             ComplexTypeDefinition baseType = complexType(baseTypeName);
             SampleXmlBuilder builder = findXmlBuilder(baseTypeName);
-            builder.populateAttributes(resultElement, baseType);
+            builder.populateAttributes(resultElement, complexTypeDefinition.getElement());
             builder.appendSequence(resultElement, baseType);
             this.appendSequence(resultElement, new ComplexTypeDefinition(extension, schemaDoc));
         }
         appendSequence(resultElement, complexTypeDefinition);
-        populateAttributes(resultElement, complexTypeDefinition);
+        populateAttributes(resultElement, complexType);
         return resultElement;
     }
 
-    private void populateAttributes(Element resultElement, ComplexTypeDefinition baseTypeDefinition) {
-        Element baseType = baseTypeDefinition.getElement();
-        for (Element attrDef : baseType.find("attribute")) {
-            if (!"required".equals(attrDef.attr("use")) && minimal) {
-                continue;
-            } else if (!"required".equals(attrDef.attr("use")) && !full && chance(.50)) {
-                continue;
-            }
-            QualifiedName type = qualifiedName(attrDef.type());
-            if (type == null) {
-                Element attrTypeDef = attributeDefinition(attrDef.attr("ref"));
-                Element simpleType = attrTypeDef.find("simpleType").single();
-                resultElement.attr(targetNamespace().attr(attrTypeDef.name(), randomAttributeText(attrTypeDef.name(), simpleType)));
-            } else if (isXsdType(type)) {
-                resultElement.attr(attrDef.name(), randomAttributeText(attrDef.name(), attrDef));
-            } else {
-                Element simpleType = schemaDoc.find("simpleType[name=" + type.getName() + "]").single();
-                resultElement.attr(attrDef.name(), randomAttributeText(attrDef.name(), simpleType));
+    private void populateAttributes(Element resultElement, Element baseTypeElement) {
+        for (Element attrDef : baseTypeElement.find("attribute")) {
+            if (shouldIncludeAttribute(attrDef)) {
+	            QualifiedName type = qualifiedName(attrDef.type());
+	            if (type == null) {
+	                Element attrTypeDef = attributeDefinition(requiredRef(attrDef));
+	                Element simpleType = attrTypeDef.find("simpleType").single();
+	                resultElement.attr(targetNamespace().attr(attrTypeDef.name(), randomAttributeText(attrTypeDef.name(), simpleType)));
+	            } else if (isXsdType(type)) {
+	                resultElement.attr(attrDef.name(), randomAttributeText(attrDef.name(), attrDef));
+	            } else {
+	                Element simpleType = schemaDoc.find("simpleType[name=" + type.getName() + "]").single();
+	                resultElement.attr(attrDef.name(), randomAttributeText(attrDef.name(), simpleType));
+	            }
             }
         }
     }
+
+    private boolean shouldIncludeAttribute(Element attrDef) {
+		return "required".equals(attrDef.attr("use")) || full || (!minimal && chance(.50));
+	}
+
+	@Nonnull
+	private String requiredRef(@Nonnull Element attrDef) {
+		String refAttr = attrDef.attr("ref");
+		if (refAttr == null) {
+			throw new IllegalArgumentException(attrDef + " should have ref attribute");
+		}
+		return refAttr;
+	}
 
     private boolean chance(double p) {
         return random.nextDouble() < p;
     }
 
     private void appendSequence(Element resultElement, ComplexTypeDefinition baseType) {
-        for (Element seqMemberDef : baseType.getElement().find("sequence", "*")) {
-            appendChildElement(resultElement, seqMemberDef, baseType);
-        }
-        for (Element seqMemberDef : baseType.getElement().find("all", "*")) {
-            appendChildElement(resultElement, seqMemberDef, baseType);
-        }
+    	if (baseType.getElement().find("sequence").isPresent()) {
+	        for (Element seqMemberDef : baseType.getElement().find("sequence", "*")) {
+	            appendChildElement(resultElement, seqMemberDef, baseType);
+	        }
+    	} else if (baseType.getElement().find("all").isPresent()) {
+	        for (Element seqMemberDef : baseType.getElement().find("all", "*")) {
+	            appendChildElement(resultElement, seqMemberDef, baseType);
+	        }
+    	} else if (baseType.getElement().find("attribute").isEmpty() &&baseType.getElement().find("complexContent").isEmpty()) {
+    		throw new IllegalArgumentException("Unexpected " + baseType.getElement());
+    	}
     }
 
+    // TODO: This makes this class is not thread safe.
+    /// If the current class could be the SampleXmlBuilderDefinition and there was one builder per build this could be avoided
+    private Stack<String> memberDefStack = new Stack<>();
+
     private void appendChildElement(Element resultElement, Element memberDef, ComplexTypeDefinition typeDef) {
+    	if (memberDefStack.contains(memberDef.toIndentedXML()) && "0".equals(memberDef.attr("minOccurs"))) {
+    		return;
+    	}
+
+    	memberDefStack.push(memberDef.toIndentedXML());
         int occurances = occurences(memberDef);
         for (int i = 0; i < occurances; i++) {
             resultElement.add(addChildElement(memberDef, typeDef.targetNamespace()));
         }
-    }
-
-    Element createRandomElement(QualifiedName elementName) {
-        Element elementDefinition = elementDefinition(elementName);
-        if (elementDefinition.type() != null) {
-            if (isXsdType(qualifiedName(elementDefinition.type()))) {
-                return Xml.el(elementName,
-                    randomElementText(elementName.getName(), elementDefinition));
-            } else {
-                return createComplexType(elementName, complexType(qualifiedName(elementDefinition.type())));
-            }
-        } else {
-            return createComplexType(elementName, new ComplexTypeDefinition(elementDefinition.find("complexType").single(), schemaDoc));
-        }
-    }
-
-    private Element createComplexType(QualifiedName elementName, ComplexTypeDefinition complexType) {
-        return populateComplexType(complexType, Xml.el(elementName));
+        memberDefStack.pop();
     }
 
     private Element addChildElement(Element memberDef, Namespace targetNamespace) {
-        String typeDef = memberDef.attr("ref");
-        if (typeDef != null) {
-            Element elementDef = elementDefinition(qualifiedName(typeDef));
-            QualifiedName memberType = qualifiedName(elementDef.type());
-            if (isXsdType(memberType)) {
-                return targetNamespace().el(elementDef.name(),
-                        randomElementText(elementDef.text(), elementDef)); // TODO: parse elementDef.text() namespace
-            } else {
-                return createRandomElement(memberType);
-            }
-        }
+	    String typeDef = memberDef.attr("ref");
+	    if (typeDef != null) {
+	        Element elementDefinition = elementDefinition(qualifiedName(typeDef));
+	        QualifiedName elementName = targetNamespace.name(elementDefinition.name());
+	        return createRandomElement(elementName, elementDefinition);
+	    }
 
-        QualifiedName qname = Namespace.NO_NAMESPACE.name(memberDef.name());
-        if ("qualified".equals(schemaDoc.getRootElement().attr("elementFormDefault"))) {
-            qname = targetNamespace.name(memberDef.name());
-        }
-        if (memberDef.type() == null) {
-            Element complexMemberType = memberDef.find("complexType").singleOrDefault();
-            if (complexMemberType != null) {
-                return createComplexType(qname, new ComplexTypeDefinition(complexMemberType, schemaDoc));
-            } else {
-                // TODO: This looks wrong
-                Element simpleMemberType = memberDef.find("simpleType", "restriction").single();
-                return Xml.el(qname, randomElementText(memberDef.name(), simpleMemberType));
-            }
-        } else if (isXsdType(qualifiedName(memberDef.type()))) {
-            return Xml.el(qname, randomElementText(memberDef.name(), memberDef));
-        } else {
-            SampleXmlBuilder builder = findXmlBuilder(qualifiedName(memberDef.type()));
-            Element simpleType = builder.schemaDoc.find("simpleType[name=" + qualifiedName(memberDef.type()).getName() + "]").singleOrDefault();
-            if (simpleType != null) {
-                return Xml.el(qname, randomElementText(memberDef.name(), simpleType));
-            } else {
-                return builder.createComplexType(qname, builder.complexType(qualifiedName(memberDef.type())));
-            }
-        }
+	    QualifiedName elementName = Namespace.NO_NAMESPACE.name(memberDef.name());
+	    if ("qualified".equals(schemaDoc.getRootElement().attr("elementFormDefault"))) {
+	        elementName = targetNamespace.name(memberDef.name());
+	    }
+	    return createRandomElement(elementName, memberDef);
+	}
+
+	Element createRandomElement(QualifiedName elementName) {
+        return createRandomElement(elementName, elementDefinition(elementName));
     }
+
+	// TODO: This looks like it could be simplified
+	private Element createRandomElement(QualifiedName elementName, Element elementDefinition) {
+		QualifiedName memberType = qualifiedName(elementDefinition.type());
+        if (memberType != null) {
+			if (isXsdType(memberType)) {
+                return Xml.el(elementName, randomElementText(elementName.getName(), elementDefinition));
+            } else {
+			    SampleXmlBuilder builder = findXmlBuilder(memberType);
+			    Element simpleType = builder.schemaDoc.find("simpleType[name=" + memberType.getName() + "]").singleOrDefault();
+			    if (simpleType != null) {
+			    	elementDefinition = simpleType;
+			        return Xml.el(elementName, randomElementText(elementName.getName(), elementDefinition));
+			    } else {
+			    	return builder.populateComplexType(complexType(memberType), Xml.el(elementName));
+			    }
+            }
+        } else {
+            Element complexMemberType = elementDefinition.find("complexType").singleOrDefault();
+            if (complexMemberType != null) {
+                return populateComplexType(new ComplexTypeDefinition(complexMemberType, schemaDoc), Xml.el(elementName));
+            } else {
+                elementDefinition = elementDefinition.find("simpleType").single();
+				return Xml.el(elementName, randomElementText(elementName.getName(), elementDefinition));
+            }
+        }
+	}
 
     private SampleXmlBuilder findXmlBuilder(QualifiedName qualifiedName) {
         if (qualifiedName.getNamespace().equals(targetNamespace())) {
@@ -243,7 +266,7 @@ public class SampleXmlBuilder {
         String maxOccursAttr = seqMemberDef.attr("maxOccurs");
         if (maxOccursAttr != null) {
             if (maxOccursAttr.equalsIgnoreCase("unbounded")) {
-                maxOccurs = 10;
+                maxOccurs = 4;
             } else {
                 maxOccurs = Integer.parseInt(maxOccursAttr);
             }
@@ -260,6 +283,12 @@ public class SampleXmlBuilder {
 
     protected String randomData(Element typeDef) {
         if ("simpleType".equals(typeDef.tagName())) {
+        	if (typeDef.find(xsNamespace.name("union")).isPresent()) {
+        		List<Element> unionMembers = typeDef.find(xsNamespace.name("union"), xsNamespace.name("simpleType")).elements();
+        		return randomData(unionMembers.get(random(unionMembers.size())));
+
+        	}
+
             String baseType = typeDef.find("restriction").single().attr("base");
 
             ElementSet enumerations = typeDef.find("restriction", "enumeration");
@@ -267,42 +296,49 @@ public class SampleXmlBuilder {
                 return pickOne(enumerations.attrs("value"));
             }
 
-            if (baseType.matches(xsNamespace.name("string").print())) {
+            if (baseType.equals(xsNamespace.name("string").print())) {
+            	// TODO: This is a hack to support a test which uses regex
                 return "123-AB";
             } else {
-                throw new RuntimeException("Don't know what to do with " + baseType);
+            	return randomBaseType(typeDef.find("restriction").single());
             }
         }
 
-        String type = typeDef.type();
+        return randomBaseType(typeDef);
+    }
+
+	private String randomBaseType(Element typeDef) {
+		String type = typeDef.type();
         if (type == null)
             type = typeDef.attr("base");
-        if (type.matches(xsNamespace.name("date").print())) {
+        if (type.equals(xsNamespace.name("date").print())) {
             return randomDate().toString();
-        } else if (type.matches(xsNamespace.name("dateTime").print())) {
+        } else if (type.equals(xsNamespace.name("dateTime").print())) {
             return randomDateTime().toString();
-        } else if (type.matches(xsNamespace.name("boolean").print())) {
+        } else if (type.equals(xsNamespace.name("boolean").print())) {
             return String.valueOf(random.nextBoolean());
-        } else if (type.matches(xsNamespace.name("string").print())) {
-            return randomString(10, 20);
-        } else if (type.matches(xsNamespace.name("int").print())) {
+        } else if (type.equals(xsNamespace.name("string").print())) {
+            return randomString(5, 10);
+        } else if (type.equals(xsNamespace.name("int").print()) || type.equals(xsNamespace.name("integer").print())) {
             return String.valueOf(random(-10, 10));
-        } else if (type.matches(xsNamespace.name("positiveInteger").print())) {
+        } else if (type.equals(xsNamespace.name("positiveInteger").print())) {
             return String.valueOf(random(1, 10));
-        } else if (type.matches(xsNamespace.name("decimal").print())) {
+        } else if (type.equals(xsNamespace.name("nonNegativeInteger").print())) {
+          return String.valueOf(random(0, 10));
+        } else if (type.equals(xsNamespace.name("decimal").print())) {
             return String.valueOf(random(-1000, 10000) / 100);
-        } else if (type.matches(xsNamespace.name("float").print())) {
+        } else if (type.equals(xsNamespace.name("float").print())) {
             return String.valueOf(random(-1000, 10000) / 100.0);
-        } else if (type.matches(xsNamespace.name("double").print())) {
+        } else if (type.equals(xsNamespace.name("double").print())) {
             return String.valueOf(random(-1000, 10000) / 100.0);
-        } else if (type.matches(xsNamespace.name("base64Binary").print())) {
+        } else if (type.equals(xsNamespace.name("base64Binary").print())) {
             // data:image/svg+xml;base64,
             return "PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgZGF0YS1uYW1lPSJMYXllciAxIiBpZD0iTGF5ZXJfMSIgdmlld0JveD0iMCAwIDQ4IDQ4IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxzdHlsZT4uY2xzLTEsLmNscy0ye2ZpbGw6bm9uZTtzdHJva2U6IzIzMWYyMDtzdHJva2UtbWl0ZXJsaW1pdDoxMDtzdHJva2Utd2lkdGg6MnB4O30uY2xzLTJ7c3Ryb2tlLWxpbmVjYXA6cm91bmQ7fS5jbHMtM3tmaWxsOiMyMzFmMjA7fTwvc3R5bGU+PC9kZWZzPjx0aXRsZS8+PGNpcmNsZSBjbGFzcz0iY2xzLTEiIGN4PSIyNCIgY3k9IjI0IiByPSIyMyIvPjxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTE0LDMzczguODMsOS4zMywyMCwwIi8+PGVsbGlwc2UgY2xhc3M9ImNscy0zIiBjeD0iMTciIGN5PSIxOSIgcng9IjMiIHJ5PSI0Ii8+PGVsbGlwc2UgY2xhc3M9ImNscy0zIiBjeD0iMzEiIGN5PSIxOSIgcng9IjMiIHJ5PSI0Ii8+PC9zdmc+";
-        } else if (type.matches(xsNamespace.name("NMTOKEN").print())) {
+        } else if (type.equals(xsNamespace.name("NMTOKEN").print())) {
             return typeDef.attr("fixed");
         }
-        throw new IllegalArgumentException("Unknown base type " + type);
-    }
+        throw new IllegalArgumentException("Unknown base type " + typeDef);
+	}
 
     private LocalDate randomDate() {
         return LocalDate.now().minusDays(100).plusDays(new Random().nextInt(200));
@@ -342,8 +378,9 @@ public class SampleXmlBuilder {
         return tns != null ? new Namespace(tns, nsPrefix) : Namespace.NO_NAMESPACE;
     }
 
-    private Element attributeDefinition(String typeNameFull) {
-        String typeName = qualifiedName(typeNameFull).getName();
+    @Nonnull
+    private Element attributeDefinition(@Nonnull String typeNameFull) {
+        @Nonnull String typeName = qualifiedName(typeNameFull).getName();
         return schemaDoc.find("attribute[name=" + typeName + "]").single();
     }
 
@@ -363,6 +400,10 @@ public class SampleXmlBuilder {
     }
 
     private Element elementDefinition(QualifiedName elementName) {
+    	if (elementName == null) {
+    		throw new IllegalArgumentException("elementName shouldn't be null");
+    	}
+
         // TODO: Lookup schema based on elementName namespace
         Element typeDefinition = schemaDoc.find("element[name=" + elementName.getName() + "]").singleOrDefault();
         if (typeDefinition != null) {
