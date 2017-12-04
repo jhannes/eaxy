@@ -54,4 +54,8 @@ public class ElementPath {
         return "..." + element;
     }
 
+	public ElementPath getParent() {
+		return parent;
+	}
+
 }

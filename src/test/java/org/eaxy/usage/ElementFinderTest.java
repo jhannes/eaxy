@@ -202,7 +202,7 @@ public class ElementFinderTest {
                 .contains("below [<root>...</root>, top, parent]")
                 .contains("Can't find <searched-child>")
                 .doesNotContain("foo")
-                .contains("\"http://a.org/b/\":actual-child");
+                .contains("a:actual-child");
         }
     }
 

@@ -62,7 +62,7 @@ public class ElementSet implements Iterable<Element> {
         List<String> children = new ArrayList<String>();
         for (ElementPath path : elementPaths) {
             for (Element subElement : path.leafElement().elements()) {
-                children.add(subElement.getName().toString());
+                children.add(subElement.toString());
             }
         }
         return children.toString();
