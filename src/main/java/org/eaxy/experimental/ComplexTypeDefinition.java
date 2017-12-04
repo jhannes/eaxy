@@ -20,7 +20,19 @@ public class ComplexTypeDefinition {
 
     public Namespace targetNamespace() {
         String tns = schemaDoc.getRootElement().attr("targetNamespace");
-        return tns != null ? new Namespace(tns, "a") : Namespace.NO_NAMESPACE;
+        if (tns == null) {
+        	return Namespace.NO_NAMESPACE;
+        }
+        for (Namespace namespace : schemaDoc.getRootElement().getNamespaces()) {
+			if (namespace.getUri().equals(tns)) {
+				return namespace;
+			}
+		}
+        return new Namespace(tns, "a");
     }
+
+    public Document getSchemaDoc() {
+		return schemaDoc;
+	}
 
 }

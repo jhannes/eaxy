@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Stack;
 
@@ -14,6 +15,7 @@ import javax.annotation.Nonnull;
 
 import org.eaxy.Document;
 import org.eaxy.Element;
+import org.eaxy.ElementPath;
 import org.eaxy.ElementSet;
 import org.eaxy.Namespace;
 import org.eaxy.QualifiedName;
@@ -79,8 +81,24 @@ public class SampleXmlBuilder {
         }
     }
 
+
+    private final static Namespace XSI = new Namespace("http://www.w3.org/2001/XMLSchema-instance", "xsi");
+
     private Element populateComplexType(ComplexTypeDefinition complexTypeDefinition, Element resultElement) {
         Element complexType = complexTypeDefinition.getElement();
+
+        if ("true".equals(complexType.attr("abstract"))) {
+        	// TODO: This may also be relevant when there are subtypes but the base type is not abstract
+        	String typeName = complexTypeDefinition.targetNamespace().getPrefix() + ":" + complexType.name();
+			ElementSet subtypes = complexTypeDefinition.getSchemaDoc().find("complexType", "complexContent", "extension[base=" + typeName + "]").check();
+			ElementPath subtype = pickOne(subtypes.getPaths());
+			Element subTypeDefElement = subtype.getParent().getParent().leafElement();
+			ComplexTypeDefinition subTypeDefinition = new ComplexTypeDefinition(subTypeDefElement, complexTypeDefinition.getSchemaDoc());
+			// TODO: There are other ways of specifying subtypes, right?
+			resultElement.attr(XSI.name("type"), subTypeDefinition.targetNamespace().getPrefix() + ":" + subTypeDefElement.name());
+			resultElement.getNamespaces().add(subTypeDefinition.targetNamespace());
+			return populateComplexType(subTypeDefinition, resultElement);
+        }
 
         if (complexType.find("simpleContent").isPresent()) {
             populateAttributes(resultElement, complexType.find("simpleContent", "extension").single());
@@ -93,11 +111,12 @@ public class SampleXmlBuilder {
             QualifiedName baseTypeName = qualifiedName(extension.attr("base"));
             ComplexTypeDefinition baseType = complexType(baseTypeName);
             SampleXmlBuilder builder = findXmlBuilder(baseTypeName);
-            builder.populateAttributes(resultElement, complexTypeDefinition.getElement());
-            builder.appendSequence(resultElement, baseType);
-            this.appendSequence(resultElement, new ComplexTypeDefinition(extension, schemaDoc));
+            builder.populateAttributes(resultElement, complexType);
+            builder.appendSequence(resultElement, baseType.getElement(), baseType.targetNamespace());
+            ComplexTypeDefinition subtype = new ComplexTypeDefinition(extension, complexTypeDefinition.getSchemaDoc());
+            builder.appendSequence(resultElement, extension, subtype.targetNamespace());
         }
-        appendSequence(resultElement, complexTypeDefinition);
+        appendSequence(resultElement, complexTypeDefinition.getElement(), complexTypeDefinition.targetNamespace());
         populateAttributes(resultElement, complexType);
         return resultElement;
     }
@@ -137,17 +156,17 @@ public class SampleXmlBuilder {
         return random.nextDouble() < p;
     }
 
-    private void appendSequence(Element resultElement, ComplexTypeDefinition baseType) {
-    	if (baseType.getElement().find("sequence").isPresent()) {
-	        for (Element seqMemberDef : baseType.getElement().find("sequence", "*")) {
-	            appendChildElement(resultElement, seqMemberDef, baseType);
+    private void appendSequence(Element resultElement, Element typeElement, Namespace targetNamespace) {
+    	if (typeElement.find("sequence").isPresent()) {
+	        for (Element seqMemberDef : typeElement.find("sequence", "*")) {
+	            appendChildElement(resultElement, seqMemberDef, targetNamespace);
 	        }
-    	} else if (baseType.getElement().find("all").isPresent()) {
-	        for (Element seqMemberDef : baseType.getElement().find("all", "*")) {
-	            appendChildElement(resultElement, seqMemberDef, baseType);
+    	} else if (typeElement.find("all").isPresent()) {
+	        for (Element seqMemberDef : typeElement.find("all", "*")) {
+	            appendChildElement(resultElement, seqMemberDef, targetNamespace);
 	        }
-    	} else if (baseType.getElement().find("attribute").isEmpty() &&baseType.getElement().find("complexContent").isEmpty()) {
-    		throw new IllegalArgumentException("Unexpected " + baseType.getElement());
+    	} else if (typeElement.find("attribute").isEmpty() && typeElement.find("complexContent").isEmpty()) {
+    		throw new IllegalArgumentException("Unexpected " + typeElement);
     	}
     }
 
@@ -155,7 +174,7 @@ public class SampleXmlBuilder {
     /// If the current class could be the SampleXmlBuilderDefinition and there was one builder per build this could be avoided
     private Stack<String> memberDefStack = new Stack<>();
 
-    private void appendChildElement(Element resultElement, Element memberDef, ComplexTypeDefinition typeDef) {
+    private void appendChildElement(Element resultElement, Element memberDef, Namespace targetNamespace) {
     	if (memberDefStack.contains(memberDef.toIndentedXML()) && "0".equals(memberDef.attr("minOccurs"))) {
     		return;
     	}
@@ -163,7 +182,7 @@ public class SampleXmlBuilder {
     	memberDefStack.push(memberDef.toIndentedXML());
         int occurances = occurences(memberDef);
         for (int i = 0; i < occurances; i++) {
-            resultElement.add(addChildElement(memberDef, typeDef.targetNamespace()));
+            resultElement.add(addChildElement(memberDef, targetNamespace));
         }
         memberDefStack.pop();
     }
@@ -195,9 +214,9 @@ public class SampleXmlBuilder {
                 return Xml.el(elementName, randomElementText(elementName.getName(), elementDefinition));
             } else {
 			    SampleXmlBuilder builder = findXmlBuilder(memberType);
-			    Element simpleType = builder.schemaDoc.find("simpleType[name=" + memberType.getName() + "]").singleOrDefault();
-			    if (simpleType != null) {
-			    	elementDefinition = simpleType;
+			    Optional<Element> simpleType = simpleType(memberType.getName());
+			    if (simpleType.isPresent()) {
+			    	elementDefinition = simpleType.get();
 			        return Xml.el(elementName, randomElementText(elementName.getName(), elementDefinition));
 			    } else {
 			    	return builder.populateComplexType(complexType(memberType), Xml.el(elementName));
@@ -384,21 +403,40 @@ public class SampleXmlBuilder {
         return schemaDoc.find("attribute[name=" + typeName + "]").single();
     }
 
-    private ComplexTypeDefinition complexType(QualifiedName qualifiedName) {
+    // TODO: Extract to SchemaDefinition
+    private Optional<Element> simpleType(String typeName) {
         // TODO: Use the namespace to lookup the schema - but it could be included as well!
-        Element typeDefinition = schemaDoc.find("complexType[name=" + qualifiedName.getName() + "]").singleOrDefault();
+        Element typeDefinition = schemaDoc.find("simpleType[name=" + typeName + "]").singleOrDefault();
         if (typeDefinition != null) {
-            return new ComplexTypeDefinition(typeDefinition, schemaDoc);
+            return Optional.of(typeDefinition);
         }
         for (Document schemaDoc : includedSchemas) {
-            typeDefinition = schemaDoc.find("complexType[name=" + qualifiedName.getName() + "]").singleOrDefault();
+            typeDefinition = schemaDoc.find("simpleType[name=" + typeName + "]").singleOrDefault();
             if (typeDefinition != null) {
-                return new ComplexTypeDefinition(typeDefinition, schemaDoc);
+                return Optional.of(typeDefinition);
             }
         }
-        throw new IllegalArgumentException("Can't find type definition of " + qualifiedName);
+        return Optional.empty();
     }
 
+    // TODO: Extract to SchemaDefinition
+    private ComplexTypeDefinition complexType(QualifiedName qualifiedName) {
+    	// TODO: Use the namespace to lookup the schema - but it could be included as well!
+    	Element typeDefinition = schemaDoc.find("complexType[name=" + qualifiedName.getName() + "]").singleOrDefault();
+    	if (typeDefinition != null) {
+    		return new ComplexTypeDefinition(typeDefinition, schemaDoc);
+    	}
+    	for (Document schemaDoc : includedSchemas) {
+    		typeDefinition = schemaDoc.find("complexType[name=" + qualifiedName.getName() + "]").singleOrDefault();
+    		if (typeDefinition != null) {
+    			return new ComplexTypeDefinition(typeDefinition, schemaDoc);
+    		}
+    	}
+    	throw new IllegalArgumentException("Can't find type definition of " + qualifiedName + " in "
+    			+ schemaDoc.getBaseUrl() + " or " + includedSchemas.size() + " included schemas");
+    }
+
+    // TODO: Extract to SchemaDefinition
     private Element elementDefinition(QualifiedName elementName) {
     	if (elementName == null) {
     		throw new IllegalArgumentException("elementName shouldn't be null");
