@@ -68,9 +68,11 @@ public class WriterXmlVisitor implements XmlVisitor {
 
     private boolean isNamespaceAlreadyPrinted(Namespace namespace) {
         for (Collection<Namespace> linkedList : printedNamespacesStack) {
-            if (linkedList.contains(namespace)) {
-                return true;
-            }
+        	for (Namespace includedNs : linkedList) {
+				if (Objects.equals(includedNs.getPrefix(), namespace.getPrefix()) && Objects.equals(includedNs.getUri(), namespace.getUri())) {
+					return true;
+				}
+			}
         }
         return false;
     }
