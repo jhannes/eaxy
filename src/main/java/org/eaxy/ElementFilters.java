@@ -41,12 +41,12 @@ public class ElementFilters {
         }
 
         @Override @Nonnull
-        public Iterable<Element> iterate(@Nonnull Reader reader) {
+        public XmlIterable iterate(@Nonnull Reader reader) {
             return XmlIterator.iterate(this, reader);
         }
 
         @Override @Nonnull
-        public Iterable<Element> iterate(@Nonnull URL url) {
+        public XmlIterable iterate(@Nonnull URL url) {
             return XmlIterator.iterate(this, url);
         }
     }
@@ -98,12 +98,12 @@ public class ElementFilters {
         }
 
         @Override @Nonnull
-        public Iterable<Element> iterate(@Nonnull Reader reader) {
+        public XmlIterable iterate(@Nonnull Reader reader) {
             return XmlIterator.iterate(this, reader);
         }
 
         @Override @Nonnull
-        public Iterable<Element> iterate(@Nonnull URL url) {
+        public XmlIterable iterate(@Nonnull URL url) {
             return XmlIterator.iterate(this, url);
         }
     }
@@ -130,12 +130,12 @@ public class ElementFilters {
         }
 
         @Override @Nonnull
-        public Iterable<Element> iterate(@Nonnull Reader reader) {
+        public XmlIterable iterate(@Nonnull Reader reader) {
             throw new UnsupportedOperationException();
         }
 
         @Override @Nonnull
-        public Iterable<Element> iterate(@Nonnull URL url) {
+        public XmlIterable iterate(@Nonnull URL url) {
             throw new UnsupportedOperationException();
         }
 
@@ -201,12 +201,12 @@ public class ElementFilters {
         }
 
         @Override @Nonnull
-        public Iterable<Element> iterate(@Nonnull Reader reader) {
+        public XmlIterable iterate(@Nonnull Reader reader) {
             return XmlIterator.iterate(this, reader);
         }
 
         @Override @Nonnull
-        public Iterable<Element> iterate(@Nonnull URL url) {
+        public XmlIterable iterate(@Nonnull URL url) {
             return XmlIterator.iterate(this, url);
         }
     }

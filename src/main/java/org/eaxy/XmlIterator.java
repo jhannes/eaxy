@@ -14,6 +14,7 @@ import java.util.zip.GZIPInputStream;
 
 import javax.annotation.Nonnull;
 import javax.xml.namespace.QName;
+import javax.xml.stream.Location;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -25,6 +26,19 @@ public class XmlIterator implements XMLStreamConstants, Iterator<Element> {
 
     private final Stack<Element> elementStack = new Stack<Element>();
     private XMLStreamReader streamReader;
+    
+    public int currentLineNumber() {
+        return streamReader.getLocation().getLineNumber();
+    }
+
+    public int currentColumnNumber() {
+        return streamReader.getLocation().getColumnNumber();
+    }
+    
+    public int currentCharacterOffset() {
+        return streamReader.getLocation().getCharacterOffset();
+    }
+
     private ElementQuery query;
 
     private Element next;
@@ -148,11 +162,11 @@ public class XmlIterator implements XMLStreamConstants, Iterator<Element> {
 
     @SuppressWarnings("resource")
     @Nonnull
-    public static Iterable<Element> iterate(@Nonnull final ElementQuery query, @Nonnull URL url) {
+    public static XmlIterable iterate(@Nonnull final ElementQuery query, @Nonnull URL url) {
         final InputStream inputStream = openStream(url);
-        return new Iterable<Element>() {
+        return new XmlIterable() {
             @Override
-            public Iterator<Element> iterator() {
+            public XmlIterator iterator() {
                 try {
                     return new XmlIterator(getInputFactory().createXMLStreamReader(inputStream), query);
                 } catch (XMLStreamException e) {
@@ -175,10 +189,10 @@ public class XmlIterator implements XMLStreamConstants, Iterator<Element> {
     }
 
     @Nonnull
-    public static Iterable<Element> iterate(@Nonnull final ElementQuery query, @Nonnull final Reader reader) {
-        return new Iterable<Element>() {
+    public static XmlIterable iterate(@Nonnull final ElementQuery query, @Nonnull final Reader reader) {
+        return new XmlIterable() {
             @Override
-            public Iterator<Element> iterator() {
+            public XmlIterator iterator() {
                 try {
                     return new XmlIterator(getInputFactory().createXMLStreamReader(reader), query);
                 } catch (XMLStreamException e) {
@@ -187,6 +201,8 @@ public class XmlIterator implements XMLStreamConstants, Iterator<Element> {
             }
         };
     }
+    
+    
 
     @Override
     public boolean hasNext() {

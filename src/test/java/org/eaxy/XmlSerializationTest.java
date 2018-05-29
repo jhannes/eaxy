@@ -64,7 +64,7 @@ public class XmlSerializationTest {
     @Test
     public void shouldIterate() throws IOException {
         int elementCount = 0;
-        ElementQuery filter = ElementFilters.create("*");
+        ElementQuery filter = Xml.filter("*");
         for (@SuppressWarnings("unused") Element element : filter.iterate(xmlFile.toURI().toURL())) {
             elementCount++;
         }

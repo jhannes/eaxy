@@ -16,6 +16,8 @@ import org.eaxy.Element;
 import org.eaxy.ElementFilters;
 import org.eaxy.Namespace;
 import org.eaxy.NonMatchingPathException;
+import org.eaxy.Xml;
+import org.eaxy.XmlIterator;
 import org.junit.Test;
 
 public class ElementFinderTest {
@@ -79,7 +81,7 @@ public class ElementFinderTest {
                 el("div", "nonmatch"),
                 el("div", el("div", el("p", "level 3"))),
                 el("div", el("p", "level 2b")));
-        assertThat(ElementFilters.create("...", "p").iterate(new StringReader(xml.toXML())))
+        assertThat(Xml.filter("...", "p").iterate(new StringReader(xml.toXML())))
             .extracting(e -> e.text())
             .contains("level 1a", "level 2a", "level 1b", "level 3", "level 2b");
     }
@@ -173,7 +175,7 @@ public class ElementFinderTest {
         Element xml = NS.el("parent",
                 NS.el("child", "wrong").attr(NS.name("included"), "false"),
                 NS.el("child", "right").attr(NS.name("included"), "true"));
-        assertThat(ElementFilters.create(NS.attr("included", "true")).iterate(new StringReader(xml.toXML())))
+        assertThat(Xml.filter(NS.attr("included", "true")).iterate(new StringReader(xml.toXML())))
             .extracting(e -> e.text())
             .containsExactly("right");
     }
@@ -209,9 +211,12 @@ public class ElementFinderTest {
     @Test
     public void shouldIterateOverFiles() {
         URL file = getClass().getResource("/medsample-mini.xml");
-        Iterator<Element> it = ElementFilters.create("MedlineCitation").iterate(file).iterator();
+        XmlIterator it = Xml.filter("MedlineCitation").iterate(file).iterator();
         int count = 0;
         while (it.hasNext()) {
+            assertThat(it.currentCharacterOffset()).isPositive();
+            assertThat(it.currentLineNumber()).isPositive();
+            assertThat(it.currentColumnNumber()).isPositive();
             it.next();
             count++;
         }
@@ -224,7 +229,7 @@ public class ElementFinderTest {
         URL file = new File("src/test/xml/performance-suite/medsamp2012.xml.gz").toURI().toURL();
         int maxReferences = Integer.MIN_VALUE;
         Element mostReferenced = null;
-        for (Element element : ElementFilters.create("MedlineCitation").iterate(file)) {
+        for (Element element : Xml.filter("MedlineCitation").iterate(file)) {
             Element references = element.find("NumberOfReferences").singleOrDefault();
             if (references != null) {
                 int numberOfReferences = Integer.parseInt(references.text());

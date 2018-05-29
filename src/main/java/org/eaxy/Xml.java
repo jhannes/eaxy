@@ -192,4 +192,8 @@ public class Xml {
         return result;
     }
 
+    public static ElementQuery filter(Object...path) {
+        return ElementFilters.create(path);
+    }
+
 }

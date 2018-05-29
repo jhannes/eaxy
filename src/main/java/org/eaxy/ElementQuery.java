@@ -14,10 +14,10 @@ public interface ElementQuery {
     boolean matches(List<Element> path, int position);
 
     @Nonnull
-    Iterable<Element> iterate(@Nonnull Reader reader);
+    XmlIterable iterate(@Nonnull Reader reader);
 
     @Nonnull
-    Iterable<Element> iterate(@Nonnull URL url);
+    XmlIterable iterate(@Nonnull URL url);
 
 
 }

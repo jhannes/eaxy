@@ -111,7 +111,7 @@ public class LargeDocumentPerformanceTest {
         }
         long start = System.currentTimeMillis();
 
-        for (Element element : ElementFilters.create("some_element", "child.class-0").iterate(new StringReader(new Document(root).toXML()))) {
+        for (Element element : Xml.filter("some_element", "child.class-0").iterate(new StringReader(new Document(root).toXML()))) {
             assertThat(element.text()).contains("yes");
         }
         return System.currentTimeMillis()-start;

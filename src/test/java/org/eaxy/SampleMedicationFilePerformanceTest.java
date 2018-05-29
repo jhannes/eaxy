@@ -44,7 +44,7 @@ public class SampleMedicationFilePerformanceTest {
         List<String> ritalinSubstitutes = new ArrayList<>();
 
         try (ZipFile zipFile = new ZipFile(medicationsZip)) {
-            for (Element medication : ElementFilters.create("KatLegemiddelpakning", "OppfLegemiddelpakning", "Legemiddelpakning")
+            for (Element medication : Xml.filter("KatLegemiddelpakning", "OppfLegemiddelpakning", "Legemiddelpakning")
                     .iterate(new InputStreamReader(new BOMInputStream(zipFile.getInputStream(zipFile.getEntry("fest251.xml")))))) {
                 ElementSet atcCode = medication.find("Atc");
                 if (atcCode.isPresent() && atcCode.first().attr("V").equals("N06BA04")) {
