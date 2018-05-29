@@ -122,7 +122,7 @@ public class SampleData {
         return result.toString();
     }
 
-    private int random(int lowerBound, int upperBound) {
+    protected int random(int lowerBound, int upperBound) {
         if (lowerBound == upperBound) {
             return lowerBound;
         }

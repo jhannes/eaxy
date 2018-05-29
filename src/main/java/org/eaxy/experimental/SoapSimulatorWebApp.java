@@ -11,6 +11,8 @@ import java.util.Map;
 
 import org.eaxy.Content;
 import org.eaxy.Element;
+import org.eaxy.Namespace;
+import org.eaxy.QualifiedName;
 import org.eaxy.Xml;
 
 import com.sun.net.httpserver.HttpExchange;
@@ -62,8 +64,6 @@ public class SoapSimulatorWebApp extends SoapSimulatorServer {
                     Xml.el("input").type("file").name("wsdlFile"),
                     Xml.el("label", "Path"),
                     Xml.el("input").type("text").name("soapRouterUrl"),
-                    Xml.el("label", "Enabled"),
-                    Xml.el("input").type("checkbox").name("enabled"),
                     Xml.el("button", "Upload"))));
     }
 
@@ -128,10 +128,27 @@ public class SoapSimulatorWebApp extends SoapSimulatorServer {
         return formData;
     }
 
+    public static class StockQuoteRandomData extends SampleData {
+
+        private static Namespace NS = new Namespace("http://example.com/stockquote.xsd");
+
+        @Override
+        public String randomElementText(QualifiedName elementName, Element typeDefinition, Namespace xsNamespace) {
+            System.out.println(elementName + " " + typeDefinition);
+            if (elementName.equals(NS.name("price"))) {
+                return String.valueOf(random(100, 10000) / 10.0);
+            }
+            return super.randomElementText(elementName, typeDefinition, xsNamespace);
+        }
+
+    }
+
     public static void main(String[] args) throws IOException {
         SoapSimulatorWebApp server = new SoapSimulatorWebApp(10080);
         server.addSoapEndpoint("/soap/stockQuote",
-            Xml.read(new File("src/test/resources/xsd/StockQuoteService.wsdl")));
+            new SampleSoapXmlBuilder(Xml.read(new File("src/test/resources/xsd/StockQuoteService.wsdl")), new StockQuoteRandomData()));
+        server.addSoapEndpoint("/soap/airport",
+            new SampleSoapXmlBuilder(Xml.read(new File("src/test/xml/wsdl-suite/airport.wsdl"))));
         server.start();
 
         for (File file : new File(".").listFiles()) {

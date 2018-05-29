@@ -16,7 +16,8 @@ public class SoapSimulatorWebAppTest {
     @Test
     public void shouldShowWsdlFilesOnFrontPage() throws IOException {
         SoapSimulatorWebApp server = new SoapSimulatorWebApp(0);
-        server.addSoapEndpoint("/soap/stockQuote", Xml.readResource("/xsd/StockQuoteService.wsdl"));
+        server.addSoapEndpoint("/soap/stockQuote",
+            new SampleSoapXmlBuilder(Xml.readResource("/xsd/StockQuoteService.wsdl")));
         server.start();
 
         Document frontPage = Xml.read(server.getUrl());

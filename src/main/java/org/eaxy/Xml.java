@@ -156,7 +156,11 @@ public class Xml {
     }
 
     public static Document readResource(String name) throws IOException {
-        return read(Xml.class.getResource(name));
+        URL url = Xml.class.getResource(name);
+        if (url == null) {
+            throw new IllegalArgumentException("Can't find resource " + name);
+        }
+        return read(url);
     }
 
     public static Document read(Reader reader) throws IOException {

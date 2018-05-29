@@ -94,16 +94,19 @@ public class SoapSimulatorServer extends WebServer {
         writeXmlResponse(response, exchange);
     }
 
-    URL addSoapEndpoint(String url, Document wsdl) throws IOException {
-        soapEndpoints.put(url, new SampleSoapXmlBuilder(wsdl));
+    protected URL addSoapEndpoint(String url, Document wsdl) throws IOException {
+        return addSoapEndpoint(url, new SampleSoapXmlBuilder(wsdl));
+    }
+
+    protected URL addSoapEndpoint(String url, SampleSoapXmlBuilder builder) throws MalformedURLException {
+        soapEndpoints.put(url, builder);
         return new URL(getUrl(), url);
     }
 
     protected URL addSoapEndpoint(URL url) throws IOException {
         SampleSoapXmlBuilder builder = new SampleSoapXmlBuilder(url);
         String path = "/soap" + builder.getPortUrlPath();
-        soapEndpoints.put(path, builder);
-        return new URL(getUrl(), path);
+        return addSoapEndpoint(path, builder);
     }
 
     public static void main(String[] args) throws IOException {

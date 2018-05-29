@@ -32,7 +32,7 @@ public class SampleXmlBuilderTest {
     @Test
     public void shouldGenerateAttributeValues() throws IOException {
         Document schemaDoc = Xml.readResource("/mailmessage.xsd");
-        SampleXmlBuilder generator = new SampleXmlBuilder(schemaDoc, null);
+        SampleXmlBuilder generator = new SampleXmlBuilder(schemaDoc, null, new SampleData());
         generator.setFull(true);
         Element element = generator.createRandomElement("message");
         assertThat(element.find("recipients", "recipient").first().attr("type")).isIn("email", "phone");
@@ -41,7 +41,7 @@ public class SampleXmlBuilderTest {
     @Test
     public void shouldGenerateManyElementsWhenAppropriate() throws Exception {
         Document schemaDoc = Xml.readResource("/mailmessage.xsd");
-        SampleXmlBuilder generator = new SampleXmlBuilder(schemaDoc, "msg");
+        SampleXmlBuilder generator = new SampleXmlBuilder(schemaDoc, "msg", new SampleData());
         generator.setFull(true);
         Element element = generator.createRandomElement("message");
         generator.getValidator().validate(element);
@@ -63,7 +63,7 @@ public class SampleXmlBuilderTest {
     @Test
     public void shouldBuildMinimal() throws IOException {
         Document schemaDoc = Xml.readResource("/xsd/po.xsd");
-        SampleXmlBuilder generator = new SampleXmlBuilder(schemaDoc, null);
+        SampleXmlBuilder generator = new SampleXmlBuilder(schemaDoc, null, new SampleData());
         generator.setMinimal(true);
         Element el = generator.createRandomElement("purchaseOrder");
         assertThat(el.hasAttr("orderDate")).isFalse();
