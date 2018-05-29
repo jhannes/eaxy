@@ -128,7 +128,7 @@ public class SoapSimulatorWebApp extends SoapSimulatorServer {
         return formData;
     }
 
-    public static class StockQuoteRandomData extends SampleData {
+    private static class StockQuoteRandomData extends SampleData {
 
         private static Namespace NS = new Namespace("http://example.com/stockquote.xsd");
 
@@ -146,7 +146,7 @@ public class SoapSimulatorWebApp extends SoapSimulatorServer {
     public static void main(String[] args) throws IOException {
         SoapSimulatorWebApp server = new SoapSimulatorWebApp(10080);
         server.addSoapEndpoint("/soap/stockQuote",
-            new SampleSoapXmlBuilder(Xml.read(new File("src/test/resources/xsd/StockQuoteService.wsdl")), new StockQuoteRandomData()));
+            new SampleSoapXmlBuilder(Xml.read(new File("src/test/resources/xsd/StockQuoteService.wsdl"))));
         server.addSoapEndpoint("/soap/airport",
             new SampleSoapXmlBuilder(Xml.read(new File("src/test/xml/wsdl-suite/airport.wsdl"))));
         server.start();

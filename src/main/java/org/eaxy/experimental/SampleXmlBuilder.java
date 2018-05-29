@@ -29,10 +29,9 @@ public class SampleXmlBuilder {
     private Random random = new Random();
     private String nsPrefix;
 
-    public SampleXmlBuilder(Document schemaDoc, String nsPrefix, SampleData sampleData) throws IOException {
+    public SampleXmlBuilder(Document schemaDoc, String nsPrefix) throws IOException {
         this.schemaDoc = schemaDoc;
         this.nsPrefix = nsPrefix;
-        this.sampleData = sampleData;
 
         xsNamespace = schemaDoc.getRootElement().getName().getNamespace();
         for (Element xsdInclude : schemaDoc.find("import")) {
@@ -49,7 +48,7 @@ public class SampleXmlBuilder {
     }
 
     public SampleXmlBuilder(URL resource, String nsPrefix) throws IOException {
-        this(Xml.read(resource), nsPrefix, new SampleData());
+        this(Xml.read(resource), nsPrefix);
     }
 
     public SampleXmlBuilder(String nsPrefix, Document schemaDoc, List<Document> includedSchemas) {
