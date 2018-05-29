@@ -8,7 +8,7 @@ import javax.annotation.Nonnull;
 
 public interface ElementQuery {
 
-	@Nonnull
+    @Nonnull
     ElementSet search(@Nonnull ElementSet elements);
 
     boolean matches(List<Element> path, int position);
