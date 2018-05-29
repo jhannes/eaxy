@@ -260,7 +260,7 @@ public class SampleXmlBuilder {
     /**
      * Override this method to create custom rules for specific elements
      * @param elementName The name of the element to write
-     * @param attrDef The element that defines the attribute
+     * @param typeDefinition The element that defines the element type
      * @return Random attribute value that fulfills the definition
      */
     protected String randomElementText(String elementName, Element typeDefinition) {

@@ -15,10 +15,16 @@ import javax.xml.validation.SchemaFactory;
 import org.eaxy.utils.IOUtils;
 import org.xml.sax.SAXException;
 
+/** Validator can validate a Element tree against a XSD */
 public class Validator {
 
     private javax.xml.validation.Validator validator;
 
+    
+    /**
+     * Load schemas for validation from class path
+     * @param resourcePaths the resource path for the schemas from the classpath
+     */
     public Validator(String[] resourcePaths) {
         Source[] sources = new Source[resourcePaths.length];
         for (int i = 0; i < resourcePaths.length; i++) {
@@ -37,10 +43,12 @@ public class Validator {
         }
     }
 
+    /** Create a validator based on a XSD loaded as a EAXY Element */
     public Validator(Element schema) {
         this(new Document(schema));
     }
 
+    /** Create a validator based on a XSD loaded as a EAXY Document */
     public Validator(Document schemaDoc) {
         this(Xml.toDom(schemaDoc));
     }
@@ -49,6 +57,8 @@ public class Validator {
      * Create a Validator consisting of several documents that may have imports to each other.
      * To facilitate &lt;import&gt;, the schemas are saved to temporary storage.
      * TODO: Is it possible to solve this more elegantly?
+     * 
+     * @throws IOException if an included schema could not be saved to temporary disk
      */
     public Validator(List<Document> includedSchemas) throws IOException {
         int index = 0;
