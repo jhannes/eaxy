@@ -24,8 +24,8 @@
 	</developers>
 
 	<scm>
-		<connection>scm:git:git@github.com:jhannes/eaxy.git</connection>
-		<developerConnection>scm:git:git@github.com:jhannes/eaxy.git</developerConnection>
+		<connection>scm:git:https://github.com/jhannes/eaxy.git</connection>
+		<developerConnection>scm:git:https://github.com/jhannes/eaxy.git</developerConnection>
 		<url>https://github.com/jhannes/eaxy.git</url>
 	  <tag>eaxy-0.2</tag>
   </scm>
