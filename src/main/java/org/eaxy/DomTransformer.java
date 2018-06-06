@@ -22,7 +22,7 @@ public class DomTransformer {
         return doc;
     }
 
-    private static Node createNode(org.w3c.dom.Node node) {
+    public static Node createNode(org.w3c.dom.Node node) {
         if (node instanceof org.w3c.dom.CDATASection) {
             return Xml.cdata(node.getTextContent());
         } else if (node instanceof org.w3c.dom.Text) {
@@ -37,7 +37,7 @@ public class DomTransformer {
 
     }
 
-    private static Element element(org.w3c.dom.Node node) {
+    public static Element element(org.w3c.dom.Node node) {
         Element element = new Element(createName(node));
         org.w3c.dom.NamedNodeMap attributes = node.getAttributes();
         if (attributes != null) {
@@ -74,7 +74,7 @@ public class DomTransformer {
         }
     }
 
-    private static org.w3c.dom.Node createElement(org.w3c.dom.Document doc, Element element) {
+    public static org.w3c.dom.Element createElement(org.w3c.dom.Document doc, Element element) {
         org.w3c.dom.Element domElement = createElement(doc, element.getName());
 
         for (Namespace namespace : element.getNamespaces()) {

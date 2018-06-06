@@ -1,6 +1,6 @@
 package org.eaxy;
 
-class Attribute implements Content {
+public class Attribute implements Content {
 
     private final QualifiedName key;
     private final String value;

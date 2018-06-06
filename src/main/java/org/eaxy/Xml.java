@@ -107,6 +107,11 @@ public class Xml {
     }
 
     @Nonnull
+    public static Element el(String tagName, Iterable<Content> contents) {
+        return Namespace.NO_NAMESPACE.el(tagName, contents);
+    }
+
+    @Nonnull
     public static Element el(String tagName, String stringContent) {
         return el(tagName, text(stringContent));
     }

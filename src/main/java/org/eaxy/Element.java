@@ -30,6 +30,12 @@ public class Element implements Node {
         children.addAll(Objects.list(contents, Node.class));
     }
 
+    Element(QualifiedName name, Iterable<Content> contents) {
+        this(name, Objects.list(contents, Attribute.class),
+                Objects.list(contents, Namespace.class), null);
+        children.addAll(Objects.list(contents, Node.class));
+    }
+
     Element(QualifiedName name, Collection<Attribute> attrs, Collection<Namespace> namespaces, Integer lineNumber) {
         this.name = name;
 		this.lineNumber = lineNumber;

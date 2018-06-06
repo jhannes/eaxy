@@ -53,6 +53,10 @@ public class Namespace implements Content {
         return el(tagName, Xml.text(stringContent));
     }
 
+    public Element el(String tagName, Iterable<Content> contents) {
+        return new Element(name(tagName), contents);
+    }
+
     public boolean isNamespace() {
         return true;
     }
@@ -86,5 +90,6 @@ public class Namespace implements Content {
     public Attribute attr(String localName, String value) {
         return new Attribute(name(localName), value);
     }
+
 
 }
