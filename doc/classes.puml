@@ -1,0 +1,43 @@
+package QueryResult {
+    class ElementSet implements IterableOfElement
+    
+    class ElementPath {
+        element: Element
+    }
+    
+    
+    ElementSet .right.> "*" ElementPath
+    ElementSet ..> ElementSet: parent
+    
+    ElementPath ..> ElementPath: parent
+}
+
+package Structure {
+    interface Content
+    
+    class Attribute implements Content
+    
+    class Namespace implements Content
+    
+    interface Node extends Content
+    
+    class Element implements Node {
+        children: List<Node>
+        attributes: Map<>
+        lineNumber: int
+    }
+    
+    class CDataElement implements Node
+    
+    class CommentElement implements Node
+    
+    class TextElement implements Node
+    
+    
+    class Document
+    
+    
+    Document -down-> Element: rootElement
+}
+
+

@@ -22,7 +22,7 @@ public class Element implements Node {
     private final Map<QualifiedName,Attribute> attributes = new LinkedHashMap<QualifiedName, Attribute>();
     // TODO: Maybe namespaces should be part of the attributes - are namespaces attributes?
     private final List<Namespace> namespaces = new ArrayList<Namespace>();
-	private Integer lineNumber;
+    private Integer lineNumber;
 
     Element(QualifiedName name, Content... contents) {
         this(name, Objects.list(contents, Attribute.class),

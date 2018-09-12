@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
 
 public class ElementPath {
 
-	@Nonnull
+    @Nonnull
     private final Element element;
     private ElementPath parent;
 

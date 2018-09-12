@@ -37,6 +37,12 @@ Features:
 4. Experimental: Random XML services for testing
    `SoapSimulatorServer server = new SoapSimulatorServer(10080); server.addSoapEndpoint(...); server.start();`
 
+Design:
+-------
+
+![Class diagram](http://www.plantuml.com/plantuml/proxy?src=https://raw.github.com/jhannes/eaxy/master/doc/classes.puml)
+
+
 Building XML documents:
 -----------------------
 ```java
