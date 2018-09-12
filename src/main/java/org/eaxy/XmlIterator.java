@@ -14,7 +14,6 @@ import java.util.zip.GZIPInputStream;
 
 import javax.annotation.Nonnull;
 import javax.xml.namespace.QName;
-import javax.xml.stream.Location;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -26,7 +25,7 @@ public class XmlIterator implements XMLStreamConstants, Iterator<Element> {
 
     private final Stack<Element> elementStack = new Stack<Element>();
     private XMLStreamReader streamReader;
-    
+
     public int currentLineNumber() {
         return streamReader.getLocation().getLineNumber();
     }
@@ -34,7 +33,7 @@ public class XmlIterator implements XMLStreamConstants, Iterator<Element> {
     public int currentColumnNumber() {
         return streamReader.getLocation().getColumnNumber();
     }
-    
+
     public int currentCharacterOffset() {
         return streamReader.getLocation().getCharacterOffset();
     }
@@ -201,8 +200,8 @@ public class XmlIterator implements XMLStreamConstants, Iterator<Element> {
             }
         };
     }
-    
-    
+
+
 
     @Override
     public boolean hasNext() {

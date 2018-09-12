@@ -1,3 +1,4 @@
+
 package org.eaxy.usage;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -9,11 +10,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URL;
-import java.util.Iterator;
 import java.util.Objects;
 
 import org.eaxy.Element;
-import org.eaxy.ElementFilters;
 import org.eaxy.Namespace;
 import org.eaxy.NonMatchingPathException;
 import org.eaxy.Xml;

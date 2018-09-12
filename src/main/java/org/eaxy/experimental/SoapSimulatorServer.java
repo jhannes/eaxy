@@ -17,6 +17,7 @@ import org.eaxy.Element;
 import org.eaxy.Xml;
 import com.sun.net.httpserver.HttpExchange;
 
+@SuppressWarnings("restriction")
 class WebServer {
 
     protected final com.sun.net.httpserver.HttpServer server;
@@ -56,6 +57,7 @@ class WebServer {
     }
 }
 
+@SuppressWarnings("restriction")
 public class SoapSimulatorServer extends WebServer {
     protected final Map<String, SampleSoapXmlBuilder> soapEndpoints = new HashMap<>();
 
@@ -94,7 +96,7 @@ public class SoapSimulatorServer extends WebServer {
         writeXmlResponse(response, exchange);
     }
 
-    protected URL addSoapEndpoint(String url, Document wsdl) throws IOException {
+    public URL addSoapEndpoint(String url, Document wsdl) throws IOException {
         return addSoapEndpoint(url, new SampleSoapXmlBuilder(wsdl));
     }
 
@@ -117,11 +119,11 @@ public class SoapSimulatorServer extends WebServer {
         System.out.println(server.getAddress() + " started");
     }
 
-    private InetSocketAddress getAddress() {
+    public InetSocketAddress getAddress() {
 		return server.getAddress();
 	}
 
-	void start() {
+	public void start() {
         server.start();
     }
 }

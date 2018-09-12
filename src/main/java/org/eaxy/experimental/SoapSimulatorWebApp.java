@@ -17,6 +17,7 @@ import org.eaxy.Xml;
 
 import com.sun.net.httpserver.HttpExchange;
 
+@SuppressWarnings("restriction")
 public class SoapSimulatorWebApp extends SoapSimulatorServer {
 
     public SoapSimulatorWebApp(int port) throws IOException {
