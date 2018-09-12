@@ -40,7 +40,7 @@ Features:
 Design:
 -------
 
-![Class diagram](http://www.plantuml.com/plantuml/proxy?src=https://raw.github.com/jhannes/eaxy/master/doc/classes.puml)
+![Class diagram](doc/classes.png)
 
 
 Building XML documents:

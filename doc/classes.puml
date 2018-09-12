@@ -1,3 +1,5 @@
+@startuml
+
 package QueryResult {
     class ElementSet implements IterableOfElement
     
@@ -40,4 +42,4 @@ package Structure {
     Document -down-> Element: rootElement
 }
 
-
+@enduml
