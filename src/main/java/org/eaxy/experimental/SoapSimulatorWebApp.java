@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.eaxy.Content;
 import org.eaxy.Element;
+import org.eaxy.ElementSet;
 import org.eaxy.Namespace;
 import org.eaxy.QualifiedName;
 import org.eaxy.Xml;
@@ -44,8 +45,17 @@ public class SoapSimulatorWebApp extends SoapSimulatorServer {
         } else if (exchange.getRequestURI().getPath().equals("/doc")) {
             writeXmlResponse(indexPage(), "text/html", exchange);
         } else {
-            SampleSoapXmlBuilder builder = soapEndpoints.get(exchange.getRequestURI().getPath().substring("/doc".length()));
-            writeXmlResponse(builder.getWsdl().getRootElement(), exchange);
+            String servicePath = exchange.getRequestURI().getPath().substring("/doc".length());
+            SampleSoapXmlBuilder builder = soapEndpoints.get(servicePath);
+            Element wsdl = builder.getWsdl().getRootElement();
+            ElementSet portAddress = wsdl.find("service", "port", "address");
+            if (portAddress.isPresent()) {
+                String serviceUrl =  "http://"
+                        + exchange.getRequestHeaders().getFirst("Host")
+                        + servicePath;
+                portAddress.first().attr("location", serviceUrl);
+            }
+            writeXmlResponse(wsdl, exchange);
         }
     }
 
@@ -129,6 +139,7 @@ public class SoapSimulatorWebApp extends SoapSimulatorServer {
         return formData;
     }
 
+    @SuppressWarnings("unused")
     private static class StockQuoteRandomData extends SampleData {
 
         private static Namespace NS = new Namespace("http://example.com/stockquote.xsd");
