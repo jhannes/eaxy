@@ -14,6 +14,7 @@ import javax.xml.validation.SchemaFactory;
 
 import org.eaxy.utils.IOUtils;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 /** Validator can validate a Element tree against a XSD */
 public class Validator {
@@ -38,19 +39,27 @@ public class Validator {
         SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         try {
             validator = schemaFactory.newSchema(sources).newValidator();
+        } catch (SAXParseException cause) {
+            MalformedXMLException e = new MalformedXMLException(cause.getMessage(), cause.getLineNumber());
+            replaceStackTrace(cause, e);
+            throw e;
         } catch (SAXException e) {
             throw new RuntimeException(e);
         }
     }
 
-    /** Create a validator based on a XSD loaded as a EAXY Element */
+    public Validator(String resourcePath) {
+        this(new String[] { resourcePath });
+    }
+
+    /** Create a validator based on a XSD loaded as a Eaxy Element */
     public Validator(Element schema) {
         this(new Document(schema));
     }
 
-    /** Create a validator based on a XSD loaded as a EAXY Document */
+    /** Create a validator based on a XSD loaded as a Eaxy Document */
     public Validator(Document schemaDoc) {
-        this(Xml.toDom(schemaDoc));
+        this(Xml.toDom(schemaDoc), schemaDoc.getBaseUrl() != null ? schemaDoc.getBaseUrl().toExternalForm() : "" );
     }
 
     /**
@@ -106,11 +115,18 @@ public class Validator {
         }
     }
 
-    public Validator(org.w3c.dom.Document dom) {
+    public Validator(org.w3c.dom.Document dom, String systemId) {
         SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         try {
-            validator = schemaFactory.newSchema(new DOMSource(dom)).newValidator();
+            validator = schemaFactory.newSchema(new DOMSource(dom, systemId)).newValidator();
+        } catch (SAXParseException cause) {
+            MalformedXMLException e = new MalformedXMLException(cause.getMessage(), cause.getLineNumber());
+            replaceStackTrace(cause, e);
+            throw e;
         } catch (SAXException e) {
+            if (e.getMessage().startsWith("src-resolve") && dom.getBaseURI() == null) {
+                throw new RuntimeException(e.getMessage() + ". Did you forget to set base URI?");
+            }
             throw new RuntimeException(e);
         }
     }
@@ -130,4 +146,12 @@ public class Validator {
         }
     }
 
+    private void replaceStackTrace(SAXParseException cause, MalformedXMLException e) {
+        StackTraceElement[] stackTrace = e.getStackTrace();
+        StackTraceElement[] newStackTrace = new StackTraceElement[stackTrace.length+1];
+        File file = new File(cause.getSystemId());
+        newStackTrace[0] = new StackTraceElement(file.getName(), "", file.getName(), cause.getLineNumber());
+        System.arraycopy(stackTrace, 0, newStackTrace, 1, stackTrace.length);
+        e.setStackTrace(newStackTrace);
+    }
 }

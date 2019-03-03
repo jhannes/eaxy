@@ -17,7 +17,7 @@ public class SoapSimulatorServerTest {
 
     @Test
     public void shouldRespondToSoapCall() throws IOException {
-        Document wsdlFile = Xml.readResource("/xsd/StockQuoteService.wsdl");
+        Document wsdlFile = Xml.readResource("xsd/StockQuoteService.wsdl");
 
         SoapSimulatorServer server = new SoapSimulatorServer(0);
         server.start();

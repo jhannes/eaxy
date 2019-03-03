@@ -201,7 +201,7 @@ public class SampleSoapXmlBuilder {
     private Map<String, SampleXmlBuilder> builders = new HashMap<>();
 
     public SampleSoapXmlBuilder(String wsdlResource) throws IOException {
-        this.wsdlFile = Xml.readResource("/" + wsdlResource);
+        this.wsdlFile = Xml.readResource(wsdlResource);
         for (Element schema : wsdlFile.find("types", XS.name("schema"))) {
             addSchema(new Namespace(schema.attr("targetNamespace")), schema);
         }

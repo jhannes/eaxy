@@ -65,7 +65,6 @@ public class LargeDocumentPerformanceTest {
         long start = System.currentTimeMillis();
         try(FileWriter writer = new FileWriter(getTmpFile())) {
             new Document(root).visit(new WriterXmlVisitor(writer));
-            writer.close();
         }
         long duration = System.currentTimeMillis()-start;
         return duration;

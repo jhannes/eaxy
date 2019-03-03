@@ -17,7 +17,7 @@ public class SoapSimulatorWebAppTest {
     public void shouldShowWsdlFilesOnFrontPage() throws IOException {
         SoapSimulatorWebApp server = new SoapSimulatorWebApp(0);
         server.addSoapEndpoint("/soap/stockQuote",
-            new SampleSoapXmlBuilder(Xml.readResource("/xsd/StockQuoteService.wsdl")));
+            new SampleSoapXmlBuilder(Xml.readResource("xsd/StockQuoteService.wsdl")));
         server.start();
 
         Document frontPage = Xml.read(server.getUrl());
@@ -44,7 +44,7 @@ public class SoapSimulatorWebAppTest {
             writer.write("--abc123\r\n");
             writer.write("Content-disposition: form-data; name=\"wsdlFile\"; content-type=text/xml\r\n");
             writer.write("\r\n");
-            writer.write(Xml.readResource("/xsd/greath-reservation.wsdl").toIndentedXML());
+            writer.write(Xml.readResource("xsd/greath-reservation.wsdl").toIndentedXML());
             writer.write("\r\n");
             writer.write("--abc123--\r\n");
         }

@@ -68,6 +68,9 @@ public class DomTransformer {
             org.w3c.dom.Document doc = factory.newDocumentBuilder().newDocument();
             doc.setXmlVersion(document.getVersion());
             doc.appendChild(createElement(doc, document.getRootElement()));
+            if (document.getBaseUrl() != null) {
+                doc.setDocumentURI(document.getBaseUrl().toExternalForm());
+            }
             return doc;
         } catch (ParserConfigurationException e) {
             throw new CanNeverHappenException("Oh, just shut up!", e);

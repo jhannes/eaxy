@@ -31,7 +31,7 @@ public class SampleXmlBuilderTest {
 
     @Test
     public void shouldGenerateAttributeValues() throws IOException {
-        Document schemaDoc = Xml.readResource("/mailmessage.xsd");
+        Document schemaDoc = Xml.readResource("mailmessage.xsd");
         SampleXmlBuilder generator = new SampleXmlBuilder(schemaDoc, null);
         generator.setFull(true);
         Element element = generator.createRandomElement("message");
@@ -40,7 +40,7 @@ public class SampleXmlBuilderTest {
 
     @Test
     public void shouldGenerateManyElementsWhenAppropriate() throws Exception {
-        Document schemaDoc = Xml.readResource("/mailmessage.xsd");
+        Document schemaDoc = Xml.readResource("mailmessage.xsd");
         SampleXmlBuilder generator = new SampleXmlBuilder(schemaDoc, "msg");
         generator.setFull(true);
         Element element = generator.createRandomElement("message");
@@ -62,7 +62,7 @@ public class SampleXmlBuilderTest {
 
     @Test
     public void shouldBuildMinimal() throws IOException {
-        Document schemaDoc = Xml.readResource("/xsd/po.xsd");
+        Document schemaDoc = Xml.readResource("xsd/po.xsd");
         SampleXmlBuilder generator = new SampleXmlBuilder(schemaDoc, null);
         generator.setMinimal(true);
         Element el = generator.createRandomElement("purchaseOrder");
@@ -100,7 +100,7 @@ public class SampleXmlBuilderTest {
 
     @Test
     public void shouldGetSoapAction() throws IOException {
-        SampleSoapXmlBuilder builder = new SampleSoapXmlBuilder(Xml.readResource("/xsd/StockQuoteService.wsdl"));
+        SampleSoapXmlBuilder builder = new SampleSoapXmlBuilder(Xml.readResource("xsd/StockQuoteService.wsdl"));
         Element output = builder.getService().soapAction("http://example.com/GetLastTradePrice").randomOutput("m");
         assertThat(output.tagName()).isEqualTo("TradePrice");
         assertThat(output.find("price").single().text()).isNotEmpty();
@@ -111,7 +111,7 @@ public class SampleXmlBuilderTest {
 
     @Test
     public void shouldRespondToSoapCall() throws IOException {
-        SampleSoapXmlBuilder builder = new SampleSoapXmlBuilder(Xml.readResource("/xsd/StockQuoteService.wsdl"));
+        SampleSoapXmlBuilder builder = new SampleSoapXmlBuilder(Xml.readResource("xsd/StockQuoteService.wsdl"));
         SoapOperationDefinition operation = builder.getService().operation("GetLastTradePrice");
         Element input = SOAP.el("Envelope",
             SOAP.el("Header"),
@@ -126,7 +126,7 @@ public class SampleXmlBuilderTest {
 
     @Test
     public void shouldValidateSoapInput() throws IOException {
-        final SampleSoapXmlBuilder builder = new SampleSoapXmlBuilder(Xml.readResource("/xsd/StockQuoteService.wsdl"));
+        final SampleSoapXmlBuilder builder = new SampleSoapXmlBuilder(Xml.readResource("xsd/StockQuoteService.wsdl"));
         Element input = SOAP.el("Envelope",
             SOAP.el("Header"),
             SOAP.el("Body", Xml.el("wrongElement", "Some content")));
@@ -149,7 +149,7 @@ public class SampleXmlBuilderTest {
 
     @Test
     public void shouldValidateSoapEnvelope() throws IOException {
-        SampleSoapXmlBuilder builder = new SampleSoapXmlBuilder(Xml.readResource("/xsd/StockQuoteService.wsdl"));
+        SampleSoapXmlBuilder builder = new SampleSoapXmlBuilder(Xml.readResource("xsd/StockQuoteService.wsdl"));
         SoapOperationDefinition operation = builder.getService().operation("GetLastTradePrice");
         String soapAction = "http://example.com/GetLastTradePrice";
         Element input = operation.randomInput("msg");

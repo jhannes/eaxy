@@ -97,6 +97,10 @@ public class Document {
         return result.toString();
     }
 
+    public void writeTo(Writer writer) throws IOException {
+        visit(new WriterXmlVisitor(writer));
+    }
+
     public void visit(XmlVisitor visitor) throws IOException {
         visitor.visitDocument(this);
     }
