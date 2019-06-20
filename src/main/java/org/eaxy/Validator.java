@@ -147,11 +147,13 @@ public class Validator {
     }
 
     private void replaceStackTrace(SAXParseException cause, MalformedXMLException e) {
-        StackTraceElement[] stackTrace = e.getStackTrace();
-        StackTraceElement[] newStackTrace = new StackTraceElement[stackTrace.length+1];
-        File file = new File(cause.getSystemId());
-        newStackTrace[0] = new StackTraceElement(file.getName(), "", file.getName(), cause.getLineNumber());
-        System.arraycopy(stackTrace, 0, newStackTrace, 1, stackTrace.length);
-        e.setStackTrace(newStackTrace);
+        if (cause.getSystemId() != null) {
+            StackTraceElement[] stackTrace = e.getStackTrace();
+            StackTraceElement[] newStackTrace = new StackTraceElement[stackTrace.length+1];
+            File file = new File(cause.getSystemId());
+            newStackTrace[0] = new StackTraceElement(file.getName(), "", file.getName(), cause.getLineNumber());
+            System.arraycopy(stackTrace, 0, newStackTrace, 1, stackTrace.length);
+            e.setStackTrace(newStackTrace);
+        }
     }
 }
