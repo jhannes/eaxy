@@ -19,9 +19,9 @@ public class Element implements Node {
     private final QualifiedName name;
     @Nonnull
     private final List<Node> children = new ArrayList<>();
-    private final Map<QualifiedName,Attribute> attributes = new LinkedHashMap<QualifiedName, Attribute>();
+    private final Map<QualifiedName,Attribute> attributes = new LinkedHashMap<>();
     // TODO: Maybe namespaces should be part of the attributes - are namespaces attributes?
-    private final List<Namespace> namespaces = new ArrayList<Namespace>();
+    private final List<Namespace> namespaces = new ArrayList<>();
     private Integer lineNumber;
 
     Element(QualifiedName name, Content... contents) {
@@ -36,7 +36,7 @@ public class Element implements Node {
         children.addAll(Objects.list(contents, Node.class));
     }
 
-    Element(QualifiedName name, Collection<Attribute> attrs, Collection<Namespace> namespaces, Integer lineNumber) {
+    Element(QualifiedName name, Collection<Attribute> attrs, Collection<Namespace> namespaces, @Nullable Integer lineNumber) {
         this.name = name;
 		this.lineNumber = lineNumber;
         if (name.hasNamespace() && !namespaces.contains(name.getNamespace())) {
@@ -49,7 +49,7 @@ public class Element implements Node {
     }
 
     public Element(QualifiedName name, int lineNumber) {
-    	this(name, new Content[0]);
+    	this(name);
 		this.lineNumber = lineNumber;
 	}
 
@@ -77,8 +77,8 @@ public class Element implements Node {
         }
     }
 
-
-    public <T extends Node> Element addAll(@SuppressWarnings("unchecked") T... content) {
+    @SafeVarargs
+    public final <T extends Node> Element addAll(T... content) {
         for (T node : content) {
             add(node);
         }
@@ -132,7 +132,7 @@ public class Element implements Node {
 
     @Nonnull
     public Map<String, String> attrs() {
-        LinkedHashMap<String, String> result = new LinkedHashMap<String, String>();
+        LinkedHashMap<String, String> result = new LinkedHashMap<>();
         for (QualifiedName attrName : attributes.keySet()) {
             result.put(attrName.getName(), attr(attrName));
         }
@@ -155,11 +155,11 @@ public class Element implements Node {
         return attribute != null ? attribute.getValue() : null;
     }
 
-    public Element attr(String name, String value) {
+    public Element attr(String name, @Nullable String value) {
         return attr(new QualifiedName(name), value);
     }
 
-    public Element attr(QualifiedName key, String value) {
+    public Element attr(QualifiedName key, @Nullable String value) {
         if (value == null) {
             attributes.remove(key);
         } else {
@@ -218,6 +218,8 @@ public class Element implements Node {
     public String toString() {
         if (children.isEmpty()) {
             return "<" + printTag() + printAttributes() + " />" + (lineNumber != null ? "@" + lineNumber : "");
+        } else if (children.size() == 1 && !(children.get(0) instanceof Element)) {
+            return "<" + printTag() + printAttributes() + ">" + children.get(0).toString().trim() + "</" + printTag() + ">" + (lineNumber != null ? "@" + lineNumber : "");
         } else {
             return "<" + printTag() + printAttributes() + ">...</" + printTag() + ">" + (lineNumber != null ? "@" + lineNumber : "");
         }

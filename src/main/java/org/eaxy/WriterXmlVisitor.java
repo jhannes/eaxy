@@ -26,19 +26,17 @@ public class WriterXmlVisitor implements XmlVisitor {
 
     @Override
     public void visitCdata(CDataElement cDataElement) throws IOException {
-        writer.write("<![CDATA[" + cDataElement.text() + "]]>");
+        writer.write(cDataElement.toString());
     }
 
     @Override
     public void visitComment(CommentElement comment) throws IOException {
-        writer.write("<!--" + comment.text() + "-->");
+        writer.write(comment.toString());
     }
 
     @Override
     public void visitText(TextElement textElement) throws IOException {
-        writer.write(textElement.text().replaceAll("&", "&amp;")
-                .replaceAll("<", "&lt;")
-                .replaceAll(">", "&gt;"));
+        writer.write(textElement.toString());
     }
 
     @Override

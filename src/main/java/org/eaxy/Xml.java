@@ -41,6 +41,11 @@ public class Xml {
         public Node copy() {
             return new CDataElement(stringContent);
         }
+
+        @Override
+        public String toString() {
+            return "<![CDATA[" + text() + "]]>";
+        }
     }
 
     static class CommentElement implements Node {
@@ -65,6 +70,11 @@ public class Xml {
         public Node copy() {
             return new CommentElement(stringContent);
         }
+
+        @Override
+        public String toString() {
+            return "<!--" + text() + "-->";
+        }
     }
 
     static class TextElement implements Node {
@@ -88,6 +98,13 @@ public class Xml {
         @Override
         public Node copy() {
             return new TextElement(stringContent);
+        }
+
+        @Override
+        public String toString() {
+            return text().replaceAll("&", "&amp;")
+                    .replaceAll("<", "&lt;")
+                    .replaceAll(">", "&gt;");
         }
     }
 
