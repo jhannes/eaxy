@@ -110,14 +110,7 @@
 			<version>3.10.0</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<!-- Compatibility: This version of Xerces breaks stuff. The tests must 
-				be able to run with it -->
-			<groupId>xerces</groupId>
-			<artifactId>xercesImpl</artifactId>
-			<scope>test</scope>
-			<version>2.12.0</version>
-		</dependency>
+		
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
